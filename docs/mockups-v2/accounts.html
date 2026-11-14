@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connected Accounts · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="accounts"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Connected Accounts" data-sub="9 accounts · 5 platforms" data-action="Connect account" data-action-href="#"></header>
+
+    <main class="page">
+
+      <div class="notice notice--warn" style="margin-bottom:14px">
+        <svg class="icon"><use href="#i-alert"/></svg>
+        <div class="row row--between" style="flex:1;gap:14px">
+          <div>
+            <strong>Work LinkedIn needs reconnecting.</strong>
+            The platform revoked the token on 9 Nov. Its 2 scheduled posts are held; other accounts publish normally.
+          </div>
+          <button class="btn btn--sm">Reconnect</button>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="filters">
+          <button class="chip" aria-pressed="true">All</button>
+          <button class="chip" aria-pressed="false">Needs attention<span class="subtle">2</span></button>
+          <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Platform</button>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Group</button>
+          <span class="topbar__spacer"></span>
+          <span class="small subtle">Several accounts per platform is the normal case.</span>
+        </div>
+
+        <table class="table table--sortable">
+          <thead>
+            <tr>
+              <th scope="col"><button>Account</button></th>
+              <th scope="col">Type</th>
+              <th scope="col">Groups</th>
+              <th scope="col"><button>Health</button></th>
+              <th scope="col">Token</th>
+              <th scope="col" class="r">Quota</th>
+              <th scope="col" class="r">Last post</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Work LinkedIn</span><span class="acct__handle">@alexmercer</span></span>
+                </span>
+              </td>
+              <td class="small muted">Personal</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span></td>
+              <td><span class="status status--danger"><i class="status__dot"></i>Needs reauth</span></td>
+              <td class="small"><span class="status status--danger"><i class="status__dot"></i>Revoked</span></td>
+              <td class="r small subtle">—</td>
+              <td class="r small subtle">9 Nov</td>
+              <td class="r"><button class="btn btn--sm">Reconnect</button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Acme Page</span><span class="acct__handle">Acme Inc</span></span>
+                </span>
+              </td>
+              <td class="small muted">Company page</td>
+              <td>
+                <span class="row" style="gap:7px">
+                  <span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span>
+                  <span class="row" style="gap:5px"><span class="gdot g-corp"></span><span class="small">Company</span></span>
+                  <span class="row" style="gap:5px"><span class="gdot g-launch"></span><span class="small">Launch</span></span>
+                </span>
+              </td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Healthy</span></td>
+              <td class="small muted">48d left</td>
+              <td class="r small subtle">—</td>
+              <td class="r small subtle">Today</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                  <span><span class="acct__name" style="display:block">X @main</span><span class="acct__handle">@acme</span></span>
+                </span>
+              </td>
+              <td class="small muted">Personal</td>
+              <td>
+                <span class="row" style="gap:7px">
+                  <span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span>
+                  <span class="row" style="gap:5px"><span class="gdot g-launch"></span><span class="small">Launch</span></span>
+                </span>
+              </td>
+              <td><span class="status status--warn"><i class="status__dot status__dot--half"></i>Quota 82%</span></td>
+              <td class="small muted">OAuth 2.0</td>
+              <td class="r"><span class="small num">1,476 / 1,800</span></td>
+              <td class="r small subtle">Today</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                  <span><span class="acct__name" style="display:block">X @tech</span><span class="acct__handle">@acmedev</span></span>
+                </span>
+              </td>
+              <td class="small muted">Personal</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span></td>
+              <td><span class="status status--warn"><i class="status__dot status__dot--half"></i>Quota 82%</span></td>
+              <td class="small muted">OAuth 2.0</td>
+              <td class="r"><span class="small num">shared</span></td>
+              <td class="r small subtle">Today</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-facebook"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Acme FB</span><span class="acct__handle">Acme Inc</span></span>
+                </span>
+              </td>
+              <td class="small muted">Page</td>
+              <td>
+                <span class="row" style="gap:7px">
+                  <span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span>
+                  <span class="row" style="gap:5px"><span class="gdot g-corp"></span><span class="small">Company</span></span>
+                </span>
+              </td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Healthy</span></td>
+              <td class="small muted">Long-lived</td>
+              <td class="r small subtle">—</td>
+              <td class="r small subtle">Today</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-instagram"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Acme IG</span><span class="acct__handle">@acme</span></span>
+                </span>
+              </td>
+              <td class="small muted">Business</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-corp"></span><span class="small">Company</span></span></td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Healthy</span></td>
+              <td class="small muted">Long-lived</td>
+              <td class="r"><span class="small num">4 / 25 today</span></td>
+              <td class="r small subtle">2 Nov</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-threads"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Acme Threads</span><span class="acct__handle">@acme</span></span>
+                </span>
+              </td>
+              <td class="small muted">Business</td>
+              <td class="small subtle">Ungrouped</td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Healthy</span></td>
+              <td class="small muted">22d left</td>
+              <td class="r small subtle">—</td>
+              <td class="r small subtle">28 Oct</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-bluesky"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Acme Bluesky</span><span class="acct__handle">@acme.bsky.social</span></span>
+                </span>
+              </td>
+              <td class="small muted">Personal</td>
+              <td class="small subtle">Ungrouped</td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Healthy</span></td>
+              <td class="small muted">App password</td>
+              <td class="r small subtle">Generous</td>
+              <td class="r small subtle">Today</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="acct">
+                  <span class="acct__mark"><svg><use href="#p-mastodon"/></svg></span>
+                  <span><span class="acct__name" style="display:block">Acme Mastodon</span><span class="acct__handle">@acme@hachyderm.io</span></span>
+                </span>
+              </td>
+              <td class="small muted">Personal</td>
+              <td class="small subtle">Ungrouped</td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Healthy</span></td>
+              <td class="small muted">Per-instance</td>
+              <td class="r small subtle">Generous</td>
+              <td class="r small subtle">Today</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="panel__foot">
+          Connecting an account that is already connected here returns the existing one
+          rather than creating a second — two credential sets would race for one account's
+          rate limits.
+        </div>
+      </section>
+
+      <div class="grid grid--2" style="margin-top:14px">
+
+        <section class="panel">
+          <div class="panel__head"><h2>Work LinkedIn</h2><span class="spacer"></span><span class="status status--danger"><i class="status__dot"></i>Needs reauth</span></div>
+          <div class="panel__body stack">
+            <dl class="dl">
+              <dt>Nickname</dt><dd>Work LinkedIn</dd>
+              <dt>Platform account</dt><dd class="mono">urn:li:person:A1b2C3</dd>
+              <dt>Account type</dt><dd>Personal profile</dd>
+              <dt>Connected</dt><dd>12 Aug 2026</dd>
+              <dt>Scopes</dt><dd class="mono">w_member_social, openid</dd>
+              <dt>Last health check</dt><dd>14 minutes ago</dd>
+            </dl>
+            <div class="divider"></div>
+            <div>
+              <h3 style="margin-bottom:7px">What this account can do</h3>
+              <div class="wrap">
+                <span class="tag tag--ok">Publish</span>
+                <span class="tag tag--ok">Images</span>
+                <span class="tag tag--ok">Alt text</span>
+                <span class="tag tag--ok">Delete</span>
+                <span class="tag">No threads</span>
+                <span class="tag">No editing</span>
+                <span class="tag">No scheduling</span>
+                <span class="tag tag--warn">Counts only, no impressions</span>
+              </div>
+              <p class="caption">
+                Read from the adapter's capability descriptor, not hardcoded. LinkedIn gives
+                personal profiles almost no analytics — Mera reports what it can observe
+                itself rather than showing an empty chart.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Defaults</h2></div>
+          <div class="panel__body stack">
+            <div class="field">
+              <label for="v">Brand voice</label>
+              <select class="select" id="v"><option>Personal — direct, first person</option><option>Acme Corporate</option></select>
+              <span class="field__hint">Overrides the Tech News group's voice for this account.</span>
+            </div>
+            <div class="field">
+              <label for="t">Posting times</label>
+              <input class="input" id="t" value="Mon–Fri 09:00, 14:00 · Asia/Kolkata">
+            </div>
+            <div class="field">
+              <label for="cap">Daily post cap</label>
+              <input class="input" id="cap" value="3">
+              <span class="field__hint">Per account, not per workspace.</span>
+            </div>
+            <div class="divider"></div>
+            <div class="row row--between">
+              <div>
+                <div class="small strong">Autopilot</div>
+                <div class="xs subtle">Resolves to the strictest of account, group and workspace</div>
+              </div>
+              <span class="tag tag--outline">Manual</span>
+            </div>
+            <div class="divider"></div>
+            <div class="row row--between">
+              <div>
+                <div class="small strong" style="color:var(--danger)">Disconnect this account</div>
+                <div class="xs subtle">Revokes at the platform first. Asks for your PIN.</div>
+              </div>
+              <button class="btn btn--sm btn--danger">Disconnect</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

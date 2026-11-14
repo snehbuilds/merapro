@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="settings"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Settings" data-sub="Acme workspace"></header>
+
+    <main class="page">
+
+      <div class="split">
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head"><h2>Workspace</h2></div>
+            <div class="panel__body stack">
+              <div class="grid grid--2">
+                <div class="field"><label for="wn">Name</label><input class="input" id="wn" value="Acme"></div>
+                <div class="field"><label for="ws">Slug</label><input class="input" id="ws" value="acme"></div>
+                <div class="field">
+                  <label for="wt">Type</label>
+                  <select class="select" id="wt"><option>Personal</option><option>Team</option><option selected>Agency client</option></select>
+                </div>
+                <div class="field"><label for="wz">Timezone</label><input class="input" id="wz" value="Asia/Kolkata"></div>
+              </div>
+              <div class="row">
+                <button class="btn btn--sm">Clone settings to a new workspace</button>
+                <span class="small subtle">Copies voices, pillars, sources, policies and group shapes — never accounts or content.</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Usage</h2><span class="spacer"></span><span class="small subtle">November</span></div>
+            <table class="table">
+              <thead><tr><th scope="col">Meter</th><th scope="col" class="r">This month</th><th scope="col" class="r">Limit</th><th scope="col" style="width:140px">Used</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Connected accounts</td><td class="r">9</td><td class="r">25</td>
+                  <td><div class="bar"><i style="width:36%"></i></div></td>
+                </tr>
+                <tr>
+                  <td>Posts published</td><td class="r">94</td><td class="r subtle">No limit</td>
+                  <td><div class="bar"><i style="width:0%"></i></div></td>
+                </tr>
+                <tr>
+                  <td>AI spend</td><td class="r mono">$31.20</td><td class="r mono">$50.00</td>
+                  <td><div class="bar"><i class="warn" style="width:62%"></i></div></td>
+                </tr>
+                <tr>
+                  <td>Media generation</td><td class="r mono">$2.40</td><td class="r mono">$25.00</td>
+                  <td><div class="bar"><i style="width:10%"></i></div></td>
+                </tr>
+                <tr>
+                  <td>WhatsApp messages</td><td class="r">0</td><td class="r subtle">Not connected</td>
+                  <td><div class="bar"><i style="width:0%"></i></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              Usage is recorded by the jobs that do the work, so billing later reads these
+              rows rather than inventing a second measurement.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>API keys</h2><span class="spacer"></span><button class="btn btn--sm">Create key</button></div>
+            <table class="table">
+              <thead><tr><th scope="col">Name</th><th scope="col">Prefix</th><th scope="col">Scopes</th><th scope="col">Last used</th><th scope="col"></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="strong">CI integration</td>
+                  <td class="mono xs">mera_sk_live_8f2…</td>
+                  <td><span class="wrap"><span class="tag tag--outline">drafts:write</span><span class="tag tag--outline">publishing:read</span></span></td>
+                  <td class="small subtle">4h ago</td>
+                  <td class="r"><button class="btn btn--sm btn--ghost">Revoke</button></td>
+                </tr>
+                <tr>
+                  <td class="strong">Claude Desktop</td>
+                  <td class="mono xs">mera_sk_live_a31…</td>
+                  <td><span class="wrap"><span class="tag tag--outline">drafts:write</span><span class="tag tag--outline">approvals:read</span><span class="tag tag--outline">analytics:read</span></span></td>
+                  <td class="small subtle">Yesterday</td>
+                  <td class="r"><button class="btn btn--sm btn--ghost">Revoke</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              A key's effective permission is the intersection of its scopes, the issuing
+              member's role, and that member's group scope.
+            </div>
+          </section>
+
+          <section class="panel" style="border-color:color-mix(in srgb, var(--danger) 34%, transparent)">
+            <div class="panel__head"><h2 style="color:var(--danger)">Danger zone</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between">
+                <div><div class="small strong">Archive workspace</div><div class="xs subtle">Stops automation and ingestion, keeps everything readable for reporting</div></div>
+                <button class="btn btn--sm">Archive</button>
+              </div>
+              <div class="divider"></div>
+              <div class="row row--between">
+                <div><div class="small strong">Export all data</div><div class="xs subtle">JSON plus media, delivered as a signed time-limited download</div></div>
+                <button class="btn btn--sm">Request export</button>
+              </div>
+              <div class="divider"></div>
+              <div class="row row--between">
+                <div><div class="small strong" style="color:var(--danger)">Delete workspace</div><div class="xs subtle">30-day grace period. Social tokens are revoked at each platform first.</div></div>
+                <button class="btn btn--sm btn--danger">Delete</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head"><h2>Appearance</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between">
+                <span class="small">Theme</span>
+                <span class="seg">
+                  <button aria-pressed="true">Light</button>
+                  <button aria-pressed="false">Dark</button>
+                  <button aria-pressed="false">System</button>
+                </span>
+              </div>
+              <p class="caption">The toggle in the top bar switches instantly on every screen.</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Your workspaces</h2></div>
+            <div class="panel__body--flush">
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+                <span class="row" style="gap:9px"><span class="ws__mark" style="width:22px;height:22px;font-size:11px">AC</span><span class="small strong">Acme</span></span>
+                <span class="tag tag--outline">Owner</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+                <span class="row" style="gap:9px"><span class="ws__mark" style="width:22px;height:22px;font-size:11px">PB</span><span class="small strong">Personal Brand</span></span>
+                <span class="tag tag--outline">Owner</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+                <span class="row" style="gap:9px"><span class="ws__mark" style="width:22px;height:22px;font-size:11px">NV</span><span class="small strong">Northvale</span></span>
+                <span class="tag tag--outline">Approver</span>
+              </div>
+            </div>
+            <div class="panel__foot">Nothing crosses a workspace boundary — accounts, content, or audit trail.</div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Notifications</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between"><span class="small">Approval requests</span><button class="switch" role="switch" aria-checked="true" aria-label="Approval requests"></button></div>
+              <div class="row row--between"><span class="small">Publish failures</span><button class="switch" role="switch" aria-checked="true" aria-label="Publish failures"></button></div>
+              <div class="row row--between"><span class="small">Account health</span><button class="switch" role="switch" aria-checked="true" aria-label="Account health"></button></div>
+              <div class="row row--between"><span class="small">Weekly insights email</span><button class="switch" role="switch" aria-checked="true" aria-label="Weekly insights"></button></div>
+              <div class="row row--between"><span class="small">Cost threshold alerts</span><button class="switch" role="switch" aria-checked="false" aria-label="Cost alerts"></button></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Security</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between"><span class="small">Two-factor authentication</span><span class="status status--ok"><i class="status__dot"></i>Enabled</span></div>
+              <div class="row row--between"><span class="small">Approval PIN</span><span class="status status--ok"><i class="status__dot"></i>Set</span></div>
+              <div class="row row--between"><span class="small">Active sessions</span><span class="small num">3</span></div>
+              <div class="divider"></div>
+              <button class="btn btn--sm">Change PIN</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,179 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "node_modules/next/dist/bin/next",
+        "start"
+      ],
+      "cwd": "apps/web",
+      "port": 3000
+    },
+    {
+      "name": "verify-api",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "uvicorn",
+        "mera.api.main:app_factory",
+        "--factory",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
+      "cwd": "backend",
+      "port": 8000,
+      "env": {
+        "MERA_ENV": "development",
+        "MERA_SECRET_KEY": "verify-secret-key-0123456789abcdef-0123456789",
+        "MERA_MASTER_KEY": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+        "DATABASE_URL": "postgresql+asyncpg://mera_app:verify-app-pw@localhost:5544/mera",
+        "DATABASE_MIGRATION_URL": "postgresql+asyncpg://mera:verify-owner-pw@localhost:5544/mera",
+        "SANDBOX_MODE": "true",
+        "SANDBOX_LLM": "true",
+        "MEDIA_ROOT": "C:/Users/ONo69962/AppData/Local/Temp/claude/00e6a36b52ee8b3e/25608858-414d-46d6-a21c-bf2c531e812c/scratchpad/media",
+        "MERA_PUBLIC_URL": "http://localhost:3100",
+        "MERA_API_URL": "http://localhost:8000",
+        "LOG_FORMAT": "console",
+        "PYTHONUTF8": "1",
+        "WEB_PROXY_SECRET": "verify-web-proxy-secret-0123456789",
+        "WHATSAPP_PHONE_NUMBER_ID": "e2e-phone",
+        "WHATSAPP_ACCESS_TOKEN": "e2e-wa-token",
+        "WHATSAPP_APP_SECRET": "e2e-wa-app-secret-0123456789",
+        "WHATSAPP_VERIFY_TOKEN": "e2e-wa-verify-0123456789",
+        "WHATSAPP_GRAPH_URL": "http://127.0.0.1:8795/v23.0",
+        "WHATSAPP_DISPLAY_NUMBER": "15550001111",
+        "MCP_SERVICE_SECRET": "verify-mcp-service-secret-0123456789",
+        "MCP_RESOURCE_URL": "http://127.0.0.1:8002/mcp"
+      }
+    },
+    {
+      "name": "verify-worker",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "python",
+        "-m",
+        "mera.workers.main",
+        "--queues",
+        "publish,approvals,agents,metrics,accounts,ingest,media,integrations,notify"
+      ],
+      "cwd": "backend",
+      "port": 8790,
+      "env": {
+        "MERA_ENV": "development",
+        "MERA_SECRET_KEY": "verify-secret-key-0123456789abcdef-0123456789",
+        "MERA_MASTER_KEY": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+        "DATABASE_URL": "postgresql+asyncpg://mera_app:verify-app-pw@localhost:5544/mera",
+        "SANDBOX_MODE": "true",
+        "SANDBOX_LLM": "true",
+        "MEDIA_ROOT": "C:/Users/ONo69962/AppData/Local/Temp/claude/00e6a36b52ee8b3e/25608858-414d-46d6-a21c-bf2c531e812c/scratchpad/media",
+        "MERA_PUBLIC_URL": "http://localhost:3100",
+        "MERA_API_URL": "http://localhost:8000",
+        "LOG_FORMAT": "console",
+        "PYTHONUTF8": "1",
+        "WHATSAPP_PHONE_NUMBER_ID": "e2e-phone",
+        "WHATSAPP_ACCESS_TOKEN": "e2e-wa-token",
+        "WHATSAPP_APP_SECRET": "e2e-wa-app-secret-0123456789",
+        "WHATSAPP_VERIFY_TOKEN": "e2e-wa-verify-0123456789",
+        "WHATSAPP_GRAPH_URL": "http://127.0.0.1:8795/v23.0",
+        "WHATSAPP_DISPLAY_NUMBER": "15550001111",
+        "MCP_SERVICE_SECRET": "verify-mcp-service-secret-0123456789",
+        "MCP_RESOURCE_URL": "http://127.0.0.1:8002/mcp"
+      }
+    },
+    {
+      "name": "web-verify",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "node_modules/next/dist/bin/next",
+        "start",
+        "-p",
+        "3100"
+      ],
+      "cwd": "apps/web",
+      "port": 3100,
+      "env": {
+        "MERA_API_URL": "http://localhost:8000",
+        "MERA_PUBLIC_API_URL": "http://localhost:8000",
+        "MERA_PUBLIC_URL": "http://localhost:3100",
+        "MERA_WEB_PROXY_SECRET": "verify-web-proxy-secret-0123456789",
+        "MERA_PUBLIC_MCP_URL": "http://127.0.0.1:8002/mcp"
+      }
+    },
+    {
+      "name": "verify-bots",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "uvicorn",
+        "mera.bots.main:app_factory",
+        "--factory",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8011"
+      ],
+      "cwd": "backend",
+      "port": 8011,
+      "env": {
+        "MERA_ENV": "development",
+        "MERA_SECRET_KEY": "verify-secret-key-0123456789abcdef-0123456789",
+        "MERA_MASTER_KEY": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+        "DATABASE_URL": "postgresql+asyncpg://mera_app:verify-app-pw@localhost:5544/mera",
+        "SANDBOX_MODE": "true",
+        "SANDBOX_LLM": "true",
+        "MERA_PUBLIC_URL": "http://localhost:3100",
+        "MERA_API_URL": "http://localhost:8000",
+        "LOG_FORMAT": "console",
+        "PYTHONUTF8": "1",
+        "WHATSAPP_PHONE_NUMBER_ID": "e2e-phone",
+        "WHATSAPP_ACCESS_TOKEN": "e2e-wa-token",
+        "WHATSAPP_APP_SECRET": "e2e-wa-app-secret-0123456789",
+        "WHATSAPP_VERIFY_TOKEN": "e2e-wa-verify-0123456789",
+        "WHATSAPP_GRAPH_URL": "http://127.0.0.1:8795/v23.0",
+        "WHATSAPP_DISPLAY_NUMBER": "15550001111"
+      }
+    },
+    {
+      "name": "verify-mcp",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "uvicorn",
+        "mera.mcp.http:app_factory",
+        "--factory",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8002"
+      ],
+      "cwd": "backend",
+      "port": 8002,
+      "env": {
+        "MERA_PUBLIC_URL": "http://localhost:3100",
+        "MERA_API_URL": "http://localhost:8000",
+        "LOG_FORMAT": "console",
+        "PYTHONUTF8": "1",
+        "MCP_SERVICE_SECRET": "verify-mcp-service-secret-0123456789",
+        "MCP_RESOURCE_URL": "http://127.0.0.1:8002/mcp"
+      }
+    },
+    {
+      "name": "verify-fake-graph",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "e2e/support/fake-whatsapp-graph.mjs"
+      ],
+      "cwd": "apps/web",
+      "port": 8795,
+      "env": {
+        "FAKE_GRAPH_PORT": "8795",
+        "FAKE_GRAPH_TOKEN": "e2e-wa-token"
+      }
+    }
+  ]
+}

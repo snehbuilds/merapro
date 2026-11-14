@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Integrations · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="mcp"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="MCP Integrations" data-sub="4 servers · 7 tools on · 1 pending review" data-action="Add server" data-action-href="#add"></header>
+
+    <main class="page">
+
+      <div class="split">
+        <div class="stack">
+
+          <!-- Registered servers -->
+          <section class="panel">
+            <div class="panel__head"><h2>Registered servers</h2><span class="spacer"></span><span class="small subtle">Acme workspace only</span></div>
+            <table class="table">
+              <thead><tr><th scope="col">Server</th><th scope="col">Transport</th><th scope="col">Scope</th><th scope="col">Status</th><th scope="col" class="r">Tools on</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="strong">Web Search</span><br><span class="xs subtle mono">exa-mcp-server</span></td>
+                  <td><span class="small">HTTP</span><br><span class="xs subtle mono">2026-07-28</span></td>
+                  <td class="small muted">Workspace</td>
+                  <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+                  <td class="r">3 of 6</td>
+                  <td class="r"><button class="btn btn--sm">Manage</button></td>
+                </tr>
+                <tr>
+                  <td><span class="strong">Notion</span><br><span class="xs subtle mono">@notionhq/notion-mcp-server@0.9.1</span></td>
+                  <td><span class="small">stdio · sandboxed</span><br><span class="xs subtle mono">2025-11-25 · legacy</span></td>
+                  <td><span class="row" style="gap:5px;flex-wrap:nowrap"><span class="gdot g-corp"></span><span class="small">Company Official</span></span></td>
+                  <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+                  <td class="r">3 of 11</td>
+                  <td class="r"><button class="btn btn--sm">Manage</button></td>
+                </tr>
+                <tr>
+                  <td><span class="strong">Image Generation</span><br><span class="xs subtle mono">fal-mcp-server</span></td>
+                  <td><span class="small">HTTP</span><br><span class="xs subtle mono">2026-07-28</span></td>
+                  <td class="small muted">Workspace</td>
+                  <td><span class="status status--warn"><i class="status__dot status__dot--half"></i>1 tool changed</span></td>
+                  <td class="r">1 of 4</td>
+                  <td class="r"><button class="btn btn--sm">Review</button></td>
+                </tr>
+                <tr>
+                  <td><span class="strong">Brave Search</span><br><span class="xs subtle mono">from the MCP Registry</span></td>
+                  <td><span class="small">HTTP</span><br><span class="xs subtle mono">2026-07-28</span></td>
+                  <td class="small muted">Workspace</td>
+                  <td><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Pending review</span></td>
+                  <td class="r">0 of 2</td>
+                  <td class="r"><button class="btn btn--sm">Review</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              Registration is per workspace. An agency running five clients registers the same
+              server five times with five credentials. One shared registration would put one
+              client's queries in another's audit log.
+            </div>
+          </section>
+
+          <div class="notice notice--warn">
+            <svg class="icon"><use href="#i-alert"/></svg>
+            <div>
+              <strong>Image Generation changed a tool since you reviewed it.</strong>
+              <p class="small" style="margin-top:3px">
+                <span class="mono">generate_image</span> gained two required parameters and a new
+                description. It is <strong>switched off</strong> and its binding to the Media agent is
+                suspended until you review the diff. This is what stops a benign tool being
+                redefined after approval.
+              </p>
+              <div class="row" style="margin-top:9px">
+                <button class="btn btn--sm">Review diff</button>
+                <button class="btn btn--sm">Keep off</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice notice--info">
+            <svg class="icon"><use href="#i-info"/></svg>
+            <div>
+              <strong>Brave Search was proposed from Claude.</strong>
+              <p class="small" style="margin-top:3px">
+                Added through Mera's MCP server by Alex at 08:41. Servers added that way always
+                arrive in <em>Pending review</em> with every tool off. Being listed in the MCP
+                Registry means it is published, not that it is safe.
+              </p>
+              <div class="row" style="margin-top:9px">
+                <button class="btn btn--sm">Review and activate</button>
+                <button class="btn btn--sm btn--danger">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tools for the selected server -->
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Notion · tools</h2>
+              <span class="spacer"></span>
+              <span class="small subtle">Discovered 2 Nov · checked 6h ago</span>
+              <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-refresh"/></svg>Re-discover</button>
+            </div>
+            <table class="table">
+              <thead><tr><th scope="col">Tool</th><th scope="col">Risk</th><th scope="col">Approval</th><th scope="col">On</th><th scope="col">Bound to</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="mono xs">search</span><br><span class="xs subtle mono">agents see notion__search</span></td>
+                  <td><span class="tag tag--outline">Read</span></td>
+                  <td class="small muted">Runs without asking</td>
+                  <td><button class="switch" role="switch" aria-checked="true" aria-label="Enable search"></button></td>
+                  <td><span class="tag tag--outline">Writer</span></td>
+                </tr>
+                <tr>
+                  <td><span class="mono xs">fetch_page</span><br><span class="xs subtle mono">agents see notion__fetch_page</span></td>
+                  <td><span class="tag tag--outline">Read</span></td>
+                  <td class="small muted">Runs without asking</td>
+                  <td><button class="switch" role="switch" aria-checked="true" aria-label="Enable fetch_page"></button></td>
+                  <td><span class="tag tag--outline">Writer</span> <span class="tag tag--outline">Research</span></td>
+                </tr>
+                <tr>
+                  <td><span class="mono xs">create_page</span><br><span class="xs subtle mono">agents see notion__create_page</span></td>
+                  <td><span class="tag tag--warn">Write</span></td>
+                  <td><span class="small">Ask in Telegram every time</span></td>
+                  <td><button class="switch" role="switch" aria-checked="true" aria-label="Enable create_page"></button></td>
+                  <td><span class="tag tag--outline">Analytics</span></td>
+                </tr>
+                <tr>
+                  <td><span class="mono xs">update_page</span><br><span class="xs subtle mono">agents see notion__update_page</span></td>
+                  <td><span class="tag tag--warn">Write</span></td>
+                  <td><span class="small">Ask in Telegram every time</span></td>
+                  <td><button class="switch" role="switch" aria-checked="false" aria-label="Enable update_page"></button></td>
+                  <td class="subtle small">—</td>
+                </tr>
+                <tr>
+                  <td><span class="mono xs">delete_block</span><br><span class="xs subtle mono">agents see notion__delete_block</span></td>
+                  <td><span class="tag tag--danger">Destructive</span></td>
+                  <td><span class="small">Blocked</span></td>
+                  <td><button class="switch" role="switch" aria-checked="false" aria-label="Enable delete_block"></button></td>
+                  <td class="subtle small">—</td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="small subtle">6 more tools, all off and unclassified · <a href="#" style="text-decoration:underline">Show</a></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              An agent can call a tool only when all three hold: it is <strong>on</strong> here, the
+              server is <strong>in scope</strong> for the run's account group (Notion is limited to
+              Company Official), and the tool is <strong>bound</strong> to that agent. Notion isn't on
+              the curated list, so its own "read-only" labels are ignored: every risk level above was
+              set by an Admin.
+            </div>
+          </section>
+
+          <!-- Recent calls -->
+          <section class="panel">
+            <div class="panel__head"><h2>Recent tool calls</h2><span class="spacer"></span><a class="small" href="audit.html">Audit log</a></div>
+            <table class="table">
+              <thead><tr><th scope="col">Time</th><th scope="col">Tool</th><th scope="col">Agent</th><th scope="col">Outcome</th><th scope="col" class="r">Latency</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="mono xs">09:41</td>
+                  <td class="mono xs">notion__create_page</td>
+                  <td class="small">Analytics</td>
+                  <td><span class="status status--warn"><i class="status__dot status__dot--half"></i>Awaiting approval · Telegram</span></td>
+                  <td class="r small subtle">—</td>
+                </tr>
+                <tr>
+                  <td class="mono xs">09:12</td>
+                  <td class="mono xs">exa__web_search</td>
+                  <td class="small">Research</td>
+                  <td><span class="status status--ok"><i class="status__dot"></i>Succeeded · 14 KB</span></td>
+                  <td class="r mono xs">820 ms</td>
+                </tr>
+                <tr>
+                  <td class="mono xs">08:55</td>
+                  <td class="mono xs">fal__generate_image</td>
+                  <td class="small">Media</td>
+                  <td><span class="status status--danger"><i class="status__dot"></i>Not called · tool changed</span></td>
+                  <td class="r small subtle">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+        </div>
+
+        <div class="stack">
+
+          <section class="panel" id="add">
+            <div class="panel__head"><h2>Add a server</h2></div>
+            <div class="panel__body stack">
+              <span class="seg" style="justify-self:start">
+                <button aria-pressed="true">Form</button>
+                <button aria-pressed="false">Paste JSON</button>
+                <button aria-pressed="false">Catalog</button>
+              </span>
+              <div class="field">
+                <label for="tr">Transport</label>
+                <select class="select" id="tr"><option>Streamable HTTP</option><option>stdio (runs in the sandbox)</option></select>
+              </div>
+              <div class="field">
+                <label for="ep">Server URL</label>
+                <input class="input" id="ep" placeholder="https://mcp.example.com/mcp">
+              </div>
+              <div class="field">
+                <label for="au">Authentication</label>
+                <select class="select" id="au"><option>OAuth 2.1</option><option>Bearer token</option><option>Custom headers</option><option>None</option></select>
+                <span class="field__hint">OAuth opens the server's consent page. Tokens are stored encrypted, bound to that one server, and never shown again.</span>
+              </div>
+              <div class="field">
+                <label for="sc">Scope</label>
+                <select class="select" id="sc"><option>Whole workspace</option><option>Tech News</option><option>Company Official</option><option>Product Launch</option></select>
+              </div>
+              <div class="row">
+                <button class="btn btn--sm">Test connection</button>
+                <span class="topbar__spacer"></span>
+                <button class="btn btn--sm btn--primary">Add for review</button>
+              </div>
+              <p class="caption">
+                A new server starts in <strong>Pending review</strong> with every tool off. Testing
+                detects its protocol version and lists its tools without changing any permission.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Import from Claude Desktop</h2></div>
+            <div class="panel__body stack">
+              <label class="sr" for="json">mcpServers JSON</label>
+              <textarea class="textarea mono xs" id="json" rows="9" style="white-space:pre;overflow-x:auto">{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_TOKEN": "••••••••" }
+    }
+  }
+}</textarea>
+              <p class="caption">
+                Each entry becomes a draft. Unpinned packages get pinned to today's version for you to
+                confirm, values in <span class="mono">env</span> move into encrypted storage, and shell
+                wrappers like <span class="mono">bash -c</span> are refused.
+              </p>
+              <div class="row"><span class="topbar__spacer"></span><button class="btn btn--sm">Import as drafts</button></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Per-agent bindings</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between"><span class="small">Research</span><span class="tag tag--outline">4 tools</span></div>
+              <div class="row row--between"><span class="small">Writer</span><span class="tag tag--outline">2 tools · read</span></div>
+              <div class="row row--between"><span class="small">Analytics</span><span class="tag tag--outline">1 tool · asks first</span></div>
+              <div class="row row--between"><span class="small">Media</span><span class="tag tag--warn">1 suspended</span></div>
+              <div class="row row--between"><span class="small">Editor</span><span class="tag">None</span></div>
+              <div class="row row--between"><span class="small">Publisher</span><span class="tag">Not permitted</span></div>
+              <div class="row row--between"><span class="small">Approval</span><span class="tag">Not permitted</span></div>
+              <div class="divider"></div>
+              <p class="caption">
+                The Publisher and Approval agents can never use outside tools. An external result must
+                not be able to reach the component that publishes, or the one that records your
+                decisions.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Safety</h2></div>
+            <div class="panel__body col">
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Tool results treated as untrusted data</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">stdio servers sandboxed, network allowlisted</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Packages pinned to an exact version</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Write tools ask first, showing exact arguments</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">A changed tool switches off until reviewed</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Every call logged, secrets redacted</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Credentials write-only, never read back</span></div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-08T13:00:00Z",
+  "title": "Design System: Mera (v2 — The Dispatch Ledger)",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#f5f3ed",
+        "dark": "#111315",
+        "purpose": "Page ground. Warm paper in light, ink in dark."
+      },
+      "bg-muted": {
+        "role": "neutral",
+        "displayName": "Muted Paper",
+        "canonical": "#efece4",
+        "dark": "#15181a",
+        "purpose": "Proof receipt ground."
+      },
+      "bg-sunken": {
+        "role": "neutral",
+        "displayName": "Well",
+        "canonical": "#e9e5db",
+        "dark": "#0c0e10",
+        "purpose": "Segmented-control tray, media drop areas, skeleton base."
+      },
+      "bg-raised": {
+        "role": "neutral",
+        "displayName": "Sheet",
+        "canonical": "#fffefa",
+        "dark": "#181b1e",
+        "purpose": "Panels, inputs, buttons, command trigger: a sheet laid on the paper."
+      },
+      "bg-hover": {
+        "role": "neutral",
+        "displayName": "Hover",
+        "canonical": "#f1eee6",
+        "dark": "#1e2125",
+        "purpose": "Row and button hover ground."
+      },
+      "bg-active": {
+        "role": "neutral",
+        "displayName": "Active",
+        "canonical": "#e7e3d8",
+        "dark": "#272b30",
+        "purpose": "Pressed ground; progress-bar track. Worst-case surface for contrast tests."
+      },
+      "bg-inverse": {
+        "role": "neutral",
+        "displayName": "Inverse",
+        "canonical": "#17181a",
+        "dark": "#ebe8e1",
+        "purpose": "Account-chip mark, pressed filter chip."
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#e0dbcf",
+        "dark": "#262a2e",
+        "purpose": "Structure: panel edges, row rules."
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "#cbc5b7",
+        "dark": "#363b41",
+        "purpose": "Operable edges, table head underline, the variant branch, every dashed and dotted rule."
+      },
+      "fg": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#17181a",
+        "dark": "#ebe8e1",
+        "purpose": "Primary content. 16.0:1 light / 15.2:1 dark on bg."
+      },
+      "fg-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#48473f",
+        "dark": "#b7b3a9",
+        "purpose": "Supporting text. 7.3:1 light / 6.8:1 dark on bg-active."
+      },
+      "fg-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Ink",
+        "canonical": "#64625a",
+        "dark": "#9d998f",
+        "purpose": "Metadata, column labels, placeholders. 4.77:1 light / 5.01:1 dark on bg-active (worst case). Not for use inside a pressed chip (2.9:1 on bg-inverse)."
+      },
+      "fg-inverse": {
+        "role": "neutral",
+        "displayName": "Inverse Ink",
+        "canonical": "#f5f3ed",
+        "dark": "#111315",
+        "purpose": "Text on bg-inverse."
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Verdigris",
+        "canonical": "#0b6b5e",
+        "dark": "#4cc4ae",
+        "purpose": "The one action colour: primary buttons, switch on, chart series A, progress, link underline, brand diamond, current-page bar. 6.4:1 light / 8.7:1 dark against accent-fg."
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Verdigris Hover",
+        "canonical": "#08594e",
+        "dark": "#6fd3c0",
+        "purpose": "Primary hover: darker in light, lighter in dark."
+      },
+      "accent-fg": {
+        "role": "primary",
+        "displayName": "On Verdigris",
+        "canonical": "#ffffff",
+        "dark": "#0b1412",
+        "purpose": "Text on the accent."
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Verdigris Soft",
+        "canonical": "#dcece7",
+        "dark": "#13302b",
+        "purpose": "Selected inbox row; index-card hover. A selection, not a status."
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus",
+        "canonical": "#0b6b5e",
+        "dark": "#4cc4ae",
+        "purpose": "Focus outline and input border on focus. The rail overrides it to #6fd3c0."
+      },
+      "focus-ring": {
+        "role": "primary",
+        "displayName": "Focus Ring",
+        "canonical": "rgba(11, 107, 94, 0.28)",
+        "dark": "rgba(76, 196, 174, 0.32)",
+        "purpose": "3px halo on focused inputs."
+      },
+      "selection": {
+        "role": "primary",
+        "displayName": "Selection",
+        "canonical": "rgba(11, 107, 94, 0.18)",
+        "dark": "rgba(76, 196, 174, 0.24)",
+        "purpose": "Text selection ground."
+      },
+      "ok": {
+        "role": "semantic",
+        "displayName": "Ok",
+        "canonical": "#22704a",
+        "dark": "#6cc391",
+        "purpose": "Settled good state. Never used for an action."
+      },
+      "ok-bg": {
+        "role": "semantic",
+        "displayName": "Ok Tint",
+        "canonical": "#e3f0e7",
+        "dark": "#12221a",
+        "purpose": "Ok tag/notice ground."
+      },
+      "warn": {
+        "role": "semantic",
+        "displayName": "Warn",
+        "canonical": "#865600",
+        "dark": "#e0ad55",
+        "purpose": "In flight, expiring, needs a look."
+      },
+      "warn-bg": {
+        "role": "semantic",
+        "displayName": "Warn Tint",
+        "canonical": "#f8ecd2",
+        "dark": "#261d0d",
+        "purpose": "Warn tag/notice ground."
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "canonical": "#ad2a1f",
+        "dark": "#ee8678",
+        "purpose": "Needs action now. Solid danger dots render as a diamond."
+      },
+      "danger-bg": {
+        "role": "semantic",
+        "displayName": "Danger Tint",
+        "canonical": "#f8e5e1",
+        "dark": "#2a1512",
+        "purpose": "Danger tag/notice ground."
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "Info",
+        "canonical": "#24549e",
+        "dark": "#8db2ec",
+        "purpose": "Informational status; hashtags in previews."
+      },
+      "info-bg": {
+        "role": "semantic",
+        "displayName": "Info Tint",
+        "canonical": "#e3eaf6",
+        "dark": "#131c2c",
+        "purpose": "Info tag/notice ground."
+      },
+      "neutral": {
+        "role": "semantic",
+        "displayName": "Neutral",
+        "canonical": "#5d5b53",
+        "dark": "#aaa69c",
+        "purpose": "Inert tag text."
+      },
+      "neutral-bg": {
+        "role": "semantic",
+        "displayName": "Neutral Tint",
+        "canonical": "#e9e5db",
+        "dark": "#1f2226",
+        "purpose": "Default tag ground."
+      },
+      "rail-bg": {
+        "role": "rail",
+        "displayName": "Rail",
+        "canonical": "#15171a",
+        "dark": "#0b0d0f",
+        "purpose": "Always-dark control rail ground, in both themes."
+      },
+      "rail-fg": {
+        "role": "rail",
+        "displayName": "Rail Ink",
+        "canonical": "#cfcbc1",
+        "dark": "#cfcbc1",
+        "purpose": "Rail text. 11.1:1 on rail-bg."
+      },
+      "rail-subtle": {
+        "role": "rail",
+        "displayName": "Rail Subtle",
+        "canonical": "#8f8b81",
+        "dark": "#8f8b81",
+        "purpose": "Rail labels and icons on rail-bg only (5.3:1). 4.0:1 on rail-active, so the current item promotes its icon to rail-hi."
+      },
+      "rail-hover": {
+        "role": "rail",
+        "displayName": "Rail Hover",
+        "canonical": "#1f2226",
+        "dark": "#16191c",
+        "purpose": "Rail item hover."
+      },
+      "rail-active": {
+        "role": "rail",
+        "displayName": "Rail Active",
+        "canonical": "#2a2e33",
+        "dark": "#1f2327",
+        "purpose": "Current rail item; nav count pills."
+      },
+      "rail-border": {
+        "role": "rail",
+        "displayName": "Rail Rule",
+        "canonical": "#26292d",
+        "dark": "#1d2023",
+        "purpose": "Rail dividers and label hairlines."
+      },
+      "rail-hi": {
+        "role": "rail",
+        "displayName": "Rail Highlight",
+        "canonical": "#ffffff",
+        "dark": "#ffffff",
+        "purpose": "Current and hovered rail items, workspace name, wordmark."
+      },
+      "group-tech": {
+        "role": "tertiary",
+        "displayName": "Tech News",
+        "canonical": "#3d6596",
+        "dark": "#7fa6d9",
+        "purpose": "Group identity, as an 8px square mark only."
+      },
+      "group-corp": {
+        "role": "tertiary",
+        "displayName": "Company Official",
+        "canonical": "#7b4f93",
+        "dark": "#b593cf",
+        "purpose": "Group identity, as an 8px square mark only."
+      },
+      "group-launch": {
+        "role": "tertiary",
+        "displayName": "Product Launch",
+        "canonical": "#a2661f",
+        "dark": "#d9a05c",
+        "purpose": "Group identity, as an 8px square mark only."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page heads (h1), Plex Sans 600 20px. 18px in the top bar, 16px below 560px; the index page alone uses 34px."
+      },
+      "topbar-title": {
+        "displayName": "Top-bar Title",
+        "purpose": "The page title in the sticky top bar; truncates, never wraps."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "h2 outside panel heads."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Post set titles, 14.5px/600."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text, 14px/1.5; reading areas cap at 70ch."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Table cells, variant rows, inbox previews, buttons."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Tags, captions, panel footers, field hints, status labels."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Buttons, chips, segmented controls."
+      },
+      "field": {
+        "displayName": "Field",
+        "purpose": "Input, select and textarea text."
+      },
+      "label-panel": {
+        "displayName": "Panel Label",
+        "purpose": "Panel titles in condensed tracked capitals, read as column heads on a form."
+      },
+      "label-column": {
+        "displayName": "Column Label",
+        "purpose": "Table headers in condensed capitals over a border-strong rule."
+      },
+      "label-rail": {
+        "displayName": "Rail Label",
+        "purpose": "Rail group names, followed by a hairline to the edge."
+      },
+      "brand": {
+        "displayName": "Wordmark",
+        "purpose": "MERA in condensed capitals at 0.14em beside the verdigris diamond."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Plex Mono at 0.92em: hashes, versions, IDs, handles, scores, the top-bar subtitle, nav counts, kbd, counters, chart and calendar times."
+      }
+    },
+    "shadows": [
+      {
+        "name": "popover",
+        "value": "0 1px 0 rgba(23,24,26,.04), 0 12px 32px -10px rgba(23,24,26,.28)",
+        "purpose": "Light overlay shadow: command palette, mobile rail drawer, calendar reschedule popover."
+      },
+      {
+        "name": "popover-dark",
+        "value": "0 1px 0 rgba(0,0,0,.4), 0 14px 36px -10px rgba(0,0,0,.75)",
+        "purpose": "Dark overlay shadow, same three surfaces."
+      },
+      {
+        "name": "button-lip",
+        "value": "0 1px 0 color-mix(in srgb, var(--border-strong) 45%, transparent)",
+        "purpose": "Key-like bottom lip on secondary buttons only; removed on press."
+      },
+      {
+        "name": "ring",
+        "value": "0 0 0 1px var(--border-strong) / 0 0 0 2px var(--bg-raised)",
+        "purpose": "Borders without layout cost: the pressed segment; the separator between overlapping account marks."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px var(--focus-ring)",
+        "purpose": "Ring on focused inputs, with a verdigris border. Not elevation."
+      },
+      {
+        "name": "scrim",
+        "value": "rgba(10,10,9,.42)",
+        "purpose": "Command palette backdrop."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control",
+        "value": "90ms ease-out",
+        "purpose": "Button background, border and colour."
+      },
+      {
+        "name": "toggle",
+        "value": "120ms ease-out",
+        "purpose": "Switch track colour."
+      },
+      {
+        "name": "knob",
+        "value": "140ms cubic-bezier(.2,.8,.3,1)",
+        "purpose": "Switch knob translation."
+      },
+      {
+        "name": "drawer",
+        "value": "180ms cubic-bezier(.2,.8,.3,1)",
+        "purpose": "Mobile rail slide-in."
+      },
+      {
+        "name": "shimmer",
+        "value": "1.4s ease-in-out infinite",
+        "purpose": "Skeleton sheen. The only loop."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Global prefers-reduced-motion override on every animation and transition."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "split-collapse",
+        "value": "1180px",
+        "purpose": "Splits single-column; three-up grids two-up; inbox list 290px; command trigger 180px."
+      },
+      {
+        "name": "rail-drawer",
+        "value": "900px",
+        "purpose": "Rail becomes a drawer; crumb and subtitle hide; command trigger icon-only; variants stack with the branch at 18px; heads and rows wrap; tables nowrap and scroll inside their panel; page padding 16px."
+      },
+      {
+        "name": "compact",
+        "value": "560px",
+        "purpose": "Top-bar primary action icon-only (label kept for assistive tech); title 16px; post set actions take a full row."
+      }
+    ],
+    "layout": [
+      {
+        "name": "rail-width",
+        "value": "232px"
+      },
+      {
+        "name": "topbar-height",
+        "value": "54px"
+      },
+      {
+        "name": "page-padding",
+        "value": "22px (16px below 900px)"
+      },
+      {
+        "name": "grid-gutter",
+        "value": "16px"
+      },
+      {
+        "name": "panel-padding",
+        "value": "14px; head min-height 42px with 8px/14px padding"
+      },
+      {
+        "name": "aside-width",
+        "value": "320px (380px wide variant, 300px leading variant)"
+      },
+      {
+        "name": "prose-measure",
+        "value": "70ch (46ch for empty-state copy)"
+      },
+      {
+        "name": "variant-branch",
+        "value": "1px border-strong rule 28px from the set edge (18px below 900px); 14px ticks to each variant"
+      },
+      {
+        "name": "table-wrapper",
+        "value": ".tablewrap (position: relative; overflow-x: auto), added at runtime around every .table",
+        "purpose": "The page never scrolls sideways."
+      }
+    ],
+    "iconography": [
+      {
+        "name": "grid",
+        "value": "16x16 viewBox"
+      },
+      {
+        "name": "stroke",
+        "value": "1.5px, round caps and joins, no fill (1.25px at 26px)"
+      },
+      {
+        "name": "sizes",
+        "value": "16px default, 14px sm, 20px lg, 26px xl; platform glyphs 11px inside the 22px account mark"
+      },
+      {
+        "name": "sprite",
+        "value": "56 authored symbols: 49 UI icons prefixed i-, 7 filled platform marks prefixed p-"
+      }
+    ],
+    "fonts": [
+      {
+        "name": "IBM Plex Sans",
+        "weights": "400, 500, 600",
+        "role": "Interface"
+      },
+      {
+        "name": "IBM Plex Sans Condensed",
+        "weights": "500, 600",
+        "role": "Labels in tracked capitals"
+      },
+      {
+        "name": "IBM Plex Mono",
+        "weights": "400, 500",
+        "role": "Machine data"
+      },
+      {
+        "name": "loading",
+        "value": "Mockups @import from Google Fonts with system fallbacks; the product should self-host (e.g. next/font)."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single verdigris action per cluster. No key lip; 600 weight.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Approve remaining 3</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: var(--r-md, 4px); background: var(--bg-raised, #fffefa); color: var(--fg, #17181a); font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 0 rgba(203,197,183,.45); transition: background 90ms ease-out, border-color 90ms ease-out, color 90ms ease-out; } .ds-btn:hover { background: var(--bg-hover, #f1eee6); border-color: var(--fg-subtle, #64625a); } .ds-btn:active { background: var(--bg-active, #e7e3d8); box-shadow: none; } .ds-btn:focus-visible { outline: 2px solid var(--focus, #0b6b5e); outline-offset: 2px; } .ds-btn-primary { background: var(--accent, #0b6b5e); border-color: var(--accent, #0b6b5e); color: var(--accent-fg, #fff); font-weight: 600; box-shadow: none; } .ds-btn-primary:hover { background: var(--accent-hover, #08594e); border-color: var(--accent-hover, #08594e); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The ordinary button: a raised sheet with a strong edge and a 1px key lip that disappears on press.",
+      "html": "<button class=\"ds-btn\">Review</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: var(--r-md, 4px); background: var(--bg-raised, #fffefa); color: var(--fg, #17181a); font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 0 rgba(203,197,183,.45); transition: background 90ms ease-out, border-color 90ms ease-out, color 90ms ease-out; } .ds-btn:hover { background: var(--bg-hover, #f1eee6); border-color: var(--fg-subtle, #64625a); } .ds-btn:active { background: var(--bg-active, #e7e3d8); box-shadow: none; } .ds-btn:focus-visible { outline: 2px solid var(--focus, #0b6b5e); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "32px sheet with a strong edge; focus takes a verdigris border and halo.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-url\">Server URL</label><input id=\"ds-url\" class=\"ds-input\" placeholder=\"https://mcp.example.com/mcp\"><span class=\"ds-hint\">Tokens are stored encrypted and never shown again.</span></div>",
+      "css": ".ds-field { display: grid; gap: 6px; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-field label { font-size: 13px; font-weight: 600; color: var(--fg, #17181a); } .ds-hint { font-size: 12.5px; color: var(--fg-subtle, #64625a); } .ds-input { width: 100%; min-height: 32px; padding: 5px 10px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: var(--r-md, 4px); background: var(--bg-raised, #fffefa); color: var(--fg, #17181a); font: inherit; font-size: 13.5px; } .ds-input::placeholder { color: var(--fg-subtle, #64625a); } .ds-input:focus { outline: none; border-color: var(--focus, #0b6b5e); box-shadow: 0 0 0 3px var(--focus-ring, rgba(11,107,94,.28)); }"
+    },
+    {
+      "name": "Rail Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "On the always-dark rail. The current page fills rail-active and carries a 3px verdigris bar flush to the rail edge; counts are mono pills.",
+      "html": "<nav class=\"ds-rail\"><div class=\"ds-raillabel\">Work</div><a class=\"ds-navitem\" href=\"#\" aria-current=\"page\">Dashboard</a><a class=\"ds-navitem\" href=\"#\">Approvals<span class=\"ds-navcount\">7</span></a><a class=\"ds-navitem\" href=\"#\">Composer</a></nav>",
+      "css": ".ds-rail { display: grid; gap: 1px; width: 232px; padding: 8px 10px; background: #15171a; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-raillabel { display: flex; align-items: center; gap: 8px; padding: 0 8px 5px; font-family: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #8f8b81; } .ds-raillabel::after { content: ''; flex: 1; height: 1px; background: #26292d; } .ds-navitem { position: relative; display: flex; align-items: center; gap: 10px; height: 29px; padding: 0 8px; border-radius: 4px; font-size: 13.5px; color: #cfcbc1; text-decoration: none; } .ds-navitem:hover { background: #1f2226; color: #fff; } .ds-navitem[aria-current=\"page\"] { background: #2a2e33; color: #fff; font-weight: 500; } .ds-navitem[aria-current=\"page\"]::before { content: ''; position: absolute; left: -10px; top: 7px; bottom: 7px; width: 3px; border-radius: 0 2px 2px 0; background: #4cc4ae; } .ds-navcount { margin-left: auto; min-width: 22px; padding: 1px 6px; border-radius: 9px; background: #2a2e33; font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; text-align: center; color: #cfcbc1; } .ds-navitem:focus-visible { outline: 2px solid #6fd3c0; outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "A rounded pill so a filter never reads as a button. Pressed inverts completely; secondary text inside inherits the inverse ink.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">All groups</button><button class=\"ds-chip\" aria-pressed=\"false\"><i class=\"ds-gdot\" style=\"background:#3d6596\"></i>Tech News <span class=\"ds-sub\">5</span></button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--border, #e0dbcf); border-radius: 14px; background: var(--bg-raised, #fffefa); font: inherit; font-size: 12.5px; color: var(--fg-muted, #48473f); cursor: pointer; } .ds-chip:hover { border-color: var(--border-strong, #cbc5b7); color: var(--fg, #17181a); } .ds-chip[aria-pressed=\"true\"] { background: var(--bg-inverse, #17181a); border-color: var(--bg-inverse, #17181a); color: var(--fg-inverse, #f5f3ed); font-weight: 500; } .ds-chip[aria-pressed=\"true\"] .ds-sub { color: inherit; } .ds-sub { color: var(--fg-subtle, #64625a); } .ds-gdot { width: 8px; height: 8px; border-radius: 1px; display: inline-block; }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "A sheet on paper: hairline edge, condensed uppercase title, dashed tear-off footer on the same ground. No shadow.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-head\"><h2>Account health</h2><a href=\"#\">All 9</a></div><div class=\"ds-panel-body\">Work LinkedIn needs reconnecting.</div><div class=\"ds-panel-foot\">X's tier allowance is shared across both X accounts.</div></section>",
+      "css": ".ds-panel { max-width: 340px; background: var(--bg-raised, #fffefa); border: 1px solid var(--border, #e0dbcf); border-radius: var(--r-lg, 6px); font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--fg, #17181a); } .ds-panel-head { display: flex; align-items: center; justify-content: space-between; min-height: 42px; padding: 8px 14px; border-bottom: 1px solid var(--border, #e0dbcf); } .ds-panel-head h2 { margin: 0; font-family: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif; font-size: 12.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; } .ds-panel-head a { font-size: 13px; color: inherit; } .ds-panel-body { padding: 14px; font-size: 13px; } .ds-panel-foot { padding: 10px 14px; border-top: 1px dashed var(--border-strong, #cbc5b7); font-size: 12.5px; color: var(--fg-muted, #48473f); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "custom",
+      "refersTo": "status",
+      "description": "An 8px dot plus a label. Shape is a second channel: solid settled, ring not started, half in flight, diamond for solid danger.",
+      "html": "<div class=\"ds-statuses\"><span class=\"ds-status ds-status-ok\"><i class=\"ds-dot\"></i>Approved</span><span class=\"ds-status ds-status-warn\"><i class=\"ds-dot ds-dot-half\"></i>Pending</span><span class=\"ds-status ds-status-neutral\"><i class=\"ds-dot ds-dot-ring\"></i>Pending review</span><span class=\"ds-status ds-status-danger\"><i class=\"ds-dot ds-dot-diamond\"></i>Reauth</span></div>",
+      "css": ".ds-statuses { display: flex; flex-wrap: wrap; gap: 14px; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; white-space: nowrap; } .ds-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: currentColor; } .ds-dot-ring { background: transparent; border: 1.5px solid currentColor; } .ds-dot-half { background: linear-gradient(to right, currentColor 50%, transparent 50%); border: 1.5px solid currentColor; } .ds-dot-diamond { border-radius: 1px; transform: rotate(45deg) scale(.9); } .ds-status-ok { color: var(--ok, #22704a); } .ds-status-warn { color: var(--warn, #865600); } .ds-status-danger { color: var(--danger, #ad2a1f); } .ds-status-neutral { color: var(--fg-subtle, #64625a); }"
+    },
+    {
+      "name": "Account Chip",
+      "kind": "custom",
+      "refersTo": "account-chip-mark",
+      "description": "A 22px inverted circle carrying the platform glyph, then the name and a mono handle.",
+      "html": "<span class=\"ds-acct\"><span class=\"ds-acct-mark\" aria-hidden=\"true\">in</span><span class=\"ds-acct-name\">Work LinkedIn</span><span class=\"ds-acct-handle\">@alexmercer</span></span>",
+      "css": ".ds-acct { display: inline-flex; align-items: center; gap: 8px; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-acct-mark { width: 22px; height: 22px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--bg-inverse, #17181a); color: var(--fg-inverse, #f5f3ed); font-size: 10px; font-weight: 600; } .ds-acct-name { font-size: 13px; font-weight: 500; color: var(--fg, #17181a); } .ds-acct-handle { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: var(--fg-subtle, #64625a); }"
+    },
+    {
+      "name": "Variant Branch",
+      "kind": "custom",
+      "refersTo": "variant-row",
+      "description": "The signature structure: a vertical rule hangs from the post set and each per-account variant ticks off it. Disabled accounts stay readable with a strikethrough and an Off label.",
+      "html": "<div class=\"ds-variants\"><div class=\"ds-variant\"><span class=\"ds-vacct\">Work LinkedIn</span><span class=\"ds-vtext\">Postgres 18 ships async I/O, and the numbers…</span><span class=\"ds-vaside\"><span class=\"ds-tag-outline\">0.84</span><span class=\"ds-vtime\">09:00</span><span class=\"ds-vstatus\">Pending</span></span></div><div class=\"ds-variant\"><span class=\"ds-vacct\">X @main</span><span class=\"ds-vtext\">1/ Postgres 18 landed async I/O. On Linux…</span><span class=\"ds-vaside\"><span class=\"ds-tag-outline\">0.77</span><span class=\"ds-vtime\">09:08</span><span class=\"ds-vstatus ds-ok\">Approved</span></span></div></div>",
+      "css": ".ds-variants { position: relative; padding: 0 0 8px; max-width: 760px; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-variants::before { content: ''; position: absolute; left: 28px; top: 0; bottom: 26px; width: 1px; background: var(--border-strong, #cbc5b7); } .ds-variant { position: relative; display: grid; grid-template-columns: 180px minmax(0, 1fr) auto; align-items: center; gap: 14px; margin: 0 10px 0 28px; padding: 8px 10px 8px 22px; border-radius: 4px; } .ds-variant::before { content: ''; position: absolute; left: 0; top: 50%; width: 14px; height: 1px; background: var(--border-strong, #cbc5b7); } .ds-variant:hover { background: var(--bg-hover, #f1eee6); } .ds-vacct { font-size: 13px; font-weight: 500; color: var(--fg, #17181a); } .ds-vtext { font-size: 13px; color: var(--fg-muted, #48473f); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-vaside { display: flex; align-items: center; gap: 12px; } .ds-tag-outline { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: 3px; font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 11.5px; color: var(--fg-muted, #48473f); } .ds-vtime { font-size: 13px; color: var(--fg-subtle, #64625a); font-variant-numeric: tabular-nums; } .ds-vstatus { font-size: 12.5px; font-weight: 500; color: var(--warn, #865600); } .ds-vstatus.ds-ok { color: var(--ok, #22704a); }"
+    },
+    {
+      "name": "Approval Proof Receipt",
+      "kind": "custom",
+      "refersTo": "proof-block",
+      "description": "A perforated receipt: dashed edge, condensed keys, monospace for the strings that identify bytes.",
+      "html": "<div class=\"ds-proof\"><span class=\"ds-proof-k\">Approved</span><span>You · 09:12 via Telegram</span><span class=\"ds-proof-k\">Account</span><span>X @main</span><span class=\"ds-proof-k\">Version</span><span class=\"ds-proof-v\">v1</span><span class=\"ds-proof-k\">Hash</span><span class=\"ds-proof-v\">7f3a9c1d8e2b4056</span></div>",
+      "css": ".ds-proof { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; padding: 8px 12px; border: 1px dashed var(--border-strong, #cbc5b7); border-radius: var(--r-md, 4px); background: var(--bg-muted, #efece4); font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12.5px; color: var(--fg, #17181a); } .ds-proof-k { font-family: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'Arial Narrow', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-subtle, #64625a); } .ds-proof-v { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; }"
+    },
+    {
+      "name": "Tool-call Approval Block",
+      "kind": "custom",
+      "refersTo": "tool-call-approval",
+      "description": "An external MCP tool call waiting for a human. Arguments shown verbatim in mono; 'Block this tool' separated from Allow once / Deny.",
+      "html": "<div class=\"ds-tc\"><div><strong>Analytics agent</strong> wants to call <code>notion__create_page</code></div><div class=\"ds-tc-meta\">Notion · write · run weekly_insights · 09:41</div><div class=\"ds-tc-args\"><div class=\"ds-tc-args-h\">Arguments, exactly as they will be sent</div><pre>parent_id: \"Marketing / Weekly reports\"\ntitle: \"Week 45 — social performance\"\ncontent: \"Tech News engagement up 18%…\"</pre></div><div class=\"ds-tc-actions\"><button class=\"ds-btn ds-btn-primary\">Allow once</button><button class=\"ds-btn\">Deny</button><span style=\"flex:1\"></span><button class=\"ds-btn ds-btn-danger\">Block this tool</button></div></div>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: var(--r-md, 4px); background: var(--bg-raised, #fffefa); color: var(--fg, #17181a); font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 0 rgba(203,197,183,.45); transition: background 90ms ease-out, border-color 90ms ease-out, color 90ms ease-out; } .ds-btn:hover { background: var(--bg-hover, #f1eee6); border-color: var(--fg-subtle, #64625a); } .ds-btn:active { background: var(--bg-active, #e7e3d8); box-shadow: none; } .ds-btn:focus-visible { outline: 2px solid var(--focus, #0b6b5e); outline-offset: 2px; } .ds-btn-primary { background: var(--accent, #0b6b5e); border-color: var(--accent, #0b6b5e); color: var(--accent-fg, #fff); font-weight: 600; box-shadow: none; } .ds-btn-primary:hover { background: var(--accent-hover, #08594e); border-color: var(--accent-hover, #08594e); } .ds-btn-danger { color: var(--danger, #ad2a1f); } .ds-tc { display: grid; gap: 10px; max-width: 320px; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--fg, #17181a); } .ds-tc code, .ds-tc pre { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; } .ds-tc-meta { font-size: 12px; color: var(--fg-subtle, #64625a); } .ds-tc-args { border: 1px solid var(--border, #e0dbcf); border-radius: var(--r-lg, 6px); overflow: hidden; background: var(--bg-raised, #fffefa); } .ds-tc-args-h { padding: 9px 12px; border-bottom: 1px solid var(--border, #e0dbcf); font-size: 12px; color: var(--fg-subtle, #64625a); } .ds-tc-args pre { margin: 0; padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; } .ds-tc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .ds-tc-actions .ds-btn { height: 28px; padding: 0 10px; font-size: 12.5px; }"
+    },
+    {
+      "name": "Reschedule Popover",
+      "kind": "custom",
+      "refersTo": "reschedule-popover",
+      "description": "Keyboard equivalent of dragging a calendar item. Nothing moves until Move; Escape returns focus to the item.",
+      "html": "<div class=\"ds-rs\" role=\"dialog\" aria-labelledby=\"ds-rs-t\"><div class=\"ds-rs-h\"><strong id=\"ds-rs-t\">Reschedule</strong><span>Postgres 18 · 09:00</span></div><div class=\"ds-rs-b\"><label>Day<select><option>Mon 10 Nov</option></select></label><label>Time<input type=\"time\" value=\"09:00\"></label><p>Moving keeps the approval: only a content change invalidates it.</p></div><div class=\"ds-rs-f\"><button>Cancel</button><span style=\"flex:1\"></span><button class=\"ds-rs-move\">Move</button></div></div>",
+      "css": ".ds-rs { width: 280px; background: var(--bg-raised, #fffefa); border: 1px solid var(--border-strong, #cbc5b7); border-radius: var(--r-lg, 6px); box-shadow: 0 1px 0 rgba(23,24,26,.04), 0 12px 32px -10px rgba(23,24,26,.28); font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--fg, #17181a); } .ds-rs-h { display: grid; gap: 2px; padding: 10px 12px; border-bottom: 1px solid var(--border, #e0dbcf); } .ds-rs-h span, .ds-rs-b p { margin: 0; font-size: 12px; color: var(--fg-subtle, #64625a); } .ds-rs-b { display: grid; gap: 10px; padding: 12px; } .ds-rs-b label { display: grid; gap: 6px; font-weight: 600; } .ds-rs-b select, .ds-rs-b input { min-height: 32px; padding: 5px 10px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: 4px; background: var(--bg-raised, #fffefa); font: inherit; font-weight: 400; } .ds-rs-f { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border, #e0dbcf); } .ds-rs-f button { height: 28px; padding: 0 10px; border: 1px solid var(--border-strong, #cbc5b7); border-radius: 4px; background: var(--bg-raised, #fffefa); font: inherit; font-weight: 500; } .ds-rs-f .ds-rs-move { background: var(--accent, #0b6b5e); border-color: var(--accent, #0b6b5e); color: var(--accent-fg, #fff); font-weight: 600; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Dispatch Ledger",
+    "overview": "Mera looks like a dispatch office's ledger: warm paper, black ink, and a single verdigris stamp for the action that moves things along. Work sits on raised sheets (bg-raised #fffefa) laid on warm paper (bg #f5f3ed). Panel titles, column heads and rail labels are set in IBM Plex Sans Condensed capitals, like the printed headings on a form; people's text is IBM Plex Sans; anything a machine produced is IBM Plex Mono. Every post set draws a branch to its per-account variants, and approval proof is a perforated receipt on a dashed edge. The shell splits by surface: an always-dark control rail holds navigation and the kill switch, apart from the work on paper.",
+    "keyCharacteristics": [
+      "Warm paper and black ink; one verdigris action colour (#0b6b5e light / #4cc4ae dark).",
+      "An always-dark control rail, with the kill switch alone at its foot.",
+      "Three registers of IBM Plex: Sans for reading, Condensed capitals for field headings, Mono for machine data.",
+      "Post sets drawn as a branch to their per-account variants.",
+      "Dashed rules for separable things (proof receipts, panel footers); dotted rules for definition lists.",
+      "Status is a dot shape plus a label; solid danger becomes a diamond.",
+      "Every text pair tested to WCAG AA 4.5:1 in both themes."
+    ],
+    "rules": [
+      {
+        "name": "The One Stamp Rule",
+        "body": "Verdigris means act here or you are here. It is never a status, a group colour or decoration; status green is ok, and neither borrows the other's job.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Block Theme Rule",
+        "body": "Light and dark are two complete, hand-tuned token blocks. New tokens are authored in both. Rail tokens are the deliberate exception: dark in both.",
+        "section": "colors"
+      },
+      {
+        "name": "The 4.5 Floor Rule",
+        "body": "Every foreground clears 4.5:1 on every surface it can land on. Test against bg-active, and against bg-inverse for anything that can appear in a pressed chip.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Registers Rule",
+        "body": "Sans for what a person reads or writes; condensed capitals only for a heading that names a field, column or section; mono only for machine strings. A string in the wrong register is a bug.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Any number compared down a column uses tabular figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Surfaces Rule",
+        "body": "Navigation and stopping live on the dark rail; work lives on paper. Nothing operational sits on the rail and the kill switch never appears on paper.",
+        "section": "layout"
+      },
+      {
+        "name": "The Kill Switch Reachability Rule",
+        "body": "Stop all automation is pinned to the rail foot, visible without scrolling on every screen, with nothing below it.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Row Per Account Rule",
+        "body": "A post set renders one variant row per target account. Bulk actions count only what they act on: Approve remaining 3, not Approve all 4.",
+        "section": "layout"
+      },
+      {
+        "name": "The No Sideways Page Rule",
+        "body": "The page never scrolls horizontally down to 390px. Tables live in a .tablewrap; grid and flex children carry min-width: 0.",
+        "section": "layout"
+      },
+      {
+        "name": "The Sheet-Not-Shadow Rule",
+        "body": "Separation is a tonal step plus a rule. Shadows only for dismissible overlays and the one key lip on secondary buttons.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Line Means Something Rule",
+        "body": "Solid is structure, dashed is separable or provisional, dotted is a ruled key/value list. They are not interchangeable.",
+        "section": "shapes"
+      },
+      {
+        "name": "The 16-Grid Icon Rule",
+        "body": "Every icon is drawn on the 16px grid at 1.5px stroke and added to the sprite. No icon fonts, no img icons, no emoji.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do keep verdigris for action and location only.",
+      "Do set panel titles, column heads and rail labels in condensed tracked capitals, and machine data in Plex Mono.",
+      "Do draw the branch for every post set, one ticked row per target account.",
+      "Do pair every status colour with a dot shape and a label; use the diamond for solid danger.",
+      "Do use dashed rules only for separable things and dotted rules only for definition lists.",
+      "Do author new tokens in both theme blocks and test against bg-active and bg-inverse.",
+      "Do keep the kill switch alone at the rail foot on every screen.",
+      "Do give every drag a keyboard path; the reschedule popover is the pattern.",
+      "Do let wide content scroll inside its container, never the page.",
+      "Do show external tool arguments verbatim wherever a human approves them.",
+      "Do self-host the Plex families in the product build."
+    ],
+    "donts": [
+      "Don't use verdigris for success, or ok green for an action.",
+      "Don't put anything operational on the rail, or the kill switch anywhere else.",
+      "Don't set sentences, buttons or emphasis in condensed capitals.",
+      "Don't add a coloured edge for selection or identity; the 3px verdigris bar on the current rail item is the one sanctioned edge.",
+      "Don't dim information with opacity; disabled controls and a disabled account's platform mark (0.55) are the only exceptions.",
+      "Don't add shadows beyond the key lip, the popover shadow and ring outlines.",
+      "Don't add gradients, glass panels or a second accent; the top bar's light blur is the one translucency.",
+      "Don't collapse several accounts into one row.",
+      "Don't put aria-selected on a button; use aria-current=\"true\".",
+      "Don't render a picture of a control with real button elements.",
+      "Don't let two screens disagree about a count, or a character count disagree with its text."
+    ]
+  }
+}

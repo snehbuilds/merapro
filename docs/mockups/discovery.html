@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Discovery · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="discovery"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Content Discovery" data-sub="Trending for Tech News"></header>
+
+    <main class="page">
+
+      <section class="panel">
+        <div class="filters">
+          <span class="small strong nowrap">Ranked for</span>
+          <button class="chip" aria-pressed="true"><span class="gdot g-tech"></span>Tech News</button>
+          <button class="chip" aria-pressed="false"><span class="gdot g-corp"></span>Company Official</button>
+          <button class="chip" aria-pressed="false">Whole workspace</button>
+          <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+          <button class="chip">Last 24h</button>
+          <button class="chip">Relevance &gt; 0.5</button>
+          <span class="topbar__spacer"></span>
+          <span class="small subtle">Scores are against this group's pillars, not the workspace's.</span>
+        </div>
+
+        <div class="setlist">
+
+          <article class="set">
+            <div class="set__head">
+              <div class="set__body">
+                <div class="row" style="gap:8px;margin-bottom:3px">
+                  <span class="tag tag--ok">0.91 relevance</span>
+                  <span class="tag tag--outline">Databases</span>
+                  <span class="xs subtle">Covered by 3 sources</span>
+                </div>
+                <div class="set__title">PostgreSQL 18 Released</div>
+                <p class="small muted" style="margin-top:4px;max-width:78ch">
+                  Async I/O subsystem built on io_uring, OAuth authentication support, and
+                  skip-scan index improvements. The async I/O work reports meaningful gains
+                  on sequential scans for read-heavy workloads.
+                </p>
+                <div class="set__meta">
+                  <span>postgresql.org</span><span class="sep">·</span>
+                  <span>2h ago</span><span class="sep">·</span>
+                  <span>Freshness 0.96</span><span class="sep">·</span>
+                  <span>Engagement potential 0.82</span>
+                </div>
+              </div>
+              <div class="set__aside">
+                <button class="btn btn--sm">Dismiss</button>
+                <a class="btn btn--sm btn--primary" href="composer.html">Draft for group</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="set">
+            <div class="set__head">
+              <div class="set__body">
+                <div class="row" style="gap:8px;margin-bottom:3px">
+                  <span class="tag tag--ok">0.84 relevance</span>
+                  <span class="tag tag--outline">Open source</span>
+                </div>
+                <div class="set__title">Kafka 4.0 removes ZooKeeper entirely</div>
+                <p class="small muted" style="margin-top:4px;max-width:78ch">
+                  KRaft becomes the only supported metadata mode. Clusters still on
+                  ZooKeeper must migrate before upgrading; the release notes document the
+                  path but it is not reversible.
+                </p>
+                <div class="set__meta">
+                  <span>Hacker News</span><span class="sep">·</span>
+                  <span>5h ago</span><span class="sep">·</span>
+                  <span>Freshness 0.88</span><span class="sep">·</span>
+                  <span>Engagement potential 0.74</span>
+                </div>
+              </div>
+              <div class="set__aside">
+                <button class="btn btn--sm">Dismiss</button>
+                <a class="btn btn--sm btn--primary" href="composer.html">Draft for group</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="set">
+            <div class="set__head">
+              <div class="set__body">
+                <div class="row" style="gap:8px;margin-bottom:3px">
+                  <span class="tag tag--warn">0.61 relevance</span>
+                  <span class="tag tag--outline">Platform engineering</span>
+                  <span class="tag tag--warn">Opinion</span>
+                </div>
+                <div class="set__title">Why we moved off Kubernetes</div>
+                <p class="small muted" style="margin-top:4px;max-width:78ch">
+                  A engineering team's account of consolidating onto a smaller deployment
+                  footprint. First-person narrative with no benchmark data.
+                </p>
+                <div class="set__meta">
+                  <span>LWN.net</span><span class="sep">·</span>
+                  <span>9h ago</span><span class="sep">·</span>
+                  <span>Freshness 0.71</span><span class="sep">·</span>
+                  <span class="status status--warn"><i class="status__dot status__dot--half"></i>Flagged opinion</span>
+                </div>
+              </div>
+              <div class="set__aside">
+                <button class="btn btn--sm">Dismiss</button>
+                <a class="btn btn--sm" href="composer.html">Draft for group</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="set">
+            <div class="set__head">
+              <div class="set__body">
+                <div class="row" style="gap:8px;margin-bottom:3px">
+                  <span class="tag">0.38 relevance</span>
+                  <span class="tag tag--outline">Duplicate</span>
+                </div>
+                <div class="set__title">Postgres 18 is out — what's new</div>
+                <p class="small muted" style="margin-top:4px;max-width:78ch">
+                  Collapsed into <a href="#">PostgreSQL 18 Released</a> — semantic similarity
+                  0.94. Kept rather than discarded, because coverage across three sources is
+                  itself a relevance signal.
+                </p>
+                <div class="set__meta">
+                  <span>Google News</span><span class="sep">·</span>
+                  <span>3h ago</span>
+                </div>
+              </div>
+              <div class="set__aside">
+                <span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Deduplicated</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="panel__foot">
+          Relevance = similarity to this group's pillar embeddings, weighted by source
+          weight and decayed by age. Arithmetic, not a model judgement, so the same input
+          always produces the same score.
+        </div>
+      </section>
+
+      <div class="grid grid--3" style="margin-top:14px">
+        <section class="panel">
+          <div class="panel__head"><h2>Pillars · Tech News</h2></div>
+          <div class="panel__body col">
+            <div class="row row--between"><span class="small">Databases</span><span class="mono xs">weight 1.4</span></div>
+            <div class="row row--between"><span class="small">Platform engineering</span><span class="mono xs">weight 1.0</span></div>
+            <div class="row row--between"><span class="small">Open source</span><span class="mono xs">weight 0.8</span></div>
+            <p class="caption">Weights are tuned by the analytics feedback loop, bounded to 15% movement per run.</p>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel__head"><h2>Last 7 days</h2></div>
+          <div class="panel__body">
+            <dl class="dl">
+              <dt>Items ingested</dt><dd>266</dd>
+              <dt>After dedupe</dt><dd>189</dd>
+              <dt>Above threshold</dt><dd>31</dd>
+              <dt>Drafted</dt><dd>12</dd>
+              <dt>Published</dt><dd>9</dd>
+            </dl>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel__head"><h2>Best sources</h2><span class="spacer"></span><span class="small subtle">By published rate</span></div>
+          <div class="panel__body col">
+            <div class="row row--between"><span class="small">PostgreSQL News</span><span class="small num">43%</span></div>
+            <div class="row row--between"><span class="small">LWN.net</span><span class="small num">13%</span></div>
+            <div class="row row--between"><span class="small">Hacker News · top</span><span class="small num">4%</span></div>
+            <p class="caption">Hacker News yields volume; PostgreSQL News yields posts. Weights follow.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

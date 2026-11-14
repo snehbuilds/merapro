@@ -1,0 +1,12 @@
+# LF in the repository and on checkout: the Docker images, shell scripts and CI run on Linux.
+* text=auto eol=lf
+
+# Vendored platform skills are pinned by sha256 (scripts/import_platform_skills.py --check);
+# no line-ending conversion may ever touch them.
+backend/src/mera/skills/platforms/** -text
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff2 binary

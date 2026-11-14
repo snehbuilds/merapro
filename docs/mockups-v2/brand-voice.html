@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand Voice · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="voice"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Brand Voice" data-sub="3 profiles" data-action="New voice" data-action-href="#"></header>
+
+    <main class="page">
+
+      <div class="split--left split">
+
+        <section class="panel">
+          <div class="panel__head"><h2>Profiles</h2></div>
+          <div class="panel__body--flush">
+            <button class="msg" aria-current="true">
+              <span class="msg__top"><span class="acct__name">Personal</span><span class="topbar__spacer"></span><span class="tag tag--outline">Account</span></span>
+              <span class="msg__body">Work LinkedIn · direct, first person</span>
+            </button>
+            <button class="msg">
+              <span class="msg__top"><span class="acct__name">Technical</span><span class="topbar__spacer"></span><span class="tag tag--outline">Group</span></span>
+              <span class="msg__body">Tech News · plain, specific, no hype</span>
+            </button>
+            <button class="msg">
+              <span class="msg__top"><span class="acct__name">Acme Corporate</span><span class="topbar__spacer"></span><span class="tag tag--outline">Workspace</span></span>
+              <span class="msg__body">Default · measured, institutional</span>
+            </button>
+          </div>
+          <div class="panel__foot">Resolution is account, then group, then workspace.</div>
+        </section>
+
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Personal</h2>
+              <span class="tag tag--outline">Applies to Work LinkedIn</span>
+              <span class="spacer"></span>
+              <button class="btn btn--sm">Duplicate</button>
+              <button class="btn btn--sm btn--primary">Save</button>
+            </div>
+            <div class="panel__body stack">
+
+              <div class="grid grid--2">
+                <div class="field">
+                  <label for="tone">Tone</label>
+                  <input class="input" id="tone" value="Direct and specific. Writes as one engineer to another.">
+                </div>
+                <div class="field">
+                  <label for="aud">Target audience</label>
+                  <input class="input" id="aud" value="Platform and infrastructure engineers, 5+ years">
+                </div>
+              </div>
+
+              <div class="grid grid--2">
+                <div class="field">
+                  <label for="emoji">Emoji policy</label>
+                  <select class="select" id="emoji"><option selected>None</option><option>Sparing</option><option>Liberal</option></select>
+                </div>
+                <div class="field">
+                  <label for="cta">CTA style</label>
+                  <select class="select" id="cta"><option selected>None — let the post stand</option><option>Soft question</option><option>Explicit link</option></select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="banned">Banned words and phrases</label>
+                <input class="input" id="banned" value="excited to share, thrilled to announce, game changer, let that sink in, deep dive, unpack">
+                <span class="field__hint">A hard guardrail — a draft containing one is blocked, including a draft you typed yourself.</span>
+              </div>
+
+              <div class="divider"></div>
+
+              <div>
+                <div class="row row--between" style="margin-bottom:8px">
+                  <h3>Example posts</h3>
+                  <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-plus"/></svg>Add example</button>
+                </div>
+                <div class="col">
+                  <div class="preview">
+                    <div class="preview__body small">Spent the afternoon working out why our p99 moved 40ms. It was the connection pool, not the query. Posting the flame graph because I'd have saved two hours if I'd seen one like it.</div>
+                    <div class="preview__foot"><span>Few-shot example · 1 of 4</span><span class="topbar__spacer"></span><button class="btn btn--sm btn--ghost btn--icon" aria-label="Remove example 1"><svg class="icon icon--sm"><use href="#i-x"/></svg></button></div>
+                  </div>
+                  <div class="preview">
+                    <div class="preview__body small">If you run Postgres on anything older than 14, the planner changes alone are worth the upgrade. The release notes undersell it.</div>
+                    <div class="preview__foot"><span>Few-shot example · 2 of 4</span><span class="topbar__spacer"></span><button class="btn btn--sm btn--ghost btn--icon" aria-label="Remove example 2"><svg class="icon icon--sm"><use href="#i-x"/></svg></button></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Learned from your edits</h2>
+              <span class="spacer"></span>
+              <span class="small subtle">This account only</span>
+            </div>
+            <table class="table">
+              <thead><tr><th scope="col">Correction</th><th scope="col" class="r">Times</th><th scope="col" class="r">Last</th><th scope="col"></th></tr></thead>
+              <tbody>
+                <tr><td>Open with the finding, not the context</td><td class="r">7</td><td class="r small subtle">6 Nov</td><td class="r"><button class="btn btn--sm btn--ghost">Forget</button></td></tr>
+                <tr><td>Shorter paragraphs — two sentences maximum</td><td class="r">5</td><td class="r small subtle">4 Nov</td><td class="r"><button class="btn btn--sm btn--ghost">Forget</button></td></tr>
+                <tr><td>Name the version number explicitly</td><td class="r">3</td><td class="r small subtle">2 Nov</td><td class="r"><button class="btn btn--sm btn--ghost">Forget</button></td></tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              Edits you make when approving attach to the account's voice, not the
+              workspace's — "be less formal" means something different on a company page.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Test this voice</h2></div>
+            <div class="panel__body">
+              <div class="field">
+                <label for="tt">Draft a sample about</label>
+                <input class="input" id="tt" value="Postgres 18 async I/O">
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn btn--sm btn--primary">Generate sample</button>
+                <span class="small subtle">Runs the Writer with this profile and nothing else changed.</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="rail" data-nav="dashboard"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Dashboard" data-sub="Mon 10 Nov" data-action="New post"></header>
+
+    <main class="page">
+
+      <!-- Account health comes first: a dead token silently stops publishing. -->
+      <div class="notice notice--warn" style="margin-bottom:14px">
+        <svg class="icon"><use href="#i-alert"/></svg>
+        <div class="row row--between" style="flex:1;gap:14px">
+          <div>
+            <strong>Work LinkedIn needs reconnecting.</strong>
+            The token was revoked by the platform. 2 scheduled posts for this account are on hold —
+            other accounts are unaffected.
+          </div>
+          <a class="btn btn--sm" href="accounts.html">Reconnect</a>
+        </div>
+      </div>
+
+      <div class="split">
+
+        <!-- The queue is the screen's job, so it leads. Not a metric strip. -->
+        <div class="stack">
+
+          <section class="panel">
+            <div class="filters">
+              <strong style="font-size:13px">Awaiting your approval</strong>
+              <span class="tag">7 posts · 3 sets</span>
+              <span class="topbar__spacer"></span>
+              <button class="chip" aria-pressed="true">All groups</button>
+              <button class="chip" aria-pressed="false"><span class="gdot g-tech"></span>Tech News</button>
+              <button class="chip" aria-pressed="false"><span class="gdot g-corp"></span>Company Official</button>
+              <button class="chip" aria-pressed="false"><span class="gdot g-launch"></span>Product Launch</button>
+            </div>
+
+            <div class="setlist">
+
+              <!-- Set 1 — the worked example from the docs -->
+              <article class="set">
+                <div class="set__head">
+                  <button class="btn btn--icon btn--sm btn--ghost" data-toggle-variants aria-expanded="true" aria-label="Collapse accounts">
+                    <svg class="icon icon--sm"><use href="#i-chevdown"/></svg>
+                  </button>
+                  <div class="set__body">
+                    <div class="set__title">Postgres 18 ships async I/O</div>
+                    <div class="set__meta">
+                      <span class="row" style="gap:5px"><span class="gdot g-tech"></span>Tech News</span>
+                      <span class="sep">·</span>
+                      <span>4 accounts</span>
+                      <span class="sep">·</span>
+                      <span>postgresql.org</span>
+                      <span class="sep">·</span>
+                      <span class="row" style="gap:4px"><svg class="icon icon--sm"><use href="#i-stagger"/></svg>09:00–09:13</span>
+                      <span class="sep">·</span>
+                      <span class="status status--warn"><i class="status__dot status__dot--half"></i>Expires in 11h 42m</span>
+                    </div>
+                  </div>
+                  <div class="set__aside">
+                    <a class="btn btn--sm" href="approvals.html">Review</a>
+                    <button class="btn btn--sm btn--primary">Approve remaining 3</button>
+                  </div>
+                </div>
+
+                <div class="variants">
+                  <div class="variant">
+                    <span class="acct">
+                      <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                      <span class="acct__name truncate">Work LinkedIn</span>
+                    </span>
+                    <span class="variant__text">Postgres 18 ships async I/O, and the numbers on read-heavy workloads are worth a look.</span>
+                    <span class="variant__aside">
+                      <span class="tag tag--outline">0.84</span>
+                      <span class="small subtle num">09:00</span>
+                      <span class="status status--warn"><i class="status__dot status__dot--half"></i>Pending</span>
+                    </span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct">
+                      <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                      <span class="acct__name truncate">Acme Page</span>
+                    </span>
+                    <span class="variant__text">Postgres 18 is out. The async I/O work is the headline for anyone running read-heavy…</span>
+                    <span class="variant__aside">
+                      <span class="tag tag--outline">0.91</span>
+                      <span class="small subtle num">09:04</span>
+                      <span class="status status--warn"><i class="status__dot status__dot--half"></i>Pending · PIN</span>
+                    </span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct">
+                      <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                      <span class="acct__name truncate">X @main</span>
+                    </span>
+                    <span class="variant__text">1/ Postgres 18 landed async I/O. On Linux the backend can issue reads without blocking.</span>
+                    <span class="variant__aside">
+                      <span class="tag tag--outline">0.77</span>
+                      <span class="small subtle num">09:08</span>
+                      <span class="status status--ok"><i class="status__dot"></i>Approved</span>
+                    </span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct">
+                      <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                      <span class="acct__name truncate">X @tech</span>
+                    </span>
+                    <span class="variant__text">Should we be sizing read replicas differently now that PG18 has async I/O?</span>
+                    <span class="variant__aside">
+                      <span class="tag tag--outline">0.73</span>
+                      <span class="small subtle num">09:13</span>
+                      <span class="status status--warn"><i class="status__dot status__dot--half"></i>Pending</span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Set 2 -->
+              <article class="set">
+                <div class="set__head">
+                  <button class="btn btn--icon btn--sm btn--ghost" data-toggle-variants aria-expanded="false" aria-label="Expand accounts">
+                    <svg class="icon icon--sm"><use href="#i-chevright"/></svg>
+                  </button>
+                  <div class="set__body">
+                    <div class="set__title">Kafka 4.0 drops ZooKeeper for good</div>
+                    <div class="set__meta">
+                      <span class="row" style="gap:5px"><span class="gdot g-tech"></span>Tech News</span>
+                      <span class="sep">·</span>
+                      <span>4 accounts</span>
+                      <span class="sep">·</span>
+                      <span>Hacker News</span>
+                      <span class="sep">·</span>
+                      <span class="row" style="gap:4px"><svg class="icon icon--sm"><use href="#i-stagger"/></svg>14:00–14:11</span>
+                      <span class="sep">·</span>
+                      <span class="status status--warn"><i class="status__dot status__dot--half"></i>Expires in 7h 02m</span>
+                    </div>
+                  </div>
+                  <div class="set__aside">
+                    <a class="btn btn--sm" href="approvals.html">Review</a>
+                    <button class="btn btn--sm btn--primary">Approve all 4</button>
+                  </div>
+                </div>
+                <div class="variants" hidden>
+                  <div class="variant">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name truncate">Work LinkedIn</span></span>
+                    <span class="variant__text">Kafka 4.0 finally removes ZooKeeper. If you run a cluster, the migration path matters more than the release note.</span>
+                    <span class="variant__aside"><span class="tag tag--outline">0.79</span><span class="small subtle num">14:00</span></span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name truncate">Acme Page</span></span>
+                    <span class="variant__text">KRaft is now the only mode in Kafka 4.0. Here is what that changes for operators.</span>
+                    <span class="variant__aside"><span class="tag tag--outline">0.88</span><span class="small subtle num">14:04</span></span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name truncate">X @main</span></span>
+                    <span class="variant__text">Kafka 4.0 is out and ZooKeeper is gone.</span>
+                    <span class="variant__aside"><span class="tag tag--outline">0.74</span><span class="small subtle num">14:08</span></span>
+                  </div>
+                  <div class="variant variant--off">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name truncate">X @tech</span></span>
+                    <span class="variant__text">Disabled — too close to @main's take on the same story</span>
+                    <span class="variant__aside"><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Skipped</span></span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Set 3 — single account, company page, needs two approvers -->
+              <article class="set">
+                <div class="set__head">
+                  <button class="btn btn--icon btn--sm btn--ghost" data-toggle-variants aria-expanded="false" aria-label="Expand accounts">
+                    <svg class="icon icon--sm"><use href="#i-chevright"/></svg>
+                  </button>
+                  <div class="set__body">
+                    <div class="set__title">We're hiring a staff platform engineer</div>
+                    <div class="set__meta">
+                      <span class="row" style="gap:5px"><span class="gdot g-corp"></span>Company Official</span>
+                      <span class="sep">·</span>
+                      <span>3 accounts</span>
+                      <span class="sep">·</span>
+                      <span>Manual</span>
+                      <span class="sep">·</span>
+                      <span class="status status--danger"><i class="status__dot"></i>Expires in 1h 54m</span>
+                    </div>
+                  </div>
+                  <div class="set__aside">
+                    <span class="tag tag--warn">1 of 2 approvers</span>
+                    <a class="btn btn--sm" href="approvals.html">Review</a>
+                  </div>
+                </div>
+                <div class="variants" hidden>
+                  <div class="variant">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name truncate">Acme Page</span></span>
+                    <span class="variant__text">We're looking for a staff platform engineer to own our ingestion pipeline.</span>
+                    <span class="variant__aside"><span class="tag tag--outline">0.91</span><span class="status status--warn"><i class="status__dot status__dot--half"></i>Needs 1 more</span></span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="acct__name truncate">Acme FB</span></span>
+                    <span class="variant__text">We're hiring. Staff platform engineer, remote-friendly, ingestion and reliability.</span>
+                    <span class="variant__aside"><span class="tag tag--outline">0.86</span><span class="status status--warn"><i class="status__dot status__dot--half"></i>Needs 1 more</span></span>
+                  </div>
+                  <div class="variant">
+                    <span class="acct"><span class="acct__mark"><svg><use href="#p-instagram"/></svg></span><span class="acct__name truncate">Acme IG</span></span>
+                    <span class="variant__text">Media required — a card image is attached</span>
+                    <span class="variant__aside"><span class="tag tag--outline">0.83</span><span class="status status--warn"><i class="status__dot status__dot--half"></i>Needs 1 more</span></span>
+                  </div>
+                </div>
+              </article>
+
+            </div>
+
+            <div class="panel__foot row row--between">
+              <span>Approvals expire rather than publishing. Nothing goes out unapproved.</span>
+              <a href="approvals.html">Open the full queue →</a>
+            </div>
+          </section>
+
+          <!-- Published today, including the partial failure -->
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Published today</h2>
+              <span class="tag">3 of 4</span>
+              <span class="spacer"></span>
+              <a class="small" href="analytics.html">Analytics</a>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Account</th>
+                  <th scope="col">Post</th>
+                  <th scope="col">Time</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="r">Engagement</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Work LinkedIn</span></span></td>
+                  <td class="truncate" style="max-width:280px">Redis 8 changed its licence again…</td>
+                  <td class="num subtle">09:00</td>
+                  <td><span class="status status--ok"><i class="status__dot"></i>Published</span></td>
+                  <td class="r num">142</td>
+                </tr>
+                <tr>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @main</span></span></td>
+                  <td class="truncate" style="max-width:280px">Redis 8 licence change, the short version</td>
+                  <td class="num subtle">09:08</td>
+                  <td><span class="status status--ok"><i class="status__dot"></i>Published</span></td>
+                  <td class="r num">89</td>
+                </tr>
+                <tr>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @tech</span></span></td>
+                  <td class="truncate" style="max-width:280px">What the Redis licence actually permits</td>
+                  <td class="num subtle">09:13</td>
+                  <td><span class="status status--ok"><i class="status__dot"></i>Published</span></td>
+                  <td class="r num">37</td>
+                </tr>
+                <tr>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="acct__name">Acme FB</span></span></td>
+                  <td class="truncate" style="max-width:280px">Redis 8 changed its licence again…</td>
+                  <td class="num subtle">09:04</td>
+                  <td><span class="status status--danger"><i class="status__dot"></i>Retrying 2/5</span></td>
+                  <td class="r subtle">—</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="panel__foot row row--between">
+              <span><strong>Meta API returned 500.</strong> Next attempt 11:20. The other three accounts published normally.</span>
+              <button class="btn btn--sm">Retry now</button>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Aside -->
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head"><h2>Automation</h2><span class="spacer"></span><a class="small" href="automation.html">Settings</a></div>
+            <div class="panel__body" style="display:grid;gap:11px">
+              <div class="row row--between">
+                <span class="small">Workspace</span>
+                <span class="tag tag--outline">Manual</span>
+              </div>
+              <div class="row row--between">
+                <span class="small row" style="gap:6px"><span class="gdot g-tech"></span>Tech News</span>
+                <span class="tag tag--outline">Manual</span>
+              </div>
+              <div class="row row--between">
+                <span class="small row" style="gap:6px"><span class="gdot g-corp"></span>Company Official</span>
+                <span class="tag tag--warn">Manual · 2 approvers</span>
+              </div>
+              <div class="divider"></div>
+              <p class="xs subtle">
+                Autopilot resolves to the strictest setting across workspace, group and
+                account — so a company page pinned to Manual stays Manual inside a group
+                running Full.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Account health</h2><span class="spacer"></span><a class="small" href="accounts.html">All 9</a></div>
+            <div class="panel__body" style="display:grid;gap:10px">
+              <div class="row row--between">
+                <span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Work LinkedIn</span></span>
+                <span class="status status--danger"><i class="status__dot"></i>Reauth</span>
+              </div>
+              <div class="row row--between">
+                <span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @main</span></span>
+                <span class="status status--warn"><i class="status__dot status__dot--half"></i>82% quota</span>
+              </div>
+              <div class="row row--between">
+                <span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Acme Page</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Healthy</span>
+              </div>
+              <div class="row row--between">
+                <span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="acct__name">Acme FB</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Healthy</span>
+              </div>
+              <div class="divider"></div>
+              <p class="xs subtle">
+                X's tier allowance is shared across both X accounts — a second account
+                halves the headroom rather than doubling it.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Agent activity</h2><span class="spacer"></span><a class="small" href="agents.html">Runs</a></div>
+            <div class="panel__body" style="display:grid;gap:10px">
+              <div class="row row--between">
+                <span class="small">Today's spend</span>
+                <span class="mono">$1.84</span>
+              </div>
+              <div class="bar"><i style="width:37%"></i></div>
+              <div class="row row--between xs subtle">
+                <span>37% of $5.00 daily cap</span>
+                <span>11 runs</span>
+              </div>
+              <div class="divider"></div>
+              <div class="row row--between">
+                <span class="small">Cost per published post</span>
+                <span class="mono">$0.061</span>
+              </div>
+              <div class="row row--between">
+                <span class="small">Most expensive agent</span>
+                <span class="small">Writer · <span class="mono">$0.98</span></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>This week</h2></div>
+            <div class="panel__body">
+              <dl class="dl">
+                <dt>Posts published</dt><dd>23</dd>
+                <dt>Approval turnaround</dt><dd>14m median</dd>
+                <dt>Expired unapproved</dt><dd>2</dd>
+                <dt>Rejected</dt><dd>4</dd>
+                <dt>Blocked by guardrails</dt><dd>3</dd>
+              </dl>
+              <p class="caption">Mera's own telemetry — available for every platform, including ones that report no analytics.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

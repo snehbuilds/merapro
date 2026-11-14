@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approval Queue · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="approvals"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Approval Queue" data-sub="7 posts across 3 sets · 1 tool call"></header>
+
+    <main class="page">
+
+      <div class="split split--wide">
+
+        <!-- ===== Left: the set under review ===== -->
+        <div class="stack">
+
+          <section class="panel">
+            <div class="filters">
+              <button class="chip" aria-pressed="true">Pending</button>
+              <button class="chip" aria-pressed="false">Awaiting edit</button>
+              <button class="chip" aria-pressed="false">Decided</button>
+              <span class="topbar__spacer"></span>
+              <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>All groups</button>
+              <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>All accounts</button>
+            </div>
+
+            <!-- Set header -->
+            <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
+              <div class="row row--top row--between" style="gap:16px">
+                <div style="min-width:0">
+                  <h2 style="font-size:17px">Postgres 18 ships async I/O</h2>
+                  <div class="set__meta" style="margin-top:6px">
+                    <span class="row" style="gap:5px"><span class="gdot g-tech"></span>Tech News</span>
+                    <span class="sep">·</span>
+                    <span>4 accounts</span>
+                    <span class="sep">·</span>
+                    <span class="row" style="gap:4px"><svg class="icon icon--sm"><use href="#i-stagger"/></svg>Staggered 09:00–09:13</span>
+                    <span class="sep">·</span>
+                    <span class="status status--warn"><i class="status__dot status__dot--half"></i>Expires in 11h 42m</span>
+                  </div>
+                </div>
+                <div class="row" style="flex:none">
+                  <button class="btn">Edit all</button>
+                  <button class="btn btn--danger">Reject all</button>
+                  <button class="btn btn--primary">Approve remaining 3</button>
+                </div>
+              </div>
+
+              <!-- Source: the most common reason to reject is the story itself -->
+              <div class="notice" style="margin-top:14px">
+                <svg class="icon"><use href="#i-sources"/></svg>
+                <div style="flex:1;min-width:0">
+                  <div class="row row--between" style="gap:12px">
+                    <strong>PostgreSQL 18 Released</strong>
+                    <a class="small nowrap" href="#">postgresql.org</a>
+                  </div>
+                  <p class="small muted" style="margin-top:3px">
+                    Async I/O subsystem, OAuth support, and skip-scan index improvements.
+                    Published 2 hours ago · covered by 3 of your sources.
+                  </p>
+                </div>
+              </div>
+
+              <div class="wrap" style="margin-top:12px">
+                <span class="status status--ok"><i class="status__dot"></i>Facts verified against source · all 4</span>
+                <span class="status status--ok"><i class="status__dot"></i>Each account's text is distinct · max 0.41</span>
+                <span class="status status--ok"><i class="status__dot"></i>Attribution present · all 4</span>
+              </div>
+            </div>
+
+            <!-- Per-account decisions -->
+            <div>
+
+              <!-- 1 -->
+              <article style="border-bottom:1px solid var(--border);padding:14px 18px">
+                <div class="row row--between" style="gap:14px;margin-bottom:10px">
+                  <span class="acct acct--lg">
+                    <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                    <span>
+                      <span class="acct__name" style="display:block">Work LinkedIn</span>
+                      <span class="acct__handle">@alexmercer · personal · 09:00</span>
+                    </span>
+                  </span>
+                  <span class="row" style="flex:none">
+                    <span class="tag tag--outline">Confidence 0.84</span>
+                    <span class="status status--warn"><i class="status__dot status__dot--half"></i>Pending</span>
+                  </span>
+                </div>
+
+                <div class="preview">
+                  <div class="preview__body">Postgres 18 ships async I/O, and the numbers on read-heavy workloads are worth a look.
+
+The short version: io_uring on Linux lets the backend issue reads without blocking, and the team is reporting meaningful gains on sequential scans.
+
+What I'm watching: whether this changes how we size read replicas.
+
+https://www.postgresql.org/about/news/…</div>
+                  <div class="preview__foot">
+                    <span class="hashtags">#postgres #databases</span>
+                    <span class="topbar__spacer"></span>
+                    <span class="row" style="gap:5px"><svg class="icon icon--sm"><use href="#i-image"/></svg>1 image · alt text set</span>
+                    <span class="counter">344 / 3000</span>
+                  </div>
+                </div>
+
+                <div class="notice notice--warn" style="margin-top:10px">
+                  <svg class="icon icon--sm"><use href="#i-alert"/></svg>
+                  <div>Similar to your post from 14 Oct (0.87). Same account, different story — worth a glance before approving.</div>
+                </div>
+
+                <div class="row" style="margin-top:12px">
+                  <button class="btn btn--primary btn--sm">Approve this account</button>
+                  <button class="btn btn--sm">Edit</button>
+                  <button class="btn btn--sm">Regenerate</button>
+                  <button class="btn btn--sm">Reschedule</button>
+                  <span class="topbar__spacer"></span>
+                  <button class="btn btn--danger btn--sm">Reject</button>
+                </div>
+              </article>
+
+              <!-- 2 — company page, second factor -->
+              <article style="border-bottom:1px solid var(--border);padding:14px 18px">
+                <div class="row row--between" style="gap:14px;margin-bottom:10px">
+                  <span class="acct acct--lg">
+                    <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                    <span>
+                      <span class="acct__name" style="display:block">Acme Page</span>
+                      <span class="acct__handle">Acme Inc · company page · 09:04</span>
+                    </span>
+                  </span>
+                  <span class="row" style="flex:none">
+                    <span class="tag tag--outline">Confidence 0.91</span>
+                    <span class="tag tag--warn">PIN required</span>
+                    <span class="status status--warn"><i class="status__dot status__dot--half"></i>Pending</span>
+                  </span>
+                </div>
+
+                <div class="preview">
+                  <div class="preview__body">Postgres 18 is out. The async I/O work is the headline for anyone running read-heavy workloads: io_uring lets the backend issue reads without blocking, with meaningful gains reported on sequential scans.
+
+Also shipping: OAuth support and skip-scan index improvements.
+
+https://www.postgresql.org/about/news/…</div>
+                  <div class="preview__foot">
+                    <span class="hashtags">#postgres #infrastructure</span>
+                    <span class="topbar__spacer"></span>
+                    <span class="row" style="gap:5px"><svg class="icon icon--sm"><use href="#i-image"/></svg>1 image</span>
+                    <span class="counter">308 / 3000</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-top:12px">
+                  <button class="btn btn--primary btn--sm">Approve this account</button>
+                  <button class="btn btn--sm">Edit</button>
+                  <span class="small subtle">Company page — publishing asks for your PIN.</span>
+                  <span class="topbar__spacer"></span>
+                  <button class="btn btn--danger btn--sm">Reject</button>
+                </div>
+              </article>
+
+              <!-- 3 — already approved, shows the proof block -->
+              <article style="border-bottom:1px solid var(--border);padding:14px 18px;background:var(--bg-muted)">
+                <div class="row row--between" style="gap:14px;margin-bottom:10px">
+                  <span class="acct acct--lg">
+                    <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                    <span>
+                      <span class="acct__name" style="display:block">X @main</span>
+                      <span class="acct__handle">@acme · thread, 3 posts · 09:08</span>
+                    </span>
+                  </span>
+                  <span class="row" style="flex:none">
+                    <span class="tag tag--outline">Confidence 0.77</span>
+                    <span class="status status--ok"><i class="status__dot"></i>Approved</span>
+                  </span>
+                </div>
+
+                <div class="preview">
+                  <div class="preview__body">1/ Postgres 18 landed async I/O. On Linux the backend can issue reads without blocking.
+
+2/ Early numbers on sequential scans look meaningful on read-heavy workloads.
+
+3/ Worth watching whether this changes how we size read replicas.
+https://www.postgresql.org/about/news/…</div>
+                  <div class="preview__foot">
+                    <span class="hashtags">#postgres</span>
+                    <span class="topbar__spacer"></span>
+                    <span class="counter">87 / 280 · part 1 of 3</span>
+                  </div>
+                </div>
+
+                <div class="proof" style="margin-top:10px">
+                  <span class="proof__k">Approved</span><span>You · 09:12 via Telegram</span>
+                  <span class="proof__k">Account</span><span>X @main</span>
+                  <span class="proof__k">Version</span><span class="proof__v">v1</span>
+                  <span class="proof__k">Hash</span><span class="proof__v">7f3a9c1d8e2b4056</span>
+                </div>
+
+                <p class="caption">
+                  Editing this post now creates v2 and invalidates this approval. The other
+                  three accounts keep theirs.
+                </p>
+              </article>
+
+              <!-- 4 -->
+              <article style="padding:14px 18px">
+                <div class="row row--between" style="gap:14px;margin-bottom:10px">
+                  <span class="acct acct--lg">
+                    <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                    <span>
+                      <span class="acct__name" style="display:block">X @tech</span>
+                      <span class="acct__handle">@acmedev · 09:13</span>
+                    </span>
+                  </span>
+                  <span class="row" style="flex:none">
+                    <span class="tag tag--outline">Confidence 0.73</span>
+                    <span class="status status--warn"><i class="status__dot status__dot--half"></i>Pending</span>
+                  </span>
+                </div>
+
+                <div class="preview">
+                  <div class="preview__body">Should we be sizing read replicas differently now that PG18 has async I/O?
+
+io_uring means the backend stops blocking on reads. Early sequential-scan numbers suggest the answer is yes.
+
+https://www.postgresql.org/about/news/…</div>
+                  <div class="preview__foot">
+                    <span class="hashtags">#postgres</span>
+                    <span class="topbar__spacer"></span>
+                    <span class="counter">219 / 280</span>
+                  </div>
+                </div>
+
+                <div class="notice notice--info" style="margin-top:10px">
+                  <svg class="icon icon--sm"><use href="#i-info"/></svg>
+                  <div>
+                    Written as a question to stay distinct from <strong>X @main</strong> in
+                    the same set — similarity 0.41, well under the 0.90 block threshold.
+                  </div>
+                </div>
+
+                <div class="row" style="margin-top:12px">
+                  <button class="btn btn--primary btn--sm">Approve this account</button>
+                  <button class="btn btn--sm">Edit</button>
+                  <button class="btn btn--sm">Regenerate</button>
+                  <span class="topbar__spacer"></span>
+                  <button class="btn btn--danger btn--sm">Reject</button>
+                </div>
+              </article>
+
+            </div>
+
+            <div class="panel__foot">
+              Approving some accounts and rejecting others resolves this request as
+              <strong>partially approved</strong> — a normal outcome, not an error.
+              Unapproved accounts expire without publishing.
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ===== Right: policy, timers, other sets ===== -->
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head"><h2>This request</h2></div>
+            <div class="panel__body">
+              <dl class="dl">
+                <dt>Policy</dt><dd>Tech News group</dd>
+                <dt>Approvers</dt><dd>Any 1 of 2</dd>
+                <dt>Requested</dt><dd>07:18</dd>
+                <dt>Reminder</dt><dd>09:18</dd>
+                <dt>Escalates</dt><dd>11:18 → Priya</dd>
+                <dt>Expires</dt><dd>19:18</dd>
+              </dl>
+              <div class="divider" style="margin:12px 0"></div>
+              <div class="row row--between" style="margin-bottom:7px">
+                <span class="small">Decisions</span>
+                <span class="small mono">1 / 4</span>
+              </div>
+              <div class="bar"><i class="ok" style="width:25%"></i></div>
+              <p class="caption">
+                One timer for the whole set, not one per account — five reminders for one
+                post is how a useful notification gets muted.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Compliance</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between"><span class="small">Factual grounding</span><span class="status status--ok"><i class="status__dot"></i>Pass</span></div>
+              <div class="row row--between"><span class="small">Attribution</span><span class="status status--ok"><i class="status__dot"></i>Pass</span></div>
+              <div class="row row--between"><span class="small">Brand safety</span><span class="status status--ok"><i class="status__dot"></i>Pass</span></div>
+              <div class="row row--between"><span class="small">PII</span><span class="status status--ok"><i class="status__dot"></i>Pass</span></div>
+              <div class="row row--between"><span class="small">Cross-account duplication</span><span class="status status--ok"><i class="status__dot"></i>0.41</span></div>
+              <div class="row row--between"><span class="small">Same-account duplication</span><span class="status status--warn"><i class="status__dot status__dot--half"></i>0.87</span></div>
+              <div class="row row--between"><span class="small">Platform policy</span><span class="status status--ok"><i class="status__dot"></i>Pass</span></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Tool call waiting</h2>
+              <span class="spacer"></span>
+              <span class="status status--warn"><i class="status__dot status__dot--half"></i>11h 47m</span>
+            </div>
+            <div class="panel__body stack">
+              <div>
+                <div class="small"><span class="strong">Analytics agent</span> wants to call <span class="mono">notion__create_page</span></div>
+                <div class="xs subtle">Notion · write · run weekly_insights · requested 09:41</div>
+              </div>
+              <div class="preview">
+                <div class="preview__head"><span class="xs subtle">Arguments, exactly as they will be sent</span></div>
+                <div class="preview__body mono xs">parent_id: "Marketing / Weekly reports"
+title: "Week 45 — social performance"
+content: "Tech News engagement up 18%…"
+<span class="subtle">2,140 chars · show all</span></div>
+              </div>
+              <div class="row">
+                <button class="btn btn--sm btn--primary">Allow once</button>
+                <button class="btn btn--sm">Deny</button>
+                <span class="topbar__spacer"></span>
+                <button class="btn btn--sm btn--danger">Block this tool</button>
+              </div>
+              <p class="caption">The approval covers these exact bytes. If the arguments change, or Notion redefines the tool before you decide, it lapses. Expiry never makes the call.</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Also waiting</h2><span class="spacer"></span><span class="tag">2</span></div>
+            <div class="panel__body--flush">
+              <a class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px" href="#">
+                <span style="min-width:0">
+                  <span class="small strong truncate" style="display:block">Kafka 4.0 drops ZooKeeper</span>
+                  <span class="xs subtle row" style="gap:5px"><span class="gdot g-tech"></span>Tech News · 4 accounts</span>
+                </span>
+                <span class="status status--warn"><i class="status__dot status__dot--half"></i>7h</span>
+              </a>
+              <a class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px" href="#">
+                <span style="min-width:0">
+                  <span class="small strong truncate" style="display:block">We're hiring a staff platform engineer</span>
+                  <span class="xs subtle row" style="gap:5px"><span class="gdot g-corp"></span>Company Official · 3 accounts</span>
+                </span>
+                <span class="status status--danger"><i class="status__dot"></i>1h 54m</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Synced with</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between">
+                <span class="row" style="gap:7px"><svg class="icon icon--sm subtle"><use href="#i-channels"/></svg><span class="small">Telegram · @alex</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Delivered</span>
+              </div>
+              <div class="row row--between">
+                <span class="row" style="gap:7px"><svg class="icon icon--sm subtle"><use href="#i-channels"/></svg><span class="small">Telegram · @priya</span></span>
+                <span class="status status--neutral"><i class="status__dot status__dot--ring"></i>On escalation</span>
+              </div>
+              <p class="caption">
+                Deciding here edits the Telegram card in place, and vice versa.
+              </p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

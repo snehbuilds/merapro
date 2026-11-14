@@ -1,0 +1,703 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-08T12:00:00Z",
+  "title": "Design System: Mera",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "dark": "#0e0e0d",
+        "purpose": "Page ground.",
+        "tonalRamp": [
+          "oklch(15% 0.003 95)",
+          "oklch(24% 0.003 95)",
+          "oklch(36% 0.004 95)",
+          "oklch(50% 0.004 95)",
+          "oklch(64% 0.003 95)",
+          "oklch(78% 0.003 95)",
+          "oklch(89% 0.002 95)",
+          "oklch(97% 0.001 95)"
+        ]
+      },
+      "bg-muted": {
+        "role": "neutral",
+        "displayName": "Chrome Grey",
+        "canonical": "#fbfbfa",
+        "dark": "#141413",
+        "purpose": "Rail, panel footers, filter bars, table headers, variant strip."
+      },
+      "bg-sunken": {
+        "role": "neutral",
+        "displayName": "Well",
+        "canonical": "#f6f6f4",
+        "dark": "#0a0a09",
+        "purpose": "Recessed areas: media placeholders, account marks, skeleton base."
+      },
+      "bg-raised": {
+        "role": "neutral",
+        "displayName": "Panel Ground",
+        "canonical": "#ffffff",
+        "dark": "#1a1a18",
+        "purpose": "Panel surface. Identical to page in light; steps apart in dark."
+      },
+      "bg-hover": {
+        "role": "neutral",
+        "displayName": "Hover Ground",
+        "canonical": "#f4f4f2",
+        "dark": "#1e1e1c",
+        "purpose": "Row and control hover."
+      },
+      "bg-active": {
+        "role": "neutral",
+        "displayName": "Active Ground",
+        "canonical": "#eeeeec",
+        "dark": "#262623",
+        "purpose": "Pressed controls, current nav item, selected list row. Worst-case surface for contrast testing."
+      },
+      "bg-inverse": {
+        "role": "neutral",
+        "displayName": "Inverse Ground",
+        "canonical": "#1a1a18",
+        "dark": "#f2f2ef",
+        "purpose": "Workspace monogram mark."
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#e7e7e4",
+        "dark": "#262623",
+        "purpose": "The primary structural device: panel edges, row dividers, table rules, calendar grid.",
+        "tonalRamp": [
+          "oklch(18% 0.003 95)",
+          "oklch(28% 0.003 95)",
+          "oklch(40% 0.004 95)",
+          "oklch(54% 0.004 95)",
+          "oklch(68% 0.003 95)",
+          "oklch(81% 0.003 95)",
+          "oklch(91% 0.002 95)",
+          "oklch(97% 0.001 95)"
+        ]
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "#d9d9d5",
+        "dark": "#383832",
+        "purpose": "Affordance edge: buttons, inputs, chips, kill switch, scrollbar thumb."
+      },
+      "fg": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1a1a18",
+        "dark": "#f2f2ef",
+        "purpose": "Primary text. 17.4:1 on bg (light), 17.2:1 on bg (dark)."
+      },
+      "fg-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#4e4e47",
+        "dark": "#b4b4ab",
+        "purpose": "Supporting prose and secondary rows. 8.4:1 light / 9.3:1 dark on bg."
+      },
+      "fg-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Ink",
+        "canonical": "#656560",
+        "dark": "#93938a",
+        "purpose": "Metadata, column labels, placeholders, timestamps. 5.9:1 light / 6.2:1 dark on bg; worst case 5.04:1 light / 4.9:1 dark on bg-active. Dark raised from #88887f, which failed at 4.24:1 on bg-active."
+      },
+      "fg-inverse": {
+        "role": "neutral",
+        "displayName": "Inverse Ink",
+        "canonical": "#fbfbfa",
+        "dark": "#0e0e0d",
+        "purpose": "Text on inverse grounds."
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Ink Accent",
+        "canonical": "#1a1a18",
+        "dark": "#f2f2ef",
+        "purpose": "Primary action fill. The same value as body text: the primary button reads as ink, not as a brand colour.",
+        "tonalRamp": [
+          "oklch(15% 0.003 95)",
+          "oklch(22% 0.004 95)",
+          "oklch(32% 0.005 95)",
+          "oklch(45% 0.005 95)",
+          "oklch(58% 0.004 95)",
+          "oklch(72% 0.004 95)",
+          "oklch(86% 0.003 95)",
+          "oklch(96% 0.002 95)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Ink Accent Hover",
+        "canonical": "#333330",
+        "dark": "#ffffff",
+        "purpose": "Primary hover. A value step, never a hue step."
+      },
+      "accent-fg": {
+        "role": "primary",
+        "displayName": "Accent Foreground",
+        "canonical": "#fbfbfa",
+        "dark": "#0e0e0d",
+        "purpose": "Text on the accent fill. 16.8:1 light / 17.2:1 dark."
+      },
+      "focus": {
+        "role": "secondary",
+        "displayName": "Signal Blue",
+        "canonical": "#3d7dfc",
+        "dark": "#5b94ff",
+        "purpose": "Reserved for focus outlines, focused input borders, and selection. Never emphasis or branding.",
+        "tonalRamp": [
+          "oklch(22% 0.09 262)",
+          "oklch(32% 0.13 262)",
+          "oklch(42% 0.17 262)",
+          "oklch(52% 0.19 262)",
+          "oklch(62% 0.19 262)",
+          "oklch(74% 0.14 262)",
+          "oklch(86% 0.08 262)",
+          "oklch(95% 0.03 262)"
+        ]
+      },
+      "focus-ring": {
+        "role": "secondary",
+        "displayName": "Focus Halo",
+        "canonical": "rgba(61, 125, 252, 0.35)",
+        "dark": "rgba(91, 148, 255, 0.4)",
+        "purpose": "3px halo on focused inputs. A ring, not elevation."
+      },
+      "selection": {
+        "role": "secondary",
+        "displayName": "Selection Tint",
+        "canonical": "rgba(61, 125, 252, 0.18)",
+        "dark": "rgba(91, 148, 255, 0.26)",
+        "purpose": "::selection ground."
+      },
+      "ok": {
+        "role": "tertiary",
+        "displayName": "Settled Green",
+        "canonical": "#2f7a4d",
+        "dark": "#6cbd8b",
+        "purpose": "Approved, published, connected, switch-on. 5.2:1 on bg, 4.8:1 on its own tint.",
+        "tonalRamp": [
+          "oklch(22% 0.05 150)",
+          "oklch(31% 0.07 150)",
+          "oklch(40% 0.09 150)",
+          "oklch(48% 0.11 150)",
+          "oklch(58% 0.11 150)",
+          "oklch(70% 0.09 150)",
+          "oklch(84% 0.06 150)",
+          "oklch(95% 0.02 150)"
+        ]
+      },
+      "ok-bg": {
+        "role": "tertiary",
+        "displayName": "Settled Tint",
+        "canonical": "#eef6f1",
+        "dark": "#142019",
+        "purpose": "Tag and notice ground for ok."
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Pending Amber",
+        "canonical": "#87610f",
+        "dark": "#dcab57",
+        "purpose": "Pending, expiring, partial. 5.6:1 on bg, 5.1:1 on its own tint.",
+        "tonalRamp": [
+          "oklch(22% 0.04 75)",
+          "oklch(31% 0.06 75)",
+          "oklch(40% 0.08 75)",
+          "oklch(48% 0.09 75)",
+          "oklch(60% 0.10 75)",
+          "oklch(73% 0.09 75)",
+          "oklch(86% 0.06 75)",
+          "oklch(96% 0.02 75)"
+        ]
+      },
+      "warn-bg": {
+        "role": "tertiary",
+        "displayName": "Pending Tint",
+        "canonical": "#fbf3e4",
+        "dark": "#221c0f",
+        "purpose": "Tag and notice ground for warn."
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Stop Red",
+        "canonical": "#a82c25",
+        "dark": "#e88077",
+        "purpose": "Failures, destructive actions, the kill switch, over-limit counters. 6.9:1 on bg.",
+        "tonalRamp": [
+          "oklch(22% 0.07 27)",
+          "oklch(31% 0.11 27)",
+          "oklch(39% 0.14 27)",
+          "oklch(45% 0.16 27)",
+          "oklch(58% 0.16 27)",
+          "oklch(72% 0.12 27)",
+          "oklch(86% 0.07 27)",
+          "oklch(96% 0.02 27)"
+        ]
+      },
+      "danger-bg": {
+        "role": "tertiary",
+        "displayName": "Stop Tint",
+        "canonical": "#fbeeed",
+        "dark": "#241412",
+        "purpose": "Tag, notice, and kill-switch hover ground."
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Note Blue",
+        "canonical": "#2b5fa8",
+        "dark": "#86adea",
+        "purpose": "Informational notices, tags, and composer hashtags. Distinct from the reserved focus blue.",
+        "tonalRamp": [
+          "oklch(22% 0.06 255)",
+          "oklch(30% 0.09 255)",
+          "oklch(38% 0.11 255)",
+          "oklch(45% 0.12 255)",
+          "oklch(57% 0.12 255)",
+          "oklch(71% 0.09 255)",
+          "oklch(85% 0.05 255)",
+          "oklch(95% 0.02 255)"
+        ]
+      },
+      "neutral": {
+        "role": "tertiary",
+        "displayName": "Inert Grey",
+        "canonical": "#67675f",
+        "dark": "#a8a89f",
+        "purpose": "Default tag foreground for states with no valence."
+      },
+      "neutral-bg": {
+        "role": "tertiary",
+        "displayName": "Inert Tint",
+        "canonical": "#f1f1ee",
+        "dark": "#1c1c1a",
+        "purpose": "Default tag ground."
+      },
+      "group-tech": {
+        "role": "tertiary",
+        "displayName": "Group Slate Blue",
+        "canonical": "#4a6fa5",
+        "dark": "#7fa3d8",
+        "purpose": "Account-group identity mark only. Identity, never status.",
+        "tonalRamp": [
+          "oklch(24% 0.04 255)",
+          "oklch(33% 0.06 255)",
+          "oklch(42% 0.07 255)",
+          "oklch(50% 0.08 255)",
+          "oklch(62% 0.08 255)",
+          "oklch(74% 0.06 255)",
+          "oklch(86% 0.04 255)",
+          "oklch(95% 0.015 255)"
+        ]
+      },
+      "group-corp": {
+        "role": "tertiary",
+        "displayName": "Group Muted Violet",
+        "canonical": "#7a5ba8",
+        "dark": "#a98fd4",
+        "purpose": "Account-group identity mark only.",
+        "tonalRamp": [
+          "oklch(24% 0.05 300)",
+          "oklch(32% 0.08 300)",
+          "oklch(40% 0.10 300)",
+          "oklch(48% 0.11 300)",
+          "oklch(60% 0.11 300)",
+          "oklch(73% 0.08 300)",
+          "oklch(86% 0.05 300)",
+          "oklch(95% 0.02 300)"
+        ]
+      },
+      "group-launch": {
+        "role": "tertiary",
+        "displayName": "Group Clay",
+        "canonical": "#a8733a",
+        "dark": "#d4a06a",
+        "purpose": "Account-group identity mark only.",
+        "tonalRamp": [
+          "oklch(24% 0.04 65)",
+          "oklch(33% 0.06 65)",
+          "oklch(43% 0.08 65)",
+          "oklch(56% 0.09 65)",
+          "oklch(67% 0.09 65)",
+          "oklch(78% 0.07 65)",
+          "oklch(88% 0.04 65)",
+          "oklch(96% 0.015 65)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page title in the top bar and page head. The largest type in the product."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Panel and section titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Block headings inside panels and empty states. Body size, separated by weight alone."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text. Reading areas cap at 70ch, page descriptions at 72ch."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "The workhorse: table cells, variant rows, nav items, buttons, chips, inbox previews."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Tags, captions, panel footers, chart axis text, timestamps."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Button and segmented-control labels."
+      },
+      "field": {
+        "displayName": "Field",
+        "purpose": "Input, select, and textarea text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rail group labels and approval proof keys. Uppercase, 0.04em tracking."
+      },
+      "label-column": {
+        "displayName": "Column Label",
+        "purpose": "Table column headers. Uppercase, 0.03em tracking."
+      },
+      "mono": {
+        "displayName": "Machine Data",
+        "purpose": "Hashes, version numbers, account and run IDs, step numbers, timestamps, costs. Never emphasis or texture."
+      }
+    },
+    "shadows": [
+      {
+        "name": "popover",
+        "value": "0 1px 2px rgba(26,26,24,.06), 0 8px 24px -6px rgba(26,26,24,.14)",
+        "purpose": "Light-theme overlay shadow. Command palette, mobile rail drawer, and the calendar reschedule popover only."
+      },
+      {
+        "name": "popover-dark",
+        "value": "0 1px 2px rgba(0,0,0,.4), 0 8px 24px -6px rgba(0,0,0,.6)",
+        "purpose": "Dark-theme overlay shadow. Same three surfaces."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px var(--focus-ring)",
+        "purpose": "Ring on focused inputs, paired with a focus-coloured border. Not elevation."
+      },
+      {
+        "name": "scrim",
+        "value": "rgba(10,10,9,.42)",
+        "purpose": "Command palette backdrop. A ground, not a shadow, but the only other overlay device."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control",
+        "value": "90ms ease-out",
+        "purpose": "Button background and border-color transitions. Nothing else on a button animates."
+      },
+      {
+        "name": "toggle",
+        "value": "120ms ease-out",
+        "purpose": "Switch track colour."
+      },
+      {
+        "name": "knob",
+        "value": "120ms cubic-bezier(.2,.8,.3,1)",
+        "purpose": "Switch knob translation."
+      },
+      {
+        "name": "drawer",
+        "value": "180ms cubic-bezier(.2,.8,.3,1)",
+        "purpose": "Mobile rail slide-in."
+      },
+      {
+        "name": "shimmer",
+        "value": "1.4s ease-in-out infinite",
+        "purpose": "Skeleton loading sheen. The only looping animation in the system."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Global prefers-reduced-motion override on every animation and transition."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "split-collapse",
+        "value": "1180px",
+        "purpose": "Splits go single-column; three-up grids go two-up; inbox list narrows to 290px."
+      },
+      {
+        "name": "rail-drawer",
+        "value": "900px",
+        "purpose": "Rail becomes a drawer; top bar compacts (subtitle hidden, search icon-only); heads and action rows wrap; tables hold one line per row and scroll inside their panel."
+      },
+      {
+        "name": "compact",
+        "value": "560px",
+        "purpose": "Top-bar primary action becomes icon-only with its label kept for assistive tech; page title 17px; a post set's actions take a full row."
+      }
+    ],
+    "layout": [
+      {
+        "name": "rail-width",
+        "value": "244px"
+      },
+      {
+        "name": "topbar-height",
+        "value": "52px"
+      },
+      {
+        "name": "page-padding",
+        "value": "18px (14px below 900px)"
+      },
+      {
+        "name": "grid-gutter",
+        "value": "14px"
+      },
+      {
+        "name": "aside-width",
+        "value": "320px (380px wide variant, 300px leading variant)"
+      },
+      {
+        "name": "prose-measure",
+        "value": "70ch (72ch for page descriptions, 46ch for empty-state copy)"
+      },
+      {
+        "name": "table-wrapper",
+        "value": ".tablewrap (position: relative; overflow-x: auto), added at runtime around every .table",
+        "purpose": "Wide tables scroll inside their panel; the page never scrolls sideways."
+      }
+    ],
+    "iconography": [
+      {
+        "name": "grid",
+        "value": "16x16 viewBox"
+      },
+      {
+        "name": "stroke",
+        "value": "1.5px, round caps and joins, no fill (1.25px at the 26px size)"
+      },
+      {
+        "name": "sizes",
+        "value": "16px default, 14px sm, 20px lg, 26px xl"
+      },
+      {
+        "name": "sprite",
+        "value": "56 authored symbols: 49 UI icons prefixed i-, 7 filled platform marks prefixed p-"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single filled action per cluster, top-right of the work area. Ink, not a brand colour.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Approve all 4</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); color: var(--fg, #1a1a18); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 90ms ease-out, border-color 90ms ease-out; } .ds-btn-primary { background: var(--accent, #1a1a18); border-color: var(--accent, #1a1a18); color: var(--accent-fg, #fbfbfa); } .ds-btn-primary:hover { background: var(--accent-hover, #333330); border-color: var(--accent-hover, #333330); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #3d7dfc); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The ordinary button. Most actions in the product are this: page ground, strong-rule edge, ink text.",
+      "html": "<button class=\"ds-btn2\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 8.6 6.8 11.4 12.4 5.8\"/><rect x=\"1.8\" y=\"1.8\" width=\"12.4\" height=\"12.4\" rx=\"3\"/></svg>Review</button>",
+      "css": ".ds-btn2 { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); color: var(--fg, #1a1a18); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 90ms ease-out, border-color 90ms ease-out; } .ds-btn2:hover { background: var(--bg-hover, #f4f4f2); } .ds-btn2:active { background: var(--bg-active, #eeeeec); } .ds-btn2:focus-visible { outline: 2px solid var(--focus, #3d7dfc); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Field with label and hint. Focus swaps the border to signal blue and adds a 3px halo; the native outline is suppressed only here.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-i1\">Account handle</label><input id=\"ds-i1\" class=\"ds-input\" type=\"text\" placeholder=\"@tech\"><span class=\"ds-hint\">Shown on the variant row and in the audit log.</span></div>",
+      "css": ".ds-field { display: grid; gap: 5px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-field label { font-size: 13px; font-weight: 550; color: var(--fg, #1a1a18); } .ds-hint { font-size: 12.5px; color: var(--fg-subtle, #656560); } .ds-input { width: 100%; min-height: 30px; padding: 5px 9px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); color: var(--fg, #1a1a18); font: inherit; font-size: 13.5px; } .ds-input::placeholder { color: var(--fg-subtle, #656560); } .ds-input:focus { outline: none; border-color: var(--focus, #3d7dfc); box-shadow: 0 0 0 3px var(--focus-ring, rgba(61,125,252,.35)); }"
+    },
+    {
+      "name": "Rail Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Left-rail navigation row with a leading 16px icon and a trailing tabular count. Current page is a ground change plus a weight change, never a coloured edge.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-navitem\" href=\"#\" aria-current=\"page\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"5.5\" height=\"5.5\" rx=\"1\"/><rect x=\"10.5\" y=\"2\" width=\"5.5\" height=\"5.5\" rx=\"1\"/><rect x=\"2\" y=\"10.5\" width=\"5.5\" height=\"5.5\" rx=\"1\"/><rect x=\"10.5\" y=\"10.5\" width=\"5.5\" height=\"5.5\" rx=\"1\"/></svg>Dashboard</a><a class=\"ds-navitem\" href=\"#\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 8.6 6.8 11.4 12.4 5.8\"/><rect x=\"1.8\" y=\"1.8\" width=\"12.4\" height=\"12.4\" rx=\"3\"/></svg>Approval Queue<span class=\"ds-navcount\">7</span></a></nav>",
+      "css": ".ds-nav { display: grid; gap: 1px; padding: 10px 8px; width: 244px; background: var(--bg-muted, #fbfbfa); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-navitem { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border-radius: var(--r-md, 6px); font-size: 13.5px; color: var(--fg-muted, #4e4e47); text-decoration: none; } .ds-navitem svg { flex: none; color: var(--fg-subtle, #656560); } .ds-navitem:hover { background: var(--bg-hover, #f4f4f2); color: var(--fg, #1a1a18); } .ds-navitem[aria-current=\"page\"] { background: var(--bg-active, #eeeeec); color: var(--fg, #1a1a18); font-weight: 550; } .ds-navitem[aria-current=\"page\"] svg { color: var(--fg, #1a1a18); } .ds-navcount { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--fg-subtle, #656560); } .ds-navitem:focus-visible { outline: 2px solid var(--focus, #3d7dfc); outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Scope filter in the bar above a queue. Pressed state darkens the border and text and raises the weight; it never fills with colour.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">All accounts</button><button class=\"ds-chip\" aria-pressed=\"false\">Tech News</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 27px; padding: 0 10px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); color: var(--fg-muted, #4e4e47); font: inherit; font-size: 13px; cursor: pointer; } .ds-chip:hover { background: var(--bg-hover, #f4f4f2); color: var(--fg, #1a1a18); } .ds-chip[aria-pressed=\"true\"] { border-color: var(--fg, #1a1a18); color: var(--fg, #1a1a18); font-weight: 550; } .ds-chip:focus-visible { outline: 2px solid var(--focus, #3d7dfc); outline-offset: 2px; }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The container primitive: hairline border, 8px radius, no shadow, internal rules dividing head from body from foot.",
+      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-head\"><h2>Upcoming</h2></header><div class=\"ds-panel-body\">Four variants staggered 09:00 to 09:13.</div><footer class=\"ds-panel-foot\">Times shown in workspace timezone.</footer></section>",
+      "css": ".ds-panel { background: var(--bg-raised, #fff); border: 1px solid var(--border, #e7e7e4); border-radius: var(--r-lg, 8px); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--fg, #1a1a18); font-size: 14px; line-height: 1.5; } .ds-panel-head { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border, #e7e7e4); } .ds-panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.012em; } .ds-panel-body { padding: 14px; } .ds-panel-foot { padding: 10px 14px; border-top: 1px solid var(--border, #e7e7e4); background: var(--bg-muted, #fbfbfa); border-radius: 0 0 var(--r-lg, 8px) var(--r-lg, 8px); font-size: 12.5px; color: var(--fg-muted, #4e4e47); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "custom",
+      "refersTo": "status",
+      "description": "The three-signal state atom: colour, dot shape (solid / ring / half), and text label. Never colour alone.",
+      "html": "<div class=\"ds-statuses\"><span class=\"ds-status ds-status-ok\"><i class=\"ds-dot\"></i>Approved</span><span class=\"ds-status ds-status-warn\"><i class=\"ds-dot ds-dot-half\"></i>Pending</span><span class=\"ds-status ds-status-neutral\"><i class=\"ds-dot ds-dot-ring\"></i>Not started</span><span class=\"ds-status ds-status-danger\"><i class=\"ds-dot\"></i>Failed</span></div>",
+      "css": ".ds-statuses { display: flex; flex-wrap: wrap; gap: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 500; white-space: nowrap; } .ds-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: currentColor; } .ds-dot-ring { background: transparent; border: 1.5px solid currentColor; } .ds-dot-half { background: linear-gradient(to right, currentColor 50%, transparent 50%); border: 1.5px solid currentColor; } .ds-status-ok { color: var(--ok, #2f7a4d); } .ds-status-warn { color: var(--warn, #87610f); } .ds-status-danger { color: var(--danger, #a82c25); } .ds-status-neutral { color: var(--fg-subtle, #656560); }"
+    },
+    {
+      "name": "Account Chip",
+      "kind": "custom",
+      "refersTo": "account-chip-mark",
+      "description": "The recurring product atom: a 20px rounded-square platform mark, a display name, and an optional handle. Appears wherever anything belongs to an account.",
+      "html": "<span class=\"ds-acct\"><span class=\"ds-acct-mark\"><svg viewBox=\"0 0 16 16\" width=\"12\" height=\"12\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M3.4 5.9h2.4v7.7H3.4zM4.6 2.4a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8zM7.4 5.9h2.3v1.05h.03c.32-.6 1.1-1.24 2.27-1.24 2.43 0 2.88 1.57 2.88 3.62v4.27h-2.4V9.8c0-.88-.02-2.02-1.24-2.02-1.24 0-1.43.95-1.43 1.95v3.87H7.4z\"/></svg></span><span class=\"ds-acct-name\">Work LinkedIn</span><span class=\"ds-acct-handle\">@acme</span></span>",
+      "css": ".ds-acct { display: inline-flex; align-items: center; gap: 7px; min-width: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-acct-mark { width: 20px; height: 20px; flex: none; display: grid; place-items: center; border-radius: var(--r-sm, 4px); background: var(--bg-sunken, #f6f6f4); border: 1px solid var(--border, #e7e7e4); color: var(--fg-muted, #4e4e47); } .ds-acct-name { font-size: 13px; font-weight: 500; color: var(--fg, #1a1a18); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-acct-handle { font-size: 12.5px; color: var(--fg-subtle, #656560); }"
+    },
+    {
+      "name": "Variant Row",
+      "kind": "custom",
+      "refersTo": "variant-row",
+      "description": "The signature structure: one row per target account inside a post set. Account chip, its own text, its own confidence tag, stagger time, and status. Never collapsed into a summary.",
+      "html": "<div class=\"ds-variants\"><div class=\"ds-variant\"><span class=\"ds-vacct\">X @main</span><span class=\"ds-vtext\">1/ Postgres 18 landed async I/O. On Linux the backend can issue reads without blocking.</span><span class=\"ds-vaside\"><span class=\"ds-tag-outline\">0.77</span><span class=\"ds-vtime\">09:08</span><span class=\"ds-vstatus\"><i></i>Approved</span></span></div><div class=\"ds-variant ds-variant-off\"><span class=\"ds-vacct\">X @tech</span><span class=\"ds-vtext\">Should we be sizing read replicas differently now?</span><span class=\"ds-vaside\"><span class=\"ds-vstatus ds-vstatus-off\">Off</span></span></div></div>",
+      "css": ".ds-variants { border: 1px solid var(--border, #e7e7e4); border-radius: var(--r-md, 6px); overflow: hidden; background: var(--bg-muted, #fbfbfa); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-variant { display: grid; grid-template-columns: 186px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 9px 14px 9px 26px; border-bottom: 1px solid var(--border, #e7e7e4); } .ds-variant:last-child { border-bottom: none; } .ds-variant:hover { background: var(--bg-hover, #f4f4f2); } .ds-vacct { font-size: 13px; font-weight: 500; color: var(--fg, #1a1a18); } .ds-vtext { font-size: 13px; color: var(--fg-muted, #4e4e47); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-vaside { display: flex; align-items: center; gap: 12px; justify-self: end; } .ds-tag-outline { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-sm, 4px); font-size: 12px; font-weight: 550; color: var(--fg-muted, #4e4e47); font-variant-numeric: tabular-nums; } .ds-vtime { font-size: 13px; color: var(--fg-subtle, #656560); font-variant-numeric: tabular-nums; } .ds-vstatus { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 500; color: var(--ok, #2f7a4d); } .ds-vstatus i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; } .ds-vstatus-off { color: var(--fg-subtle, #656560); } .ds-variant-off .ds-vtext { text-decoration: line-through; color: var(--fg-subtle, #656560); } .ds-variant-off .ds-vacct { color: var(--fg-subtle, #656560); }"
+    },
+    {
+      "name": "Approval Proof Block",
+      "kind": "custom",
+      "refersTo": "proof-block",
+      "description": "Makes 'which version, on which account, approved by whom' legible at a glance. Uppercase subtle keys; monospace for the strings that identify bytes.",
+      "html": "<div class=\"ds-proof\"><span class=\"ds-proof-k\">Approved</span><span>You · 09:12 via Telegram</span><span class=\"ds-proof-k\">Account</span><span>X @main</span><span class=\"ds-proof-k\">Version</span><span class=\"ds-proof-v\">v1</span><span class=\"ds-proof-k\">Hash</span><span class=\"ds-proof-v\">7f3a9c1d8e2b4056</span></div>",
+      "css": ".ds-proof { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; padding: 7px 10px; border: 1px solid var(--border, #e7e7e4); border-radius: var(--r-md, 6px); background: var(--bg-muted, #fbfbfa); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12.5px; color: var(--fg, #1a1a18); } .ds-proof-k { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-subtle, #656560); } .ds-proof-v { font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 12px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Tool-call Approval Block",
+      "kind": "custom",
+      "refersTo": "tool-call-approval",
+      "description": "An external MCP tool call waiting for a human. States who wants to call what, shows the arguments verbatim in monospace under 'Arguments, exactly as they will be sent', and separates the destructive 'Block this tool' from Allow once / Deny with a spacer. The approval binds to these exact bytes.",
+      "html": "<div class=\"ds-tc\"><div class=\"ds-tc-who\"><strong>Analytics agent</strong> wants to call <code>notion__create_page</code></div><div class=\"ds-tc-meta\">Notion · write · run weekly_insights · requested 09:41</div><div class=\"ds-tc-args\"><div class=\"ds-tc-args-h\">Arguments, exactly as they will be sent</div><pre>parent_id: \"Marketing / Weekly reports\"\ntitle: \"Week 45 — social performance\"\ncontent: \"Tech News engagement up 18%…\"</pre></div><div class=\"ds-tc-actions\"><button class=\"ds-btn ds-btn-primary\">Allow once</button><button class=\"ds-btn\">Deny</button><span style=\"flex:1\"></span><button class=\"ds-btn ds-btn-danger\">Block this tool</button></div></div>",
+      "css": ".ds-tc { display: grid; gap: 10px; max-width: 320px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--fg, #1a1a18); } .ds-tc code, .ds-tc pre { font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 12px; letter-spacing: -0.01em; } .ds-tc-meta { font-size: 12px; color: var(--fg-subtle, #656560); } .ds-tc-args { border: 1px solid var(--border, #e7e7e4); border-radius: var(--r-md, 6px); overflow: hidden; background: var(--bg, #fff); } .ds-tc-args-h { padding: 9px 11px; border-bottom: 1px solid var(--border, #e7e7e4); background: var(--bg-muted, #fbfbfa); font-size: 12px; color: var(--fg-subtle, #656560); } .ds-tc-args pre { margin: 0; padding: 11px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; } .ds-tc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .ds-btn { display: inline-flex; align-items: center; height: 27px; padding: 0 9px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); color: var(--fg, #1a1a18); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; } .ds-btn-primary { background: var(--accent, #1a1a18); border-color: var(--accent, #1a1a18); color: var(--accent-fg, #fbfbfa); } .ds-btn-danger { color: var(--danger, #a82c25); }"
+    },
+    {
+      "name": "Reschedule Popover",
+      "kind": "custom",
+      "refersTo": "reschedule-popover",
+      "description": "The keyboard equivalent of dragging a calendar item. Opens on click or Enter, focuses the Day select, changes nothing until Move, and returns focus to the item on Escape, Cancel, or an outside click. Non-modal role=dialog with the popover shadow.",
+      "html": "<div class=\"ds-rs\" role=\"dialog\" aria-labelledby=\"ds-rs-t\"><div class=\"ds-rs-h\"><strong id=\"ds-rs-t\">Reschedule</strong><span>Postgres 18 · 09:00</span></div><div class=\"ds-rs-b\"><label>Day<select><option>Mon 10 Nov</option></select></label><label>Time<input type=\"time\" value=\"09:00\"></label><p>Moving keeps the approval: only a content change invalidates it.</p></div><div class=\"ds-rs-f\"><button>Cancel</button><span style=\"flex:1\"></span><button class=\"ds-rs-move\">Move</button></div></div>",
+      "css": ".ds-rs { width: 280px; background: var(--bg-raised, #fff); border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-lg, 8px); box-shadow: 0 1px 2px rgba(26,26,24,.06), 0 8px 24px -6px rgba(26,26,24,.14); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: var(--fg, #1a1a18); } .ds-rs-h { display: grid; gap: 2px; padding: 10px 12px; border-bottom: 1px solid var(--border, #e7e7e4); } .ds-rs-h span, .ds-rs-b p { font-size: 12px; color: var(--fg-subtle, #656560); } .ds-rs-b { display: grid; gap: 10px; padding: 12px; } .ds-rs-b label { display: grid; gap: 5px; font-weight: 550; } .ds-rs-b select, .ds-rs-b input { min-height: 30px; padding: 5px 9px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); font: inherit; font-weight: 400; } .ds-rs-f { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border, #e7e7e4); } .ds-rs-f button { height: 27px; padding: 0 9px; border: 1px solid var(--border-strong, #d9d9d5); border-radius: var(--r-md, 6px); background: var(--bg, #fff); font: inherit; font-weight: 500; } .ds-rs-f .ds-rs-move { background: var(--accent, #1a1a18); border-color: var(--accent, #1a1a18); color: var(--accent-fg, #fbfbfa); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Hairline Ledger",
+    "overview": "Mera looks like a ledger ruled in hairlines, not a dashboard built from cards. Every structural division — panel from page, row from row, account from account, column from column — is a single 1px line in border (#e7e7e4). Nothing floats. Nothing is lifted off the page to signal importance; importance is signalled by position, weight, and label. The palette is warm-leaning near-monochrome, and the one near-black accent (#1a1a18) is the same value as the primary text colour, so the primary button reads as ink, not as a brand colour. Colour that is not a neutral appears only where it carries meaning: a status, a semantic tint behind a tag, a group identity dot, a focus ring.\n\nThe density target is someone scanning, not studying. Rows are Raycast-compact — a 30px control height, 9px table cells, a 13px row type size — while reading areas stay calm, capped at 70–72ch with 1.5 line-height. The type ramp is deliberately short: 21px down to 11.5px across the whole product, with weight and colour doing the hierarchy work that size would do in a marketing surface. A generic design detector reads this as flat-type-hierarchy; it is an accepted, intentional trade for an operations console where a 36px heading would push the queue below the fold.\n\nWhat the system refuses is as load-bearing as what it does. It refuses the decorated-card scaffold of same-size icon-and-heading tiles standing in for structure. It refuses the dashboard reflex of collapsing five accounts into one summary row — the per-account variant row is the signature structure, and the Dashboard leads with the approval queue itself rather than a metric strip. It refuses gradients, glass, decorative shadow, emoji, and multi-hue status rainbows. Light and dark are two complete token blocks (:root and [data-theme=\"dark\"]), neither derived from the other.",
+    "keyCharacteristics": [
+      "Hairline 1px rules as the only structural device; shadow exists for popovers alone.",
+      "Near-monochrome warm greys; the accent is ink-black in light, paper-white in dark.",
+      "Status is always colour plus dot shape plus text label — never colour alone.",
+      "Monospace strictly reserved for machine data: hashes, versions, IDs, step numbers.",
+      "A short type ramp (21/16/14/13/12/11.5px) with weight 500/550/600 carrying hierarchy.",
+      "Every foreground/surface pair tested to WCAG AA 4.5:1 in both themes.",
+      "Authored SVG icons on one 16px grid at 1.5px stroke; no icon font, no emoji."
+    ],
+    "rules": [
+      {
+        "name": "The Meaning-Only Colour Rule",
+        "body": "Hue appears only where it carries information: status, group identity, focus, or selection. There is no decorative colour, no brand gradient, and no hue used purely to make a surface look less plain.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Block Theme Rule",
+        "body": "Light and dark are two complete, hand-tuned token blocks, not a filter and its inversion. Every new token must be authored in both :root and [data-theme=\"dark\"] before it ships. A token that exists in only one block is a bug.",
+        "section": "colors"
+      },
+      {
+        "name": "The 4.5 Floor Rule",
+        "body": "Any foreground token must clear 4.5:1 against every surface token it can land on — not just against bg. Test the pair against bg-active, which is the worst case in both themes, before adding a colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Machine-Data Monospace Rule",
+        "body": "Monospace is reserved for strings a machine generated or that a human must compare character by character: content hashes, version numbers (v1), account and run IDs, step numbers, raw timestamps, costs. Prose, labels, headings, and handles rendered as display names stay in the UI face. Monospace is never used for emphasis or texture.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Any number compared down a column carries font-variant-numeric: tabular-nums — applied globally to .num, .mono, table cells, definition-list values, nav counts, calendar times, and character counters.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tight Ramp Rule",
+        "body": "The whole product spans 21px to 11.5px. Hierarchy comes from weight (400/500/550/600) and colour (fg / fg-muted / fg-subtle), not from size jumps. A heading larger than 21px does not exist here; adding one would push the thing the operator came to decide about below the fold. Automated heuristics flag this as a flat type hierarchy — that finding is accepted and closed, not a defect to fix.",
+        "section": "typography"
+      },
+      {
+        "name": "The Kill Switch Reachability Rule",
+        "body": "Stopping everything is pinned to the bottom of the rail, inside the viewport without scrolling, on every screen. It is never placed in a menu, a settings page, or adjacent to a primary action.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Row Per Account Rule",
+        "body": "A post set renders one .variant row per target account — account chip, its own text, its own status. Five accounts never collapse into one summary row. Any aggregate count (\"4 accounts\", \"Approve all 4\") must sit beside the expandable rows that prove it, not replace them.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hairline-Not-Shadow Rule",
+        "body": "Structure is drawn with 1px border. If a new component needs separation from its neighbour, it gets a rule or a ground change. A shadow is only permitted on something that genuinely overlays the page and can be dismissed.",
+        "section": "elevation"
+      },
+      {
+        "name": "The 16-Grid Icon Rule",
+        "body": "Every icon is authored on the 16px grid at 1.5px stroke and added to the sprite. No icon fonts, no <img> icons, no emoji, no pasted icon-set SVGs at a foreign stroke weight.",
+        "section": "shapes"
+      },
+      {
+        "name": "The No Sideways Page Rule",
+        "body": "The page never scrolls horizontally at any width down to 390px. Every .table is wrapped in a .tablewrap that scrolls on its own, and grid and flex children carry min-width: 0. The wrapper is position: relative so absolutely positioned .sr labels inside cells cannot escape it. Screens are checked at 1440, 1280, 1024, 768 and 390px.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Number Rule",
+        "body": "A count shown on more than one screen is the same number everywhere. The Tech News group is five accounts on every screen; a set that disables one says 4 accounts with the fifth shown Off. Character counts match the text they sit under, using the platform's own counting (a link is 23 characters on X). A bulk action counts only what it will act on: Approve remaining 3, not Approve all 4.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Do build structure from 1px border rules and ground changes. A new container gets a hairline and an 8px radius, not a shadow.",
+      "Do pair every status colour with a dot shape (solid / ring / half) and a text label. The three-signal rule is non-negotiable; it is how the AA commitment survives a colour-blind operator.",
+      "Do render one row per target account whenever a post set, an outcome, or a metric spans accounts.",
+      "Do use monospace only for machine data — hashes, versions, IDs, step numbers, costs — and tabular figures for any number compared down a column.",
+      "Do author both theme blocks for any new token, and verify the foreground clears 4.5:1 against bg-active, the worst-case surface, in both.",
+      "Do keep the type ramp inside 21px–11.5px and express hierarchy with weight (500/550/600) and the three-step text colour ramp.",
+      "Do keep the kill switch pinned to the rail foot, reachable without scrolling.",
+      "Do draw new icons on the 16px grid at 1.5px stroke and add them to the sprite.",
+      "Do state a limitation in words — \"not reported\", \"LinkedIn does not support editing\" — rather than hiding the affordance.",
+      "Do give every drag interaction a keyboard path that does the same job; the calendar's reschedule popover is the pattern. A shortcut hint in copy must be wired before it ships.",
+      "Do let wide content scroll inside its own container, and check every screen at 1440, 1024 and 390px for a sideways-scrolling page.",
+      "Do show external tool arguments verbatim wherever a human is asked to approve them."
+    ],
+    "donts": [
+      "Don't mark identity or selection with a coloured border-left above 1px. A tinted edge above a hairline reads as decoration and fails at a glance anyway. Group identity rides on the gdot or the calendar event's leading dot; selection is a ground change plus a weight change.",
+      "Don't dim information with opacity. Disabled accounts, expired items, and inactive rows use fg-subtle, a strikethrough, and an explicit label — opacity would drop text under the contrast floor. The only sanctioned opacity is on a control already removed from the tab order ([disabled] at 0.55) and on a decorative platform mark (0.6).",
+      "Don't add a second accent, a brand hue, or a gradient. The accent is ink; blue is reserved for focus and selection.",
+      "Don't put a shadow on anything that does not overlay the page and cannot be dismissed.",
+      "Don't collapse several accounts into one summary row, and don't lead an operational screen with a metric strip when there is a queue to act on.",
+      "Don't build a wall of same-size icon-and-heading tiles standing in for structure.",
+      "Don't use pill radii on containers or controls; the family stops at 8px.",
+      "Don't use emoji, icon fonts, or imported icons at a foreign stroke weight.",
+      "Don't place a destructive action adjacent to the primary action in a page-head cluster.",
+      "Don't put aria-selected on a <button>. A selected item in a list of buttons is aria-current=\"true\"; aria-selected belongs to role=\"option\".",
+      "Don't let two screens disagree about a count, or show a character count that does not match the text beside it.",
+      "Don't render a picture of a control (a bot card preview) with real <button> elements."
+    ]
+  }
+}

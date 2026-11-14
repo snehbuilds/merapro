@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account Groups · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="groups"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Account Groups" data-sub="3 groups · 9 accounts" data-action="New group" data-action-href="#"></header>
+
+    <main class="page">
+
+      <div class="split--left split">
+
+        <!-- Group list -->
+        <section class="panel">
+          <div class="panel__head"><h2>Groups</h2></div>
+          <div class="panel__body--flush">
+            <button class="msg" aria-current="true">
+              <span class="msg__top">
+                <span class="gdot g-tech"></span>
+                <span class="acct__name">Tech News</span>
+                <span class="topbar__spacer"></span>
+                <span class="tag">5</span>
+              </span>
+              <span class="msg__body">LinkedIn ×2, X ×2, Facebook</span>
+            </button>
+            <button class="msg">
+              <span class="msg__top">
+                <span class="gdot g-corp"></span>
+                <span class="acct__name">Company Official</span>
+                <span class="topbar__spacer"></span>
+                <span class="tag">3</span>
+              </span>
+              <span class="msg__body">LinkedIn page, Facebook, Instagram</span>
+            </button>
+            <button class="msg">
+              <span class="msg__top">
+                <span class="gdot g-launch"></span>
+                <span class="acct__name">Product Launch</span>
+                <span class="topbar__spacer"></span>
+                <span class="tag">2</span>
+              </span>
+              <span class="msg__body">LinkedIn page, X @main</span>
+            </button>
+          </div>
+          <div class="panel__foot">
+            An account can belong to several groups. <strong>Acme Page</strong> is in all three.
+          </div>
+        </section>
+
+        <!-- Selected group -->
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head">
+              <span class="gdot g-tech"></span>
+              <h2>Tech News</h2>
+              <span class="spacer"></span>
+              <button class="btn btn--sm">Rename</button>
+              <button class="btn btn--sm btn--danger">Delete group</button>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col" style="width:40px"><span class="sr">Order</span></th>
+                  <th scope="col">Account</th>
+                  <th scope="col">Platform</th>
+                  <th scope="col">Voice</th>
+                  <th scope="col" class="r">Publishes at</th>
+                  <th scope="col" class="r">On by default</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="subtle mono xs">1</td>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Work LinkedIn</span></span></td>
+                  <td class="small muted">LinkedIn · personal</td>
+                  <td><span class="tag tag--outline">Personal</span></td>
+                  <td class="r num small">+0</td>
+                  <td class="r"><button class="switch" role="switch" aria-checked="true" aria-label="Work LinkedIn on by default"></button></td>
+                </tr>
+                <tr>
+                  <td class="subtle mono xs">2</td>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Acme Page</span></span></td>
+                  <td class="small muted">LinkedIn · company</td>
+                  <td><span class="tag tag--outline">Corporate</span></td>
+                  <td class="r num small">+4m</td>
+                  <td class="r"><button class="switch" role="switch" aria-checked="true" aria-label="Acme Page on by default"></button></td>
+                </tr>
+                <tr>
+                  <td class="subtle mono xs">3</td>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @main</span></span></td>
+                  <td class="small muted">X</td>
+                  <td><span class="tag tag--outline">Group default</span></td>
+                  <td class="r num small">+8m</td>
+                  <td class="r"><button class="switch" role="switch" aria-checked="true" aria-label="X @main on by default"></button></td>
+                </tr>
+                <tr>
+                  <td class="subtle mono xs">4</td>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @tech</span></span></td>
+                  <td class="small muted">X</td>
+                  <td><span class="tag tag--outline">Group default</span></td>
+                  <td class="r num small">+13m</td>
+                  <td class="r"><button class="switch" role="switch" aria-checked="true" aria-label="X @tech on by default"></button></td>
+                </tr>
+                <tr>
+                  <td class="subtle mono xs">5</td>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="acct__name">Acme FB</span></span></td>
+                  <td class="small muted">Facebook page</td>
+                  <td><span class="tag tag--outline">Corporate</span></td>
+                  <td class="r num small">+17m</td>
+                  <td class="r"><button class="switch" role="switch" aria-checked="false" aria-label="Acme FB on by default"></button></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="panel__foot row row--between">
+              <span>Drag to reorder. Order drives the stagger sequence.</span>
+              <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-plus"/></svg>Add accounts</button>
+            </div>
+          </section>
+
+          <div class="notice notice--warn">
+            <svg class="icon"><use href="#i-alert"/></svg>
+            <div>
+              <strong>Two X accounts in this group.</strong>
+              Staggering is required and each account must receive different text. X treats
+              substantially similar content across accounts as grounds for suspension, so
+              "all at once" is blocked for this group until one of them is removed.
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+
+            <section class="panel">
+              <div class="panel__head"><h2>Publishing</h2></div>
+              <div class="panel__body stack">
+                <div class="field">
+                  <label for="sm">Stagger mode</label>
+                  <select class="select" id="sm">
+                    <option selected>Random spread</option>
+                    <option>Fixed interval</option>
+                    <option disabled>All at once — blocked, two X accounts</option>
+                  </select>
+                </div>
+                <div class="row" style="gap:10px">
+                  <div class="field" style="flex:1">
+                    <label for="mn">Minimum</label>
+                    <input class="input" id="mn" value="3 min">
+                  </div>
+                  <div class="field" style="flex:1">
+                    <label for="mx">Maximum</label>
+                    <input class="input" id="mx" value="15 min">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="slots">Posting slots</label>
+                  <input class="input" id="slots" value="Mon–Fri 09:00, 14:00">
+                  <span class="field__hint">Each account can override this.</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel__head"><h2>Content</h2></div>
+              <div class="panel__body stack">
+                <div class="field">
+                  <label for="gv">Default brand voice</label>
+                  <select class="select" id="gv"><option>Technical — plain, specific</option><option>Acme Corporate</option></select>
+                </div>
+                <div class="field">
+                  <label>Content pillars</label>
+                  <div class="wrap">
+                    <span class="tag tag--outline">Databases</span>
+                    <span class="tag tag--outline">Platform engineering</span>
+                    <span class="tag tag--outline">Open source</span>
+                    <span class="tag">+ add</span>
+                  </div>
+                  <span class="field__hint">Sources are scored against these for this group specifically.</span>
+                </div>
+                <div class="field">
+                  <label>Linked sources</label>
+                  <div class="wrap">
+                    <span class="tag tag--outline">PostgreSQL News</span>
+                    <span class="tag tag--outline">Hacker News · top</span>
+                    <span class="tag tag--outline">LWN</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Resolved settings</h2><span class="spacer"></span><span class="small subtle">and where each came from</span></div>
+            <table class="table">
+              <thead><tr><th scope="col">Setting</th><th scope="col">Effective value</th><th scope="col">Inherited from</th><th scope="col">Rule</th></tr></thead>
+              <tbody>
+                <tr><td>Brand voice</td><td>Technical</td><td><span class="tag tag--outline">Group</span></td><td class="small subtle">Most specific</td></tr>
+                <tr><td>Posting slots</td><td>09:00, 14:00</td><td><span class="tag tag--outline">Group</span></td><td class="small subtle">Most specific</td></tr>
+                <tr><td>Daily cap</td><td>3 per account</td><td><span class="tag tag--outline">Workspace</span></td><td class="small subtle">Most specific</td></tr>
+                <tr><td>Autopilot mode</td><td>Manual</td><td><span class="tag tag--outline">Account</span></td><td><span class="tag tag--warn">Strictest wins</span></td></tr>
+                <tr><td>Approvers</td><td>Any 1 of 2</td><td><span class="tag tag--outline">Group</span></td><td><span class="tag tag--warn">Strictest wins</span></td></tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              Approval policy and autopilot mode resolve to the <strong>strictest</strong>
+              applicable value, not the most specific — so adding a locked-down account to a
+              permissive group never quietly loosens it.
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

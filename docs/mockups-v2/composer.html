@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Composer · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="composer"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Composer" data-sub="Draft · 4 accounts"></header>
+
+    <main class="page">
+
+      <!-- Target picker: groups expand into accounts, which is the whole point -->
+      <section class="panel" style="margin-bottom:14px">
+        <div class="filters" style="border-radius:var(--r-lg)">
+          <span class="small strong nowrap">Targets</span>
+          <button class="chip" aria-pressed="true"><span class="gdot g-tech"></span>Tech News<span class="subtle">5</span></button>
+          <button class="chip" aria-pressed="false"><span class="gdot g-corp"></span>Company Official<span class="subtle">3</span></button>
+          <button class="chip" aria-pressed="false"><span class="gdot g-launch"></span>Product Launch<span class="subtle">2</span></button>
+          <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-plus"/></svg>Add an account</button>
+          <span class="topbar__spacer"></span>
+          <span class="small subtle">Acme Page is also in Company Official and Product Launch — adding those groups still gives it one post.</span>
+        </div>
+      </section>
+
+      <div class="split--left split">
+
+        <!-- ===== Left: one row per target account ===== -->
+        <div class="stack">
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Accounts</h2>
+              <span class="spacer"></span>
+              <span class="tag">4 enabled</span>
+            </div>
+
+            <div class="panel__body--flush">
+              <button class="msg" aria-current="true">
+                <span class="msg__top">
+                  <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                  <span class="acct__name truncate">Work LinkedIn</span>
+                  <span class="topbar__spacer"></span>
+                  <span class="tag tag--outline">0.84</span>
+                </span>
+                <span class="msg__body">Postgres 18 ships async I/O, and the numbers on read-heavy workloads…</span>
+                <span class="row xs subtle" style="gap:8px">
+                  <span class="num">09:00</span>
+                  <span>·</span>
+                  <span>344 / 3000</span>
+                  <span>·</span>
+                  <span class="status status--warn"><i class="status__dot status__dot--half"></i>Draft</span>
+                </span>
+              </button>
+
+              <button class="msg">
+                <span class="msg__top">
+                  <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                  <span class="acct__name truncate">Acme Page</span>
+                  <span class="topbar__spacer"></span>
+                  <span class="tag tag--outline">0.91</span>
+                </span>
+                <span class="msg__body">Postgres 18 is out. The async I/O work is the headline for anyone…</span>
+                <span class="row xs subtle" style="gap:8px">
+                  <span class="num">09:04</span>
+                  <span>·</span>
+                  <span>308 / 3000</span>
+                  <span>·</span>
+                  <span class="status status--warn"><i class="status__dot status__dot--half"></i>Draft</span>
+                </span>
+              </button>
+
+              <button class="msg">
+                <span class="msg__top">
+                  <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                  <span class="acct__name truncate">X @main</span>
+                  <span class="topbar__spacer"></span>
+                  <span class="tag tag--outline">0.77</span>
+                </span>
+                <span class="msg__body">1/ Postgres 18 landed async I/O. On Linux the backend can issue…</span>
+                <span class="row xs subtle" style="gap:8px">
+                  <span class="num">09:08</span>
+                  <span>·</span>
+                  <span>Thread · 3</span>
+                  <span>·</span>
+                  <span class="status status--warn"><i class="status__dot status__dot--half"></i>Draft</span>
+                </span>
+              </button>
+
+              <button class="msg">
+                <span class="msg__top">
+                  <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+                  <span class="acct__name truncate">X @tech</span>
+                  <span class="topbar__spacer"></span>
+                  <span class="tag tag--outline">0.73</span>
+                </span>
+                <span class="msg__body">Should we be sizing read replicas differently now that PG18 has…</span>
+                <span class="row xs subtle" style="gap:8px">
+                  <span class="num">09:13</span>
+                  <span>·</span>
+                  <span>219 / 280</span>
+                  <span>·</span>
+                  <span class="status status--warn"><i class="status__dot status__dot--half"></i>Draft</span>
+                </span>
+              </button>
+
+              <button class="msg variant--off">
+                <span class="msg__top">
+                  <span class="acct__mark"><svg><use href="#p-facebook"/></svg></span>
+                  <span class="acct__name truncate">Acme FB</span>
+                  <span class="topbar__spacer"></span>
+                  <span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Off</span>
+                </span>
+                <span class="msg__body">Disabled for this post — drops out of the set without losing its history.</span>
+              </button>
+            </div>
+
+            <div class="panel__foot">
+              Each account is drafted, approved, scheduled and published on its own.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Publishing order</h2></div>
+            <div class="panel__body">
+              <div class="field" style="margin-bottom:12px">
+                <label for="stagger">Stagger</label>
+                <select class="select" id="stagger">
+                  <option selected>Random spread · 3–15 min</option>
+                  <option>Fixed interval · 4 min</option>
+                  <option>All at once</option>
+                </select>
+                <span class="field__hint">Two X accounts in this group — staggering is required.</span>
+              </div>
+              <div class="tl" style="border:1px solid var(--border);border-radius:var(--r-md)">
+                <div class="tl__row" style="grid-template-columns:auto 1fr auto">
+                  <span class="mono xs subtle">09:00</span>
+                  <span class="small truncate">Work LinkedIn</span>
+                  <span class="xs subtle">+0</span>
+                </div>
+                <div class="tl__row" style="grid-template-columns:auto 1fr auto">
+                  <span class="mono xs subtle">09:04</span>
+                  <span class="small truncate">Acme Page</span>
+                  <span class="xs subtle">+4m</span>
+                </div>
+                <div class="tl__row" style="grid-template-columns:auto 1fr auto">
+                  <span class="mono xs subtle">09:08</span>
+                  <span class="small truncate">X @main</span>
+                  <span class="xs subtle">+8m</span>
+                </div>
+                <div class="tl__row" style="grid-template-columns:auto 1fr auto">
+                  <span class="mono xs subtle">09:13</span>
+                  <span class="small truncate">X @tech</span>
+                  <span class="xs subtle">+13m</span>
+                </div>
+              </div>
+              <p class="caption">Offsets are fixed now and stored, so the calendar and any retry agree with what you approved.</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- ===== Right: editor and live preview for the selected account ===== -->
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head">
+              <span class="acct acct--lg">
+                <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                <span>
+                  <span class="acct__name" style="display:block">Work LinkedIn</span>
+                  <span class="acct__handle">@alexmercer · personal profile</span>
+                </span>
+              </span>
+              <span class="spacer"></span>
+              <span class="small subtle">Voice:</span>
+              <span class="tag tag--outline">Personal · from account</span>
+              <button class="btn btn--sm">Switch</button>
+            </div>
+
+            <div class="panel__body">
+              <div class="field">
+                <label for="body" class="sr">Post text for Work LinkedIn</label>
+                <textarea class="textarea" id="body" data-counter="c1" style="min-height:190px">Postgres 18 ships async I/O, and the numbers on read-heavy workloads are worth a look.
+
+The short version: io_uring on Linux lets the backend issue reads without blocking, and the team is reporting meaningful gains on sequential scans.
+
+What I'm watching: whether this changes how we size read replicas.
+
+https://www.postgresql.org/about/news/…</textarea>
+              </div>
+
+              <div class="row" style="margin-top:10px">
+                <button class="btn btn--sm">Shorter</button>
+                <button class="btn btn--sm">More professional</button>
+                <button class="btn btn--sm">Add a hook</button>
+                <button class="btn btn--sm">Regenerate</button>
+                <span class="topbar__spacer"></span>
+                <span class="counter small subtle" id="c1" data-limit="3000">344 / 3000</span>
+              </div>
+
+              <div class="divider" style="margin:14px 0"></div>
+
+              <!-- Hashtags, with their evidence -->
+              <div class="row row--between" style="margin-bottom:8px">
+                <h3>Hashtags</h3>
+                <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-hash"/></svg>Suggest</button>
+              </div>
+              <div class="wrap">
+                <span class="tag tag--info">#postgres <span class="subtle">×</span></span>
+                <span class="tag tag--info">#databases <span class="subtle">×</span></span>
+                <span class="tag tag--outline">+ add</span>
+              </div>
+              <table class="table" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--r-md)">
+                <thead>
+                  <tr><th scope="col">Tag</th><th scope="col">Basis</th><th scope="col" class="r">Lift vs median</th><th scope="col" class="r">Posts</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="mono">#postgres</td><td><span class="tag tag--ok">Measured</span></td><td class="r num">+34%</td><td class="r num">41</td></tr>
+                  <tr><td class="mono">#databases</td><td><span class="tag tag--ok">Measured</span></td><td class="r num">+11%</td><td class="r num">23</td></tr>
+                  <tr><td class="mono">#iouring</td><td><span class="tag tag--outline">Content only</span></td><td class="r subtle">—</td><td class="r num">2</td></tr>
+                </tbody>
+              </table>
+              <p class="caption">Lift is against this account's own median, not the workspace's. Below 5 posts there is no usable signal, and the table says so rather than guessing.</p>
+
+              <div class="divider" style="margin:14px 0"></div>
+
+              <!-- Media -->
+              <div class="row row--between" style="margin-bottom:8px">
+                <h3>Media</h3>
+                <div class="row">
+                  <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-upload"/></svg>Upload</button>
+                  <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-image"/></svg>Generate</button>
+                </div>
+              </div>
+              <div class="row row--top" style="gap:12px">
+                <div class="preview__media" style="margin:0;width:180px;flex:none;height:102px">
+                  <svg class="icon icon--lg"><use href="#i-image"/></svg>
+                  <span>og-image.png</span>
+                </div>
+                <div class="col" style="flex:1">
+                  <div class="field">
+                    <label for="alt">Alt text</label>
+                    <input class="input" id="alt" value="A terminal showing PostgreSQL 18 release notes beside a benchmark chart.">
+                  </div>
+                  <div class="row xs subtle" style="gap:8px">
+                    <span>From the source's OG image</span><span>·</span>
+                    <span>1200×627 for LinkedIn</span><span>·</span>
+                    <span>3 renditions derived</span>
+                  </div>
+                </div>
+              </div>
+              <div class="notice notice--info" style="margin-top:10px">
+                <svg class="icon icon--sm"><use href="#i-info"/></svg>
+                <div>Changing the image creates a new version and invalidates any approval for this account. Media is inside the content hash.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Live preview -->
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Preview</h2>
+              <span class="spacer"></span>
+              <span class="seg">
+                <button aria-pressed="true">Desktop</button>
+                <button aria-pressed="false">Mobile</button>
+              </span>
+            </div>
+            <div class="panel__body">
+              <div class="preview">
+                <div class="preview__head">
+                  <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+                  <span>
+                    <span class="small strong" style="display:block">Alex Mercer</span>
+                    <span class="xs subtle">Platform engineering · Now</span>
+                  </span>
+                </div>
+                <div class="preview__body">Postgres 18 ships async I/O, and the numbers on read-heavy workloads are worth a look.
+
+The short version: io_uring on Linux lets the backend issue reads without blocking, and the team is reporting meaningful gains on sequential scans.
+
+What I'm watching: whether this changes how we size read replicas.
+
+https://www.postgresql.org/about/news/… <span class="hashtags">#postgres #databases</span></div>
+                <div class="preview__media">
+                  <svg class="icon icon--lg"><use href="#i-image"/></svg>
+                  <span>1200 × 627</span>
+                </div>
+                <div class="preview__foot">
+                  <span>Renders as LinkedIn shows it · 3,000 character limit · 3–5 hashtags conventional</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Commit bar -->
+          <section class="panel">
+            <div class="panel__body row row--between" style="gap:14px">
+              <div class="row" style="gap:10px;min-width:0">
+                <span class="status status--ok"><i class="status__dot"></i>All 4 accounts distinct</span>
+                <span class="status status--ok"><i class="status__dot"></i>Guardrails clear</span>
+              </div>
+              <div class="row" style="flex:none">
+                <button class="btn">Save draft</button>
+                <button class="btn">Schedule…</button>
+                <button class="btn btn--primary">Send 4 for approval</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

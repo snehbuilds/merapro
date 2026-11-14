@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unified Inbox · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="inbox"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Unified Inbox" data-sub="12 need attention"></header>
+
+    <main class="page page--flush">
+
+      <div class="filters" style="border-radius:0">
+        <button class="chip" aria-pressed="true">Needs attention<span class="subtle">12</span></button>
+        <button class="chip" aria-pressed="false">All</button>
+        <button class="chip" aria-pressed="false">Replied</button>
+        <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+        <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Account</button>
+        <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Intent</button>
+        <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Sentiment</button>
+        <span class="topbar__spacer"></span>
+        <span class="small subtle">Replies always send as the account that owns the post.</span>
+      </div>
+
+      <div class="inbox">
+
+        <!-- List -->
+        <div class="inbox__list">
+          <button class="msg" aria-current="true">
+            <span class="msg__top">
+              <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+              <span class="small strong truncate">Dana Whitfield</span>
+              <span class="topbar__spacer"></span>
+              <span class="tag tag--info">Question</span>
+            </span>
+            <span class="msg__body">Does the async I/O work land for replicas too, or primary only? We're on 16 and planning an upgrade.</span>
+            <span class="row xs subtle" style="gap:7px"><span>Work LinkedIn</span><span>·</span><span>18m ago</span></span>
+          </button>
+
+          <button class="msg">
+            <span class="msg__top">
+              <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+              <span class="small strong truncate">@kvothe_dev</span>
+              <span class="topbar__spacer"></span>
+              <span class="tag tag--danger">Complaint</span>
+            </span>
+            <span class="msg__body">Third time this week you've posted the same benchmark. Is anyone actually reading these before they go out?</span>
+            <span class="row xs subtle" style="gap:7px"><span>X @main</span><span>·</span><span>41m ago</span></span>
+          </button>
+
+          <button class="msg">
+            <span class="msg__top">
+              <span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span>
+              <span class="small strong truncate">Marcus Hale</span>
+              <span class="topbar__spacer"></span>
+              <span class="tag tag--ok">Praise</span>
+            </span>
+            <span class="msg__body">Clearest explanation of io_uring I've read this month. Saved.</span>
+            <span class="row xs subtle" style="gap:7px"><span>Acme Page</span><span>·</span><span>1h ago</span></span>
+          </button>
+
+          <button class="msg">
+            <span class="msg__top">
+              <span class="acct__mark"><svg><use href="#p-x"/></svg></span>
+              <span class="small strong truncate">@perf_nerd</span>
+              <span class="topbar__spacer"></span>
+              <span class="tag tag--info">Question</span>
+            </span>
+            <span class="msg__body">Source on the sequential scan numbers?</span>
+            <span class="row xs subtle" style="gap:7px"><span>X @tech</span><span>·</span><span>2h ago</span></span>
+          </button>
+
+          <button class="msg">
+            <span class="msg__top">
+              <span class="acct__mark"><svg><use href="#p-facebook"/></svg></span>
+              <span class="small strong truncate">Crypto Giveaway</span>
+              <span class="topbar__spacer"></span>
+              <span class="tag">Spam</span>
+            </span>
+            <span class="msg__body">🎁 DM to claim your free…</span>
+            <span class="row xs subtle" style="gap:7px"><span>Acme FB</span><span>·</span><span>3h ago</span><span>·</span><span>Auto-hidden</span></span>
+          </button>
+
+          <button class="msg">
+            <span class="msg__top">
+              <span class="acct__mark"><svg><use href="#p-instagram"/></svg></span>
+              <span class="small strong truncate">@sarah.builds</span>
+              <span class="topbar__spacer"></span>
+              <span class="tag tag--ok">Praise</span>
+            </span>
+            <span class="msg__body">Love the new office shots!</span>
+            <span class="row xs subtle" style="gap:7px"><span>Acme IG</span><span>·</span><span>5h ago</span><span>·</span><span>Replied</span></span>
+          </button>
+        </div>
+
+        <!-- Detail -->
+        <div style="display:grid;align-content:start">
+
+          <div style="padding:16px 18px;border-bottom:1px solid var(--border)">
+            <div class="row row--between" style="gap:14px">
+              <div class="row" style="gap:10px;min-width:0">
+                <span class="acct__mark" style="width:32px;height:32px"><svg style="width:16px;height:16px"><use href="#p-linkedin"/></svg></span>
+                <div style="min-width:0">
+                  <div class="row" style="gap:8px"><span class="strong">Dana Whitfield</span><span class="tag tag--info">Question</span><span class="tag tag--ok">Positive</span></div>
+                  <div class="xs subtle">Commented on <a href="#">Postgres 18 ships async I/O</a> · Work LinkedIn · 18 minutes ago</div>
+                </div>
+              </div>
+              <div class="row" style="flex:none">
+                <button class="btn btn--sm">Assign</button>
+                <button class="btn btn--sm">Hide</button>
+                <button class="btn btn--sm btn--danger">Delete</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:16px 18px;display:grid;gap:14px">
+
+            <div class="preview">
+              <div class="preview__head">
+                <span class="xs subtle">In reply to your post</span>
+              </div>
+              <div class="preview__body small muted">Postgres 18 ships async I/O, and the numbers on read-heavy workloads are worth a look…</div>
+            </div>
+
+            <div class="notice">
+              <svg class="icon"><use href="#i-inbox"/></svg>
+              <div>
+                <strong>Dana Whitfield</strong>
+                <p class="small" style="margin-top:3px">Does the async I/O work land for replicas too, or primary only? We're on 16 and planning an upgrade.</p>
+              </div>
+            </div>
+
+            <section class="panel">
+              <div class="panel__head">
+                <h2>Suggested reply</h2>
+                <span class="spacer"></span>
+                <span class="tag tag--outline">Confidence 0.81</span>
+                <span class="tag tag--outline">Work LinkedIn voice</span>
+              </div>
+              <div class="panel__body">
+                <div class="field">
+                  <label for="rep" class="sr">Reply</label>
+                  <textarea class="textarea" id="rep" style="min-height:78px">Both — the async I/O path is in the backend, so replicas benefit on read-heavy workloads too. Worth testing on your own scan patterns before you plan the 16 → 18 move.</textarea>
+                </div>
+                <div class="row" style="margin-top:10px">
+                  <button class="btn btn--sm">Shorter</button>
+                  <button class="btn btn--sm">Warmer</button>
+                  <button class="btn btn--sm">Regenerate</button>
+                  <span class="topbar__spacer"></span>
+                  <button class="btn btn--sm">Save draft</button>
+                  <button class="btn btn--sm btn--primary">Send as Work LinkedIn</button>
+                </div>
+                <p class="caption">
+                  Grounded in the post and your FAQ. It will go out from the account that
+                  owns the post — there is no control to send it from a different one.
+                </p>
+              </div>
+            </section>
+
+            <div class="notice notice--warn">
+              <svg class="icon"><use href="#i-alert"/></svg>
+              <div>
+                <strong>One comment needs you rather than the agent.</strong>
+                <p class="small" style="margin-top:3px">
+                  <strong>@kvothe_dev</strong> on X @main is classified as a complaint, so no
+                  reply was drafted. Complaints escalate rather than auto-answering.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

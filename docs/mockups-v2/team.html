@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team &amp; Roles · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="team"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Team &amp; Roles" data-sub="4 members" data-action="Invite" data-action-href="#"></header>
+
+    <main class="page">
+
+      <section class="panel">
+        <div class="panel__head"><h2>Members</h2><span class="spacer"></span><span class="small subtle">Acme workspace</span></div>
+        <table class="table">
+          <thead><tr><th scope="col">Member</th><th scope="col">Role</th><th scope="col">Scope</th><th scope="col">Approval channel</th><th scope="col">Last active</th><th scope="col"></th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="strong">Alex Mercer</span> <span class="xs subtle">(you)</span><br><span class="xs subtle">alex@acme.dev</span></td>
+              <td><span class="tag tag--outline">Owner</span></td>
+              <td class="small">Whole workspace</td>
+              <td class="small mono xs">Telegram @alex</td>
+              <td class="small subtle">Now</td>
+              <td class="r"><button class="btn btn--sm btn--ghost" aria-disabled="true">Edit</button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Priya Raman</span><br><span class="xs subtle">priya@acme.dev</span></td>
+              <td><span class="tag tag--outline">Admin</span></td>
+              <td class="small">Whole workspace</td>
+              <td class="small mono xs">Telegram @priya</td>
+              <td class="small subtle">2h ago</td>
+              <td class="r"><button class="btn btn--sm">Edit</button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Sam Okafor</span><br><span class="xs subtle">sam@acme.dev</span></td>
+              <td><span class="tag tag--outline">Editor</span></td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News only</span></span></td>
+              <td class="small subtle">Not paired</td>
+              <td class="small subtle">Yesterday</td>
+              <td class="r"><button class="btn btn--sm">Edit</button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Dana Whitfield</span><br><span class="xs subtle">dana@client.example</span></td>
+              <td><span class="tag tag--outline">Approver</span></td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-corp"></span><span class="small">Company Official only</span></span></td>
+              <td class="small mono xs">Telegram @dana</td>
+              <td class="small subtle">4d ago</td>
+              <td class="r"><button class="btn btn--sm">Edit</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="panel__foot">
+          Scope narrows a role; it never widens one. Dana receives approval requests for
+          Company Official and cannot see, or act on, anything else — through the web UI,
+          the API, MCP, or the bot.
+        </div>
+      </section>
+
+      <div class="grid grid--2" style="margin-top:14px">
+
+        <section class="panel">
+          <div class="panel__head"><h2>What each role can do</h2></div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Capability</th>
+                <th scope="col" class="r">Viewer</th>
+                <th scope="col" class="r">Approver</th>
+                <th scope="col" class="r">Editor</th>
+                <th scope="col" class="r">Admin</th>
+                <th scope="col" class="r">Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Read content and analytics</td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Approve and reject</td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Create and edit posts</td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Create account groups</td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Connect social accounts</td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Register MCP servers</td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Engage the kill switch</td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Change autopilot mode</td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+              <tr><td>Delete the workspace</td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r n"><span class="sr">No</span></td><td class="r y"><span class="sr">Yes</span></td></tr>
+            </tbody>
+          </table>
+          <div class="panel__foot">
+            Approver sits <em>below</em> Editor on purpose: a reviewing stakeholder who
+            approves but never drafts. Anyone who can approve can also stop everything.
+          </div>
+        </section>
+
+        <div class="stack">
+          <section class="panel">
+            <div class="panel__head"><h2>Edit · Dana Whitfield</h2></div>
+            <div class="panel__body stack">
+              <div class="field">
+                <label for="role">Role</label>
+                <select class="select" id="role"><option>Viewer</option><option selected>Approver</option><option>Editor</option><option>Admin</option></select>
+              </div>
+              <div class="field">
+                <label>Restrict to</label>
+                <div class="wrap">
+                  <button class="chip" aria-pressed="false"><span class="gdot g-tech"></span>Tech News</button>
+                  <button class="chip" aria-pressed="true"><span class="gdot g-corp"></span>Company Official</button>
+                  <button class="chip" aria-pressed="false"><span class="gdot g-launch"></span>Product Launch</button>
+                </div>
+                <span class="field__hint">Leave all unselected for the whole workspace.</span>
+              </div>
+              <div class="divider"></div>
+              <div class="row row--between">
+                <div><div class="small strong">Receives approval requests</div><div class="xs subtle">For Company Official only</div></div>
+                <button class="switch" role="switch" aria-checked="true" aria-label="Receives approval requests"></button>
+              </div>
+              <div class="row">
+                <button class="btn btn--sm btn--danger">Remove from workspace</button>
+                <span class="topbar__spacer"></span>
+                <button class="btn btn--sm btn--primary">Save</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Pending invitations</h2></div>
+            <div class="panel__body--flush">
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+                <span><span class="small truncate" style="display:block">marcus@acme.dev</span><span class="xs subtle">Editor · Tech News · sent 2d ago</span></span>
+                <button class="btn btn--sm btn--ghost">Revoke</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

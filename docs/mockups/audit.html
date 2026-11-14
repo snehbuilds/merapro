@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit Log · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="audit"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Audit Log" data-sub="Append-only · 2 year retention"></header>
+
+    <main class="page">
+
+      <section class="panel">
+        <div class="filters">
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Actor</button>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Action</button>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Account</button>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Surface</button>
+          <button class="chip">Today</button>
+          <span class="topbar__spacer"></span>
+          <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-dl"/></svg>Export</button>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Actor</th>
+              <th scope="col">Action</th>
+              <th scope="col">Account</th>
+              <th scope="col">Subject</th>
+              <th scope="col">Version</th>
+              <th scope="col">Surface</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono xs">09:13:02</td>
+              <td class="small">System</td>
+              <td><span class="tag tag--ok">post.published</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @tech</span></span></td>
+              <td class="small truncate" style="max-width:220px">Postgres 18 ships async I/O</td>
+              <td class="mono xs">v1 · 4c9e…</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr>
+              <td class="mono xs">09:08:41</td>
+              <td class="small">System</td>
+              <td><span class="tag tag--ok">post.published</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @main</span></span></td>
+              <td class="small truncate" style="max-width:220px">Postgres 18 ships async I/O</td>
+              <td class="mono xs">v1 · 7f3a…</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr style="background:var(--bg-muted)">
+              <td class="mono xs">09:12:18</td>
+              <td class="small strong">Alex Mercer</td>
+              <td><span class="tag tag--ok">approval.granted</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @main</span></span></td>
+              <td class="small truncate" style="max-width:220px">Postgres 18 ships async I/O</td>
+              <td class="mono xs">v1 · 7f3a9c1d8e2b4056</td>
+              <td class="small subtle">telegram</td>
+            </tr>
+            <tr>
+              <td class="mono xs">09:04:55</td>
+              <td class="small">System</td>
+              <td><span class="tag tag--danger">post.failed</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="small">Acme FB</span></span></td>
+              <td class="small truncate" style="max-width:220px">Redis 8 licence change</td>
+              <td class="mono xs">v2 · b812…</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr>
+              <td class="mono xs">09:02:10</td>
+              <td class="small">System</td>
+              <td><span class="tag tag--warn">account.needs_reauth</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="small">Work LinkedIn</span></span></td>
+              <td class="small subtle">Token revoked by platform</td>
+              <td class="subtle">—</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr>
+              <td class="mono xs">08:47:33</td>
+              <td class="small strong">Writer agent</td>
+              <td><span class="tag">post_version.created</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @tech</span></span></td>
+              <td class="small truncate" style="max-width:220px">Postgres 18 ships async I/O</td>
+              <td class="mono xs">v2 · 4c9e…</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr>
+              <td class="mono xs">08:47:29</td>
+              <td class="small strong">Orchestrator</td>
+              <td><span class="tag tag--warn">guardrail.warn</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @tech</span></span></td>
+              <td class="small truncate" style="max-width:220px">cross_account_duplicate · 0.84</td>
+              <td class="mono xs">v1 · 9a01…</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr>
+              <td class="mono xs">08:31:04</td>
+              <td class="small strong">Priya Raman</td>
+              <td><span class="tag tag--danger">approval.rejected</span></td>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-instagram"/></svg></span><span class="small">Acme IG</span></span></td>
+              <td class="small truncate" style="max-width:220px">Office move photos</td>
+              <td class="mono xs">v1 · 22d7…</td>
+              <td class="small subtle">web</td>
+            </tr>
+            <tr>
+              <td class="mono xs">07:18:00</td>
+              <td class="small strong">Approval agent</td>
+              <td><span class="tag">approval.requested</span></td>
+              <td class="small subtle">4 accounts</td>
+              <td class="small truncate" style="max-width:220px">Postgres 18 ships async I/O</td>
+              <td class="mono xs">set · e55b…</td>
+              <td class="small subtle">worker</td>
+            </tr>
+            <tr>
+              <td class="mono xs">06:02:17</td>
+              <td class="small strong">Alex Mercer</td>
+              <td><span class="tag tag--info">api_key.created</span></td>
+              <td class="small subtle">—</td>
+              <td class="small">CI integration key</td>
+              <td class="subtle">—</td>
+              <td class="small subtle">web</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="panel__foot">
+          Append-only, enforced at the database. Every row names the actor, the surface,
+          the target account, and the content hash — so the answerable question is not
+          "who approved this post" but "who approved <em>which text</em>, on which account".
+        </div>
+      </section>
+
+      <div class="grid grid--3" style="margin-top:14px">
+        <section class="panel">
+          <div class="panel__head"><h2>Entry detail</h2></div>
+          <div class="panel__body">
+            <dl class="dl">
+              <dt>Action</dt><dd>approval.granted</dd>
+              <dt>Actor</dt><dd>Alex Mercer</dd>
+              <dt>Actor type</dt><dd>user</dd>
+              <dt>Surface</dt><dd>telegram</dd>
+              <dt>External identity</dt><dd class="mono xs">48209173</dd>
+              <dt>Account</dt><dd>X @main</dd>
+              <dt>Version</dt><dd class="mono xs">v1</dd>
+              <dt>IP</dt><dd class="mono xs">203.0.113.42</dd>
+            </dl>
+            <div class="proof" style="margin-top:12px">
+              <span class="proof__k">Content hash</span>
+              <span class="proof__v">7f3a9c1d8e2b4056</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Today by actor</h2></div>
+          <div class="panel__body col">
+            <div class="row row--between"><span class="small">System / workers</span><span class="small num">142</span></div>
+            <div class="row row--between"><span class="small">Agents</span><span class="small num">61</span></div>
+            <div class="row row--between"><span class="small">Alex Mercer</span><span class="small num">18</span></div>
+            <div class="row row--between"><span class="small">Priya Raman</span><span class="small num">4</span></div>
+            <div class="row row--between"><span class="small">API keys</span><span class="small num">2</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Security events</h2><span class="spacer"></span><span class="tag tag--warn">2</span></div>
+          <div class="panel__body col">
+            <div class="notice notice--warn">
+              <svg class="icon icon--sm"><use href="#i-alert"/></svg>
+              <div>
+                <strong>Stale token rejected</strong>
+                <p class="xs" style="margin-top:2px">A v1 button was tapped after v2 existed. content_mismatch · 08:52</p>
+              </div>
+            </div>
+            <div class="notice notice--warn">
+              <svg class="icon icon--sm"><use href="#i-alert"/></svg>
+              <div>
+                <strong>Unpaired chat messaged the bot</strong>
+                <p class="xs" style="margin-top:2px">Generic reply sent, nothing disclosed · 07:44</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

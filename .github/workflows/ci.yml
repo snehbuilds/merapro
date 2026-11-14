@@ -1,0 +1,44 @@
+# docs/10 §7: lint, typecheck, unit and integration tests with per-area coverage gates,
+# the OpenAPI and SDK drift checks, the web tests and build. Security scans: security.yml.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "3.11" }
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Typecheck
+        run: uv run mypy src
+      - name: OpenAPI drift (the committed spec is the code's)
+        run: uv run python scripts/export_openapi.py --check
+      - name: Platform skills are the pinned bytes
+        run: uv run python scripts/import_platform_skills.py --check
+      - name: Tests (unit + integration, testcontainers) with coverage
+        run: uv run pytest --cov=mera --cov-report=json --cov-report=term:skip-covered
+      - name: Coverage gates per area (docs/11 §1 DoD 15)
+        run: uv run python scripts/coverage_gates.py coverage.json
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: SDK drift (src/gen is generated from openapi.json)
+        run: pnpm sdk:check
+      - run: pnpm -r lint
+      - run: pnpm -r typecheck
+      - run: pnpm --filter web test
+      - run: pnpm --filter web build

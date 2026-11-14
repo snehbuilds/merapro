@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="analytics"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Analytics" data-sub="1–30 Nov"></header>
+
+    <main class="page">
+
+      <section class="panel" style="margin-bottom:14px">
+        <div class="filters" style="border-radius:var(--r-lg)">
+          <span class="seg">
+            <button aria-pressed="false">Workspace</button>
+            <button aria-pressed="true">Group</button>
+            <button aria-pressed="false">Account</button>
+            <button aria-pressed="false">Post set</button>
+          </span>
+          <button class="chip" aria-pressed="true"><span class="gdot g-tech"></span>Tech News</button>
+          <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+          <button class="chip">Last 30 days</button>
+          <span class="topbar__spacer"></span>
+          <button class="btn btn--sm"><svg class="icon icon--sm"><use href="#i-dl"/></svg>Export CSV</button>
+        </div>
+      </section>
+
+      <div class="grid grid--2" style="margin-bottom:14px">
+
+        <section class="panel">
+          <div class="panel__head"><h2>Engagement rate by account</h2><span class="spacer"></span><span class="small subtle">Tech News</span></div>
+          <div class="panel__body">
+            <svg class="chart" viewBox="0 0 440 180" role="img" aria-label="Line chart of engagement rate by account over 30 days. X at main averages 4.1 percent, Work LinkedIn averages 3.4 percent.">
+              <line class="axis" x1="34" y1="150" x2="430" y2="150"/>
+              <line class="axis" x1="34" y1="14" x2="34" y2="150"/>
+              <line class="grid-line" x1="34" y1="114" x2="430" y2="114"/>
+              <line class="grid-line" x1="34" y1="78" x2="430" y2="78"/>
+              <line class="grid-line" x1="34" y1="42" x2="430" y2="42"/>
+              <text x="28" y="153" text-anchor="end">0</text>
+              <text x="28" y="117" text-anchor="end">2</text>
+              <text x="28" y="81" text-anchor="end">4</text>
+              <text x="28" y="45" text-anchor="end">6</text>
+              <text x="10" y="86" transform="rotate(-90 10 86)" text-anchor="middle">Engagement rate (%)</text>
+              <polyline class="series-a" points="34,96 90,88 146,102 202,80 258,74 314,86 370,70 426,76"/>
+              <polyline class="series-b" points="34,118 90,110 146,122 202,108 258,114 314,100 370,104 426,96"/>
+              <text x="34" y="167">1 Nov</text>
+              <text x="232" y="167" text-anchor="middle">15 Nov</text>
+              <text x="430" y="167" text-anchor="end">30 Nov</text>
+            </svg>
+            <div class="legend" style="margin-top:10px">
+              <span><i></i>X @main · 4.1% avg</span>
+              <span><i class="b"></i>Work LinkedIn · 3.4% avg</span>
+            </div>
+            <p class="caption">Source: platform APIs, last 30 days. Rate = (likes + comments + shares) ÷ impressions, where impressions are reported.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Posts published per account</h2><span class="spacer"></span><span class="small subtle">30 days</span></div>
+          <div class="panel__body">
+            <svg class="chart" viewBox="0 0 440 180" role="img" aria-label="Bar chart of posts published per account. X at main 28, Work LinkedIn 22, Acme Page 19, X at tech 14, Acme Facebook 11.">
+              <line class="axis" x1="110" y1="14" x2="110" y2="156"/>
+              <rect class="bar"   x="110" y="20"  width="268" height="18" rx="2"/>
+              <rect class="bar"   x="110" y="48"  width="210" height="18" rx="2"/>
+              <rect class="bar-b" x="110" y="76"  width="182" height="18" rx="2"/>
+              <rect class="bar-b" x="110" y="104" width="134" height="18" rx="2"/>
+              <rect class="bar-b" x="110" y="132" width="105" height="18" rx="2"/>
+              <text x="104" y="33" text-anchor="end">X @main</text>
+              <text x="104" y="61" text-anchor="end">Work LinkedIn</text>
+              <text x="104" y="89" text-anchor="end">Acme Page</text>
+              <text x="104" y="117" text-anchor="end">X @tech</text>
+              <text x="104" y="145" text-anchor="end">Acme FB</text>
+              <text x="386" y="33">28</text>
+              <text x="328" y="61">22</text>
+              <text x="300" y="89">19</text>
+              <text x="252" y="117">14</text>
+              <text x="223" y="145">11</text>
+              <text x="244" y="172" text-anchor="middle">Posts published (count)</text>
+            </svg>
+            <p class="caption">Source: Mera publishing records, last 30 days.</p>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel" style="margin-bottom:14px">
+        <div class="panel__head">
+          <h2>Account comparison</h2>
+          <span class="spacer"></span>
+          <span class="small subtle">Normalized against each account's own baseline</span>
+        </div>
+        <table class="table table--sortable">
+          <thead>
+            <tr>
+              <th scope="col"><button>Account</button></th>
+              <th scope="col" class="r"><button>Posts</button></th>
+              <th scope="col" class="r">Impressions</th>
+              <th scope="col" class="r">Engagement</th>
+              <th scope="col" class="r"><button>Rate</button></th>
+              <th scope="col" class="r">vs own median</th>
+              <th scope="col" class="r">Followers</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @main</span></span></td>
+              <td class="r">28</td>
+              <td class="r">184,200</td>
+              <td class="r">7,552</td>
+              <td class="r">4.1%</td>
+              <td class="r"><span class="status status--ok"><i class="status__dot"></i>+18%</span></td>
+              <td class="r">12,480 <span class="xs subtle">+214</span></td>
+            </tr>
+            <tr>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Work LinkedIn</span></span></td>
+              <td class="r">22</td>
+              <td class="r subtle">Not reported</td>
+              <td class="r">1,043</td>
+              <td class="r subtle">Not reported</td>
+              <td class="r"><span class="status status--ok"><i class="status__dot"></i>+9%</span></td>
+              <td class="r subtle">Not reported</td>
+            </tr>
+            <tr>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Acme Page</span></span></td>
+              <td class="r">19</td>
+              <td class="r">96,310</td>
+              <td class="r">2,118</td>
+              <td class="r">2.2%</td>
+              <td class="r"><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>+1%</span></td>
+              <td class="r">8,902 <span class="xs subtle">+96</span></td>
+            </tr>
+            <tr>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__name">X @tech</span></span></td>
+              <td class="r">14</td>
+              <td class="r">31,870</td>
+              <td class="r">892</td>
+              <td class="r">2.8%</td>
+              <td class="r"><span class="status status--danger"><i class="status__dot"></i>−12%</span></td>
+              <td class="r">2,140 <span class="xs subtle">+18</span></td>
+            </tr>
+            <tr>
+              <td><span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="acct__name">Acme FB</span></span></td>
+              <td class="r">11</td>
+              <td class="r">24,460</td>
+              <td class="r">417</td>
+              <td class="r">1.7%</td>
+              <td class="r"><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>−2%</span></td>
+              <td class="r">5,610 <span class="xs subtle">+11</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="panel__foot">
+          LinkedIn gives personal profiles no impressions or follower data, so those cells
+          read <strong>Not reported</strong> rather than zero. Comparison uses each account's
+          own baseline — a company page and a personal profile have different audiences.
+        </div>
+      </section>
+
+      <div class="grid grid--3">
+
+        <section class="panel">
+          <div class="panel__head"><h2>Post set performance</h2></div>
+          <div class="panel__body--flush">
+            <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+              <span style="min-width:0">
+                <span class="small strong truncate" style="display:block">Postgres 18 async I/O</span>
+                <span class="xs subtle">4 accounts · combined</span>
+              </span>
+              <span class="small num">9,431</span>
+            </div>
+            <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+              <span style="min-width:0">
+                <span class="small strong truncate" style="display:block">Redis licence change</span>
+                <span class="xs subtle">4 accounts · 1 failed</span>
+              </span>
+              <span class="small num">6,218</span>
+            </div>
+            <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:11px 14px">
+              <span style="min-width:0">
+                <span class="small strong truncate" style="display:block">Kafka 4.0 ZooKeeper</span>
+                <span class="xs subtle">3 accounts</span>
+              </span>
+              <span class="small num">4,092</span>
+            </div>
+            <div class="panel__foot">
+              One story, several posts. The set total answers "was this worth covering"; the
+              per-account split answers "which account carried it".
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Approval turnaround</h2></div>
+          <div class="panel__body">
+            <dl class="dl">
+              <dt>Median</dt><dd>14m</dd>
+              <dt>90th percentile</dt><dd>3h 41m</dd>
+              <dt>Expired unapproved</dt><dd>2</dd>
+              <dt>Edited before approval</dt><dd>31%</dd>
+              <dt>Approved from Telegram</dt><dd>84%</dd>
+            </dl>
+            <p class="caption">
+              Mera's own data, so it works for every platform — including ones that report
+              no analytics at all.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Insights</h2><span class="spacer"></span><span class="tag tag--outline">Weekly</span></div>
+          <div class="panel__body col">
+            <div class="notice">
+              <svg class="icon icon--sm"><use href="#i-bolt"/></svg>
+              <div>
+                <strong>Questions outperform statements on X @main.</strong>
+                <p class="small" style="margin-top:2px">Posts opening with a question averaged 5.2% engagement against 3.1% otherwise, across 28 posts.</p>
+              </div>
+            </div>
+            <div class="notice">
+              <svg class="icon icon--sm"><use href="#i-bolt"/></svg>
+              <div>
+                <strong>X @tech is below its own baseline.</strong>
+                <p class="small" style="margin-top:2px">Down 12% over 14 posts. Small sample — worth watching rather than acting on yet.</p>
+              </div>
+            </div>
+            <p class="caption">Every insight cites the aggregate it came from, and states its sample size.</p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

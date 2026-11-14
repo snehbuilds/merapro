@@ -1,0 +1,234 @@
+# Phase 1 services (docs/12 §1.2 P6): postgres, migrate (one-shot), api, worker, bots, web,
+# and seed (one-shot demo data, sandbox only). Telegram: set TELEGRAM_* in .env
+# (docs/runbooks/telegram-bot-setup.md); without a token cards go to /sandbox.
+# Phase 2 adds mcp (Mera's MCP server), mcp-sandbox (stdio servers) and mcp-egress (the
+# sandbox's only way out). Pin image digests before release (M1.2).
+x-backend-env: &backend-env
+  # .env.example supplies safe sandbox defaults; a local .env (optional) overrides them.
+  env_file:
+    - path: .env.example
+    - path: .env
+      required: false
+  environment: &backend-environment
+    DATABASE_URL: postgresql+asyncpg://mera_app:${MERA_APP_DB_PASSWORD}@postgres:5432/mera
+    WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
+    # The deterministic offline FakeLLM unless you opt in to a real provider: set
+    # SANDBOX_LLM=false and put ANTHROPIC_API_KEY / OPENAI_API_KEY in .env (M4).
+    SANDBOX_LLM: ${SANDBOX_LLM:-true}
+    DATABASE_MIGRATION_URL: postgresql+asyncpg://mera:${POSTGRES_PASSWORD}@postgres:5432/mera
+    # The filesystem object store (uploads and renditions) on the shared media volume.
+    MEDIA_ROOT: /var/lib/mera/media
+    # Addresses of a reverse proxy placed directly in front of api or bots (public API,
+    # Telegram webhook), whose X-Forwarded-For uvicorn should believe. Browser traffic
+    # through the web app needs nothing here: it carries the address with
+    # MERA_WEB_PROXY_SECRET instead.
+    FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+
+# Only api and worker talk to the stdio MCP sandbox (P2-M9): the relay token and the
+# egress grant token. The defaults work locally only; outside MERA_ENV=development the
+# services refuse them.
+x-sandbox-client-env: &sandbox-client-env
+  MCP_SANDBOX_URL: http://mcp-sandbox:8010
+  MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+  MCP_EGRESS_ADMIN_URL: http://mcp-egress:3129
+  MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+  MCP_EGRESS_PROXY: mcp-egress:3128
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: mera
+      POSTGRES_USER: mera
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD:?set MERA_APP_DB_PASSWORD}
+    command: >
+      postgres -c max_connections=200
+               -c shared_preload_libraries=pg_stat_statements
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    ports: ["${POSTGRES_HOST_PORT:-5432}:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mera -d mera"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: { context: ./backend, target: migrate, secrets: [corp_ca] }
+    <<: *backend-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: { context: ./backend, target: api, secrets: [corp_ca] }
+    <<: *backend-env
+    environment:
+      <<: [*backend-environment, *sandbox-client-env]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    ports: ["8000:8000"]
+    volumes: ["media:/var/lib/mera/media"]
+    # sandbox_rpc: to reach mcp-sandbox and the egress grant API (server discovery).
+    networks: [default, sandbox_rpc]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  worker:
+    build: { context: ./backend, target: worker, secrets: [corp_ca] }
+    <<: *backend-env
+    environment:
+      <<: [*backend-environment, *sandbox-client-env]
+    command: ["python", "-m", "mera.workers.main",
+              "--queues", "ingest,agents,media,publish,accounts,metrics,approvals,notify,integrations"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    volumes: ["media:/var/lib/mera/media"]
+    networks: [default, sandbox_rpc]
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD", "python", "-m", "mera.workers.health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # One-shot demo data in sandbox mode (M11.4): two workspaces, five accounts in two
+  # overlapping groups, 90 days of history. Idempotent; refuses to run outside sandbox.
+  seed:
+    build: { context: ./backend, target: worker, secrets: [corp_ca] }
+    <<: *backend-env
+    command: ["python", "-m", "mera.seed"]
+    depends_on:
+      api: { condition: service_healthy }
+    volumes: ["media:/var/lib/mera/media"]
+    restart: "no"
+
+  bots:
+    build: { context: ./backend, target: bots, secrets: [corp_ca] }
+    <<: *backend-env
+    depends_on:
+      api: { condition: service_healthy }
+    ports: ["8001:8001"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  mcp:
+    # Mera's MCP server for remote clients (P2-M8, docs/05 §1). Holds no database
+    # connection: every tool call goes to the API with the caller's credential. It faces
+    # the internet, so it is given only what it needs: no database URL, no master or
+    # signing key, no platform or provider secrets (mera.mcp.settings). Set
+    # MCP_SERVICE_SECRET in .env: api reads the same value.
+    build: { context: ./backend, target: mcp, secrets: [corp_ca] }
+    environment:
+      MCP_SERVICE_SECRET: ${MCP_SERVICE_SECRET:-}
+      MCP_RESOURCE_URL: ${MCP_RESOURCE_URL:-http://localhost:8002/mcp}
+      MCP_ALLOWED_ORIGINS: ${MCP_ALLOWED_ORIGINS:-[]}
+      MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-http://localhost:3000}
+      # Named to clients as the authorization server; calls go over the Compose network.
+      MERA_API_URL: ${MERA_PUBLIC_API_URL:-http://localhost:8000}
+      MCP_API_URL: http://api:8000
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+    depends_on:
+      api: { condition: service_healthy }
+    ports: ["8002:8002"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - DATABASE_URL=postgresql://mera:${POSTGRES_PASSWORD}@postgres:5432/litellm
+      - STORE_MODEL_IN_DB=True
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-mera-litellm-admin-key}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-mera-litellm-salt-key-secure-2026}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+    depends_on:
+      postgres: { condition: service_healthy }
+    volumes:
+      - ./infra/litellm/config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+
+  mcp-sandbox:
+    # Third-party stdio MCP servers (P2-M9, docs/05 §2.4). No database, no API, no route
+    # out except mcp-egress. Set MCP_SANDBOX_RUNTIME=runsc where gVisor is installed.
+    # The relay starts as root with only the capabilities it needs to run each server as
+    # its own uid (SETUID/SETGID), give it a private home (CHOWN) and stop it (KILL).
+    # It never holds the egress admin token: the API and workers register grants.
+    build: { context: ./backend, target: mcp-sandbox, secrets: [corp_ca] }
+    runtime: ${MCP_SANDBOX_RUNTIME:-runc}
+    user: "0:0"
+    read_only: true
+    tmpfs: ["/tmp:size=768m,mode=1777"]
+    pids_limit: 256
+    mem_limit: 1g
+    cpus: 1.0
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID, CHOWN, KILL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      MERA_ENV: ${MERA_ENV:-development}
+      MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+    # sandbox: the servers' network, whose only way out is mcp-egress. sandbox_rpc: the
+    # relay's port for the API and workers (every route needs MCP_SANDBOX_TOKEN).
+    networks: [sandbox, sandbox_rpc]
+
+  mcp-egress:
+    # The egress proxy: per-server host allowlists plus the SSRF deny-list (P2-M9.5).
+    build: { context: ./backend, target: mcp-egress, secrets: [corp_ca] }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      MERA_ENV: ${MERA_ENV:-development}
+      MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+    networks: [sandbox, sandbox_rpc, default]
+
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile, secrets: [corp_ca] }
+    environment:
+      # Server-side calls go over the Compose network; the browser is sent to the public
+      # URLs (OAuth redirects), which must be reachable from outside.
+      MERA_API_URL: http://api:8000
+      MERA_PUBLIC_API_URL: ${MERA_PUBLIC_API_URL:-http://localhost:8000}
+      MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-http://localhost:3000}
+      MERA_WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
+    depends_on:
+      api: { condition: service_healthy }
+    ports: ["3000:3000"]
+
+secrets:
+  # Corporate TLS proxies: export CORP_CA_BUNDLE=/path/to/ca.pem before `make up`.
+  corp_ca:
+    file: ${CORP_CA_BUNDLE:-./infra/certs/none.pem}
+
+networks:
+  default: {}
+  # The sandbox's network: internal, so its only way out is the egress proxy.
+  sandbox:
+    internal: true
+  # The API and workers to mcp-sandbox and the egress grant API; internal as well.
+  sandbox_rpc:
+    internal: true
+
+volumes:
+  pgdata: {}
+  media: {}

@@ -1,0 +1,7 @@
+secret:
+  ignored_matches:
+  - match: e84c64650950ddf50adaf681e728c6adecf1bbc1e9906141ba0d50c82f696cec
+    name: Generic High Entropy Secret - commit://staged/.claude/launch.json
+  - match: ed6a0487818b8ae1fce549a032a2ac9d6068c03c529af21abcf909c0c896f6e7
+    name: Generic High Entropy Secret - commit://staged/.env.example
+version: 2

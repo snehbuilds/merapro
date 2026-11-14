@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approval Channels · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="channels"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Approval Channels" data-sub="Telegram connected"></header>
+
+    <main class="page">
+
+      <div class="split">
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Telegram</h2>
+              <span class="spacer"></span>
+              <span class="status status--ok"><i class="status__dot"></i>Connected</span>
+              <button class="btn btn--sm">Send test</button>
+            </div>
+            <div class="panel__body stack">
+              <dl class="dl">
+                <dt>Bot</dt><dd class="mono">@acme_mera_bot</dd>
+                <dt>Webhook</dt><dd class="mono">/api/v1/webhooks/telegram</dd>
+                <dt>Secret token</dt><dd class="mono">set · rotated 2 Nov</dd>
+                <dt>Delivery</dt><dd>Verified 4 minutes ago</dd>
+                <dt>Cost</dt><dd>Free</dd>
+              </dl>
+              <div class="divider"></div>
+              <div>
+                <h3 style="margin-bottom:8px">Paired approvers</h3>
+                <table class="table" style="border:1px solid var(--border);border-radius:var(--r-md)">
+                  <thead><tr><th scope="col">User</th><th scope="col">Chat</th><th scope="col">Scope</th><th scope="col">Paired</th><th scope="col"></th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td class="strong">Alex Mercer <span class="xs subtle">(you)</span></td>
+                      <td class="mono xs">@alex · 48209173</td>
+                      <td class="small">All groups</td>
+                      <td class="small subtle">12 Aug</td>
+                      <td class="r"><button class="btn btn--sm btn--ghost">Revoke</button></td>
+                    </tr>
+                    <tr>
+                      <td class="strong">Priya Raman</td>
+                      <td class="mono xs">@priya · 51038822</td>
+                      <td><span class="row" style="gap:5px"><span class="gdot g-corp"></span><span class="small">Company Official</span></span></td>
+                      <td class="small subtle">3 Sep</td>
+                      <td class="r"><button class="btn btn--sm btn--ghost">Revoke</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p class="caption">
+                  A pairing binds to the <em>user</em>, not the workspace — it covers every
+                  workspace they belong to, and their scope decides what actually arrives.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Approval policy</h2><span class="spacer"></span><span class="small subtle">Tech News group</span></div>
+            <div class="panel__body stack">
+              <div class="grid grid--2">
+                <div class="field"><label for="q">Quorum</label><select class="select" id="q"><option selected>Any 1 of 2</option><option>All of 2</option></select></div>
+                <div class="field"><label for="ap">Approvers</label><input class="input" id="ap" value="Alex Mercer, Priya Raman"></div>
+                <div class="field"><label for="rm">Remind after</label><input class="input" id="rm" value="2 hours"></div>
+                <div class="field"><label for="es">Escalate after</label><input class="input" id="es" value="4 hours → Priya"></div>
+                <div class="field"><label for="ex">Expires after</label><input class="input" id="ex" value="12 hours"></div>
+                <div class="field"><label for="vw">Approval valid for</label><input class="input" id="vw" value="24 hours"></div>
+              </div>
+              <div class="field">
+                <label>Second factor required for</label>
+                <div class="wrap">
+                  <span class="tag tag--warn">Publishing to a company page</span>
+                  <span class="tag tag--warn">Deleting a published post</span>
+                  <span class="tag tag--warn">Disconnecting an account</span>
+                  <span class="tag tag--warn">Resuming after a kill switch</span>
+                </div>
+              </div>
+              <div class="row row--between">
+                <div><div class="small strong">Daily digest instead of individual cards</div><div class="xs subtle">One message per group at 08:30</div></div>
+                <button class="switch" role="switch" aria-checked="false" aria-label="Daily digest"></button>
+              </div>
+            </div>
+            <div class="panel__foot">
+              Expiry never publishes. If nobody decides in time the post returns to drafts.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>WhatsApp</h2><span class="spacer"></span><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Not connected</span><span class="tag tag--outline">Phase 2</span></div>
+            <div class="panel__body stack">
+              <div class="notice notice--warn">
+                <svg class="icon"><use href="#i-alert"/></svg>
+                <div>
+                  <strong>Setup takes days, not minutes.</strong>
+                  <p class="small" style="margin-top:3px">
+                    Meta business verification, a dedicated phone number not registered to a
+                    personal WhatsApp account, and eight message templates submitted for
+                    approval. Messages outside a 24-hour window must use a template and are
+                    billed per conversation.
+                  </p>
+                </div>
+              </div>
+              <div class="row row--between">
+                <span class="small">Business verification</span><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Not started</span>
+              </div>
+              <div class="row row--between">
+                <span class="small">Phone number</span><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Not added</span>
+              </div>
+              <div class="row row--between">
+                <span class="small">Templates approved</span><span class="small mono">0 / 8</span>
+              </div>
+              <button class="btn btn--sm" style="justify-self:start">Start setup</button>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head"><h2>Pair a device</h2></div>
+            <div class="panel__body stack">
+              <p class="small muted">Generate a code, then send it to the bot as <span class="mono">/pair CODE</span>.</p>
+              <div style="padding:16px;border:1px dashed var(--border-strong);border-radius:var(--r-md);text-align:center">
+                <div class="mono" style="font-size:19px;letter-spacing:0.08em">MERA-7K2Q-X9</div>
+                <div class="xs subtle" style="margin-top:5px">Expires in 9:41 · single use</div>
+              </div>
+              <button class="btn btn--sm btn--primary">Generate new code</button>
+              <p class="caption">
+                Five failed attempts from one chat locks it out for an hour. Unpaired chats
+                get a generic reply and learn nothing about your workspaces.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>What a card carries</h2></div>
+            <div class="panel__body col">
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Workspace and group label</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Every account's text, first two lines</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Per-account time and confidence</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Source article and link</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Compliance flags, warnings first</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Approve all, or per-account buttons</span></div>
+              <div class="row"><svg class="icon icon--sm subtle"><use href="#i-check"/></svg><span class="small">Tool calls: the exact arguments, never a summary</span></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Card preview · tool call</h2><span class="spacer"></span><span class="tag tag--outline">Telegram</span></div>
+            <div class="panel__body stack">
+              <div class="preview">
+                <div class="preview__body mono xs">Tool call needs approval · Acme
+Analytics agent → Notion
+notion__create_page · write
+
+Arguments (exactly what will be sent):
+parent_id: "Marketing / Weekly reports"
+title: "Week 45 — social performance"
+content: "Tech News engagement up 18%…"
+(2,140 chars · Full text)</div>
+                <div class="preview__foot">
+                  <span class="btn btn--sm">Allow once</span>
+                  <span class="btn btn--sm">Deny</span>
+                  <span class="btn btn--sm">Block this tool</span>
+                </div>
+              </div>
+              <p class="caption">Sent when an agent wants a write tool on an MCP server you added. On WhatsApp, if the arguments don't fit the template, "Allow once" is replaced by "Open web app".</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Recent deliveries</h2></div>
+            <div class="panel__body--flush">
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">notion__create_page · tool call</span><span class="xs subtle">@alex · 09:41</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Delivered</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">Postgres 18 · card</span><span class="xs subtle">@alex · 07:18</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Read</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">Hiring post · reminder</span><span class="xs subtle">@priya · 09:18</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Delivered</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">Work LinkedIn · reauth alert</span><span class="xs subtle">@alex · 09:02</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>Read</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

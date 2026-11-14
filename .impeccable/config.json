@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "apps/web/components/ui/kbd.tsx"
+        ],
+        "createdAt": "2026-11-08T07:28:29.995Z",
+        "reason": "Claude triage: keycap bottom edge ported verbatim from docs/mockups-v2/assets/mera.css kbd (neutral --border-strong, 3px radius), not an accent border on a card"
+      }
+    ]
+  }
+}

@@ -1,0 +1,381 @@
+/* ==========================================================================
+   Mera design tokens — ported from docs/mockups-v2/assets/mera.css
+   ("Dispatch ledger"). mera.css is the visual authority; change values there
+   first, then here. Contrast ratios are carried over from the source.
+
+   Layers:
+     1. Raw tokens as CSS variables, light on :root, dark on [data-theme="dark"].
+     2. `@theme inline` exposes them to Tailwind v4 utilities
+        (bg-surface-raised, text-fg-muted, border-border-strong, text-ok, ...).
+     3. Base styles that mera.css applies globally (focus, selection,
+        scrollbars, type scale, reduced motion).
+
+   Spacing (F1.3): Tailwind's default 4px scale (--spacing: 0.25rem) is used.
+   mera.css hardcodes px; where a value is not on the 4px grid it was mapped:
+     page padding      22px -> 24px desktop (p-6) / 16px ≤900px (p-4)
+     topbar padding    22px -> 24px (px-6); 12px ≤900px unchanged
+     nav item height   29px -> 28px (h-7)
+     nav label bottom   5px ->  4px (pb-1)
+     rail head pad     10px 10px 4px -> kept (2.5 = 10px is on the 0.5 step)
+     ws gap / navitem gap 10px -> kept (gap-2.5)
+     rail user gap      9px ->  8px (gap-2)
+     killswitch pad    11px -> 12px (px-3), gap 9px -> 8px
+     panel head pad    8px 14px -> kept (py-2 px-3.5)
+     panel body/foot   14px / 10px 14px -> kept (3.5 / 2.5)
+     cmdk palette pad  11px 13px -> 12px (p-3); items 7px 9px -> 8px (py-2 px-2)
+     tag padding        7px ->  8px (px-2)
+   Control heights stay exact (32 / 28 / 22 / 36 / 26 are on the 4px or 2px step);
+   rail width 232px and topbar 54px are tokens, not spacing.
+   ========================================================================== */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* --- Tokens: light (paper) ------------------------------------------------ */
+
+/* [data-theme="light"] lets a subtree opt back into paper inside a dark page
+   (the dev component gallery renders both themes side by side). */
+:root,
+[data-theme="light"] {
+  --bg: #f5f3ed; /* paper */
+  --bg-muted: #efece4;
+  --bg-sunken: #e9e5db;
+  --bg-raised: #fffefa; /* sheet laid on the paper */
+  --bg-hover: #f1eee6;
+  --bg-active: #e7e3d8;
+  --bg-inverse: #17181a;
+
+  --border: #e0dbcf;
+  --border-strong: #cbc5b7;
+
+  --fg: #17181a; /* 16.1:1 on --bg */
+  --fg-muted: #48473f; /*  8.6:1 on --bg, 7.3:1 on --bg-active */
+  --fg-subtle: #64625a; /*  5.4:1 on --bg, 4.7:1 on --bg-active */
+  --fg-inverse: #f5f3ed;
+
+  /* One action colour. Verdigris: reads as "go" without borrowing status green. */
+  --accent: #0b6b5e; /* 6.4:1 against --accent-fg */
+  --accent-hover: #08594e;
+  --accent-fg: #ffffff;
+  --accent-soft: #dcece7;
+
+  --focus: #0b6b5e;
+  --focus-ring: rgba(11, 107, 94, 0.28);
+  --selection: rgba(11, 107, 94, 0.18);
+
+  /* Semantic status — muted inks, always paired with a shape and a label. */
+  --ok: #22704a;
+  --ok-bg: #e3f0e7;
+  --warn: #865600;
+  --warn-bg: #f8ecd2;
+  --danger: #ad2a1f;
+  --danger-bg: #f8e5e1;
+  --info: #24549e;
+  --info-bg: #e3eaf6;
+  --neutral: #5d5b53;
+  --neutral-bg: #e9e5db;
+
+  /* Rail: a dark control surface in both themes. */
+  --rail-bg: #15171a;
+  --rail-fg: #cfcbc1; /* 11.6:1 on --rail-bg */
+  --rail-subtle: #8f8b81; /*  5.3:1 on --rail-bg */
+  --rail-hover: #1f2226;
+  --rail-active: #2a2e33;
+  --rail-border: #26292d;
+  --rail-hi: #ffffff;
+  /* Literals in mera.css's rail rules, promoted to tokens (same in both themes). */
+  --rail-accent: #4cc4ae; /* brand diamond + active bar */
+  --rail-focus: #6fd3c0; /* the rail is always dark, so it needs its own focus colour */
+  --rail-ws-mark-bg: #e9e5db;
+  --rail-ws-mark-fg: #15171a;
+  --kill-bg: #2a1311;
+  --kill-border: #7a2a22;
+  --kill-fg: #ffb4a8;
+  --kill-bg-hover: #3a1814;
+  --kill-border-hover: #ee8678;
+  --kill-fg-hover: #ffd2ca;
+  --scrim: rgba(10, 10, 9, 0.42);
+
+  --shadow-popover: 0 1px 0 rgba(23, 24, 26, 0.04), 0 12px 32px -10px rgba(23, 24, 26, 0.28);
+
+  --r-sm: 3px;
+  --r-md: 4px;
+  --r-lg: 6px;
+
+  --rail-w: 232px;
+  --topbar-h: 54px;
+
+  /* Font stacks. The first family is the next/font self-hosted face (set on <html>). */
+  --font-ui: var(--font-plex-sans), "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    system-ui, Arial, sans-serif;
+  --font-label: var(--font-plex-condensed), "IBM Plex Sans Condensed", "IBM Plex Sans", "Arial Narrow",
+    "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
+    Consolas, monospace;
+
+  /* Group identity — not status. Carried as a small square mark.
+     Groups are user-created, so lib/group-color.ts generates the palette:
+     these three are the seeds from the mockups (g-tech, g-corp, g-launch) and
+     index 3+ is derived in OKLCH at the same lightness band per theme. */
+  --g-1: #3d6596;
+  --g-2: #7b4f93;
+  --g-3: #a2661f;
+
+  color-scheme: light;
+}
+
+/* --- Tokens: dark (ink) --------------------------------------------------- */
+
+[data-theme="dark"] {
+  --bg: #111315;
+  --bg-muted: #15181a;
+  --bg-sunken: #0c0e10;
+  --bg-raised: #181b1e;
+  --bg-hover: #1e2125;
+  --bg-active: #272b30;
+  --bg-inverse: #ebe8e1;
+
+  --border: #262a2e;
+  --border-strong: #363b41;
+
+  --fg: #ebe8e1; /* 15.2:1 on --bg */
+  --fg-muted: #b7b3a9; /*  9.0:1 on --bg, 6.6:1 on --bg-active */
+  --fg-subtle: #9d998f; /*  6.6:1 on --bg, 4.9:1 on --bg-active */
+  --fg-inverse: #111315;
+
+  --accent: #4cc4ae; /* 9.2:1 against --accent-fg */
+  --accent-hover: #6fd3c0;
+  --accent-fg: #0b1412;
+  --accent-soft: #13302b;
+
+  --focus: #4cc4ae;
+  --focus-ring: rgba(76, 196, 174, 0.32);
+  --selection: rgba(76, 196, 174, 0.24);
+
+  --ok: #6cc391;
+  --ok-bg: #12221a;
+  --warn: #e0ad55;
+  --warn-bg: #261d0d;
+  --danger: #ee8678;
+  --danger-bg: #2a1512;
+  --info: #8db2ec;
+  --info-bg: #131c2c;
+  --neutral: #aaa69c;
+  --neutral-bg: #1f2226;
+
+  --rail-bg: #0b0d0f;
+  --rail-hover: #16191c;
+  --rail-active: #1f2327;
+  --rail-border: #1d2023;
+
+  --shadow-popover: 0 1px 0 rgba(0, 0, 0, 0.4), 0 14px 36px -10px rgba(0, 0, 0, 0.75);
+
+  --g-1: #7fa6d9;
+  --g-2: #b593cf;
+  --g-3: #d9a05c;
+
+  color-scheme: dark;
+}
+
+/* --- Tailwind theme ------------------------------------------------------- */
+
+@theme inline {
+  /* Surfaces */
+  --color-surface: var(--bg);
+  --color-surface-muted: var(--bg-muted);
+  --color-surface-sunken: var(--bg-sunken);
+  --color-surface-raised: var(--bg-raised);
+  --color-surface-hover: var(--bg-hover);
+  --color-surface-active: var(--bg-active);
+  --color-surface-inverse: var(--bg-inverse);
+
+  /* Borders */
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  /* Foreground tiers */
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-inverse: var(--fg-inverse);
+
+  /* Accent (verdigris) */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-focus: var(--focus);
+  --color-focus-ring: var(--focus-ring);
+
+  /* Status */
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-neutral: var(--neutral);
+  --color-neutral-bg: var(--neutral-bg);
+
+  /* Rail */
+  --color-rail-bg: var(--rail-bg);
+  --color-rail-fg: var(--rail-fg);
+  --color-rail-subtle: var(--rail-subtle);
+  --color-rail-hover: var(--rail-hover);
+  --color-rail-active: var(--rail-active);
+  --color-rail-border: var(--rail-border);
+  --color-rail-hi: var(--rail-hi);
+  --color-rail-accent: var(--rail-accent);
+  --color-rail-ws-mark-bg: var(--rail-ws-mark-bg);
+  --color-rail-ws-mark-fg: var(--rail-ws-mark-fg);
+  --color-kill-bg: var(--kill-bg);
+  --color-kill-border: var(--kill-border);
+  --color-kill-fg: var(--kill-fg);
+  --color-kill-bg-hover: var(--kill-bg-hover);
+  --color-kill-border-hover: var(--kill-border-hover);
+  --color-kill-fg-hover: var(--kill-fg-hover);
+  --color-scrim: var(--scrim);
+
+  /* Groups */
+  --color-g-1: var(--g-1);
+  --color-g-2: var(--g-2);
+  --color-g-3: var(--g-3);
+
+  /* Radii 3 / 4 / 6 */
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+
+  /* The one shadow (popovers, palette, mobile rail). Utility: shadow-popover. */
+  --shadow-popover: var(--shadow-popover);
+
+  /* Fonts. Utilities: font-ui, font-label, font-mono. */
+  --font-sans: var(--font-ui);
+  --font-ui: var(--font-ui);
+  --font-label: var(--font-label);
+  --font-mono: var(--font-mono);
+
+  /* Type scale from mera.css (px kept exact: these are type, not spacing). */
+  --text-2xs: 11px;
+  --text-2xs--line-height: 1.4;
+  --text-mono-xs: 11.5px;
+  --text-xs: 12px;
+  --text-xs--line-height: 1.4;
+  --text-caption: 12.5px;
+  --text-caption--line-height: 1.45;
+  --text-sm: 13px;
+  --text-sm--line-height: 1.5;
+  --text-body: 13.5px;
+  --text-body--line-height: 1.4;
+  --text-base: 14px;
+  --text-base--line-height: 1.5;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-lg--line-height: 1.25;
+  --text-xl: 20px;
+  --text-xl--line-height: 1.25;
+
+  /* mera.css .skel shimmer. Utility: animate-shimmer. */
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+
+  /* Breakpoints from mera.css media queries. They are max-width queries there,
+     so each is 1px above the source value: `max-rail:` == (max-width: 900px). */
+  --breakpoint-narrow: 561px;
+  --breakpoint-rail: 901px;
+  --breakpoint-wide: 1181px;
+}
+
+/* --- Base ----------------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--selection);
+    color: var(--fg);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  /* Plain links get the accent underline on hover; components that are links
+     (buttons, nav items, palette rows) carry data-slot and opt out. */
+  a:not([data-slot]):hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--accent);
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.008em;
+  }
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  code,
+  kbd {
+    font-family: var(--font-mono);
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

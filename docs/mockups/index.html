@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mera — Phase 1 screen mockups</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="idx">
+
+  <div class="row row--between" style="margin-bottom:32px">
+    <div class="row" style="gap:10px">
+      <div class="ws__mark" style="width:28px;height:28px;font-size:12px">M</div>
+      <div>
+        <div class="strong" style="font-size:15px">Mera</div>
+        <div class="small subtle">Phase 1 screen mockups</div>
+      </div>
+    </div>
+    <button class="btn btn--icon" data-theme-toggle aria-pressed="false" aria-label="Switch to dark theme">
+      <svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg>
+    </button>
+  </div>
+
+  <h1 style="font-size:28px;letter-spacing:-0.02em">Every Phase&nbsp;1 screen, in light and dark.</h1>
+  <p class="muted prose" style="margin-top:10px;font-size:15px;line-height:1.6">
+    Static HTML, no build step and no dependencies — open any file directly. The design
+    system lives in one stylesheet and is written to port into Next.js, Tailwind and
+    shadcn/ui without redrawing anything. Press <kbd>⌘</kbd><kbd>K</kbd> anywhere to jump
+    between screens, and use the toggle above to switch themes.
+  </p>
+
+  <div class="notice notice--info" style="margin-top:20px;max-width:70ch">
+    <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+    <div>
+      <strong>All content is demonstration data.</strong>
+      Accounts, handles, metrics and post text are synthetic. The worked example — a
+      PostgreSQL&nbsp;18 story going to four accounts in the Tech&nbsp;News group — is the
+      same one used throughout the architecture docs.
+    </div>
+  </div>
+
+  <h2 style="margin-top:34px">Work</h2>
+  <div class="idx__list">
+    <a class="idx__item" href="dashboard.html"><strong>Dashboard</strong><span>Queue, today's schedule, agent activity</span></a>
+    <a class="idx__item" href="approvals.html"><strong>Approval Queue</strong><span>Whole-set and per-account decisions</span></a>
+    <a class="idx__item" href="composer.html"><strong>Composer</strong><span>Target picker, per-account previews, stagger</span></a>
+    <a class="idx__item" href="calendar.html"><strong>Content Calendar</strong><span>Drag-and-drop, colour-coded by group</span></a>
+    <a class="idx__item" href="inbox.html"><strong>Unified Inbox</strong><span>Comments across every account</span></a>
+    <a class="idx__item" href="analytics.html"><strong>Analytics</strong><span>Post set, account, group, workspace</span></a>
+  </div>
+
+  <h2 style="margin-top:28px">Content</h2>
+  <div class="idx__list">
+    <a class="idx__item" href="sources.html"><strong>Sources</strong><span>Feeds, health, group links</span></a>
+    <a class="idx__item" href="discovery.html"><strong>Content Discovery</strong><span>Trending, scored per group</span></a>
+    <a class="idx__item" href="brand-voice.html"><strong>Brand Voice</strong><span>Workspace, group and account scopes</span></a>
+  </div>
+
+  <h2 style="margin-top:28px">Accounts</h2>
+  <div class="idx__list">
+    <a class="idx__item" href="accounts.html"><strong>Connected Accounts</strong><span>Several per platform, health, reconnection</span></a>
+    <a class="idx__item" href="groups.html"><strong>Account Groups</strong><span>Membership, order, staggering</span></a>
+  </div>
+
+  <h2 style="margin-top:28px">System</h2>
+  <div class="idx__list">
+    <a class="idx__item" href="agents.html"><strong>Agents</strong><span>Configuration and per-account run viewer</span></a>
+    <a class="idx__item" href="automation.html"><strong>Automation</strong><span>Autopilot at three scopes, kill switch</span></a>
+    <a class="idx__item" href="approval-channels.html"><strong>Approval Channels</strong><span>Telegram and WhatsApp pairing</span></a>
+    <a class="idx__item" href="mcp.html"><strong>MCP Integrations</strong><span>Register servers, allowlist tools</span></a>
+    <a class="idx__item" href="team.html"><strong>Team &amp; Roles</strong><span>Members and group scopes</span></a>
+    <a class="idx__item" href="audit.html"><strong>Audit Log</strong><span>Who approved which text, on which account</span></a>
+    <a class="idx__item" href="settings.html"><strong>Settings</strong><span>Workspace, usage, danger zone</span></a>
+  </div>
+
+  <h2 style="margin-top:40px">Design system</h2>
+  <p class="muted small prose" style="margin-top:6px">
+    The category standard, played straight, at the craft level of Notion, Raycast and
+    Resend. Near-monochrome with one near-black action colour that inverts in dark;
+    hairline rules rather than floating cards; monospace reserved for machine data —
+    hashes, versions, IDs, timestamps, costs.
+  </p>
+
+  <div class="panel" style="margin-top:14px">
+    <div class="panel__body stack">
+      <div>
+        <h3 class="subtle xs" style="letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px">Surfaces</h3>
+        <div class="swatches">
+          <div class="swatch"><i style="background:var(--bg)"></i>bg</div>
+          <div class="swatch"><i style="background:var(--bg-muted)"></i>muted</div>
+          <div class="swatch"><i style="background:var(--bg-sunken)"></i>sunken</div>
+          <div class="swatch"><i style="background:var(--bg-active)"></i>active</div>
+          <div class="swatch"><i style="background:var(--accent)"></i>accent</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <h3 class="subtle xs" style="letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px">Status — shape and label, never colour alone</h3>
+        <div class="wrap">
+          <span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Draft</span>
+          <span class="status status--warn"><i class="status__dot status__dot--half"></i>Awaiting approval</span>
+          <span class="status status--info"><i class="status__dot"></i>Scheduled</span>
+          <span class="status status--ok"><i class="status__dot"></i>Published</span>
+          <span class="status status--danger"><i class="status__dot"></i>Failed</span>
+          <span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Expired</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <h3 class="subtle xs" style="letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px">Platform marks</h3>
+        <div class="wrap">
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__handle">LinkedIn</span></span>
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="acct__handle">X</span></span>
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-facebook"/></svg></span><span class="acct__handle">Facebook</span></span>
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-instagram"/></svg></span><span class="acct__handle">Instagram</span></span>
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-threads"/></svg></span><span class="acct__handle">Threads</span></span>
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-bluesky"/></svg></span><span class="acct__handle">Bluesky</span></span>
+          <span class="acct"><span class="acct__mark"><svg><use href="#p-mastodon"/></svg></span><span class="acct__handle">Mastodon</span></span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <h3 class="subtle xs" style="letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px">Controls</h3>
+        <div class="wrap" style="align-items:center">
+          <button class="btn btn--primary">Approve all</button>
+          <button class="btn">Edit</button>
+          <button class="btn btn--danger">Reject</button>
+          <button class="btn" aria-disabled="true">Disabled</button>
+          <span class="seg">
+            <button aria-pressed="true">Light</button>
+            <button aria-pressed="false">Dark</button>
+          </span>
+          <button class="switch" role="switch" aria-checked="true" aria-label="Example switch"></button>
+          <span class="tag tag--ok">Approved</span>
+          <span class="tag tag--outline">0.84 confidence</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <h3 class="subtle xs" style="letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px">Approval proof — the core guarantee, made legible</h3>
+        <div class="proof">
+          <span class="proof__k">Approved</span><span>Alex Mercer · 09:12</span>
+          <span class="proof__k">Account</span><span>Work LinkedIn</span>
+          <span class="proof__k">Version</span><span class="proof__v">v2</span>
+          <span class="proof__k">Hash</span><span class="proof__v">a1b2c3d4e5f67890</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="caption" style="margin-top:28px">
+    Direction, tokens and rationale: <code class="mono">.impeccable/surfaces/mockups.md</code> and <code class="mono">PRODUCT.md</code>.
+  </p>
+
+</div>
+
+</body>
+</html>

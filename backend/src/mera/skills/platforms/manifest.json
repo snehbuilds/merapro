@@ -1,0 +1,234 @@
+{
+  "imported_at": "2026-11-08T22:01:41+00:00",
+  "bundles": [
+    {
+      "platform": "linkedin",
+      "repo": "https://github.com/sergebulaev/linkedin-skills",
+      "commit": "8f8bc4b40a2d5419b2dcf898772b85712cfbdf41",
+      "licence": "MIT",
+      "roles": {
+        "writer": "linkedin-post-writer",
+        "repurposer": "linkedin-repurposer",
+        "humanizer": "linkedin-humanizer"
+      },
+      "files": [
+        {
+          "role": "writer",
+          "source_path": "skills/linkedin-post-writer/SKILL.md",
+          "file": "skills__linkedin-post-writer__SKILL.md",
+          "sha256": "4107d04639d3896710990799cdf59ebe45c2eefedb236444cfccada77f004b6d",
+          "chars": 14459
+        },
+        {
+          "role": "repurposer",
+          "source_path": "skills/linkedin-repurposer/SKILL.md",
+          "file": "skills__linkedin-repurposer__SKILL.md",
+          "sha256": "8b5e1861d17ebfbc6a7cfcb8714ced0f59cd002cb22b5fdbadabb5746f726e19",
+          "chars": 6646
+        },
+        {
+          "role": "humanizer",
+          "source_path": "skills/linkedin-humanizer/SKILL.md",
+          "file": "skills__linkedin-humanizer__SKILL.md",
+          "sha256": "15d30a63d7f4bf4e60c82565dd25a0c729af038c70243dc6b22d3b672895bd0f",
+          "chars": 19842
+        },
+        {
+          "role": "licence",
+          "source_path": "LICENSE",
+          "file": "LICENSE",
+          "sha256": "1a21cf7c208981ef516dcf2edb4517dab907b8dc94c2cfc523565c794ea8e148",
+          "chars": 1070
+        }
+      ]
+    },
+    {
+      "platform": "facebook",
+      "repo": "https://github.com/sergebulaev/facebook-skills",
+      "commit": "79e9e2fe26584f2b528cd7f8bc2f3ae1dec1dc80",
+      "licence": "MIT",
+      "roles": {
+        "writer": "fb-post-writer",
+        "repurposer": "fb-repurposer",
+        "humanizer": "fb-humanizer"
+      },
+      "files": [
+        {
+          "role": "writer",
+          "source_path": "skills/fb-post-writer/SKILL.md",
+          "file": "skills__fb-post-writer__SKILL.md",
+          "sha256": "99fbb7776a3cee7de99bae07eae7726160b209e74b1ef16635819ed630b21de5",
+          "chars": 7797
+        },
+        {
+          "role": "repurposer",
+          "source_path": "skills/fb-repurposer/SKILL.md",
+          "file": "skills__fb-repurposer__SKILL.md",
+          "sha256": "834db95a23880d3691d850189986c512bbe1fcd35d082bd9d67ff4ddfd39be3b",
+          "chars": 8017
+        },
+        {
+          "role": "humanizer",
+          "source_path": "skills/fb-humanizer/SKILL.md",
+          "file": "skills__fb-humanizer__SKILL.md",
+          "sha256": "cd9a7de3b8f4ca766138f40e789dfec24677834b32033f72fbe1210c59ad24b0",
+          "chars": 17643
+        },
+        {
+          "role": "licence",
+          "source_path": "LICENSE",
+          "file": "LICENSE",
+          "sha256": "1a21cf7c208981ef516dcf2edb4517dab907b8dc94c2cfc523565c794ea8e148",
+          "chars": 1070
+        }
+      ]
+    },
+    {
+      "platform": "instagram",
+      "repo": "https://github.com/sergebulaev/instagram-skills",
+      "commit": "550d3cf6cece08de75dae64235bd32136820920f",
+      "licence": "MIT",
+      "roles": {
+        "writer": "ig-caption-writer",
+        "repurposer": "ig-repurposer",
+        "humanizer": "ig-humanizer",
+        "hashtags": "ig-hashtag-strategist",
+        "carousel": "ig-carousel-planner"
+      },
+      "files": [
+        {
+          "role": "writer",
+          "source_path": "skills/ig-caption-writer/SKILL.md",
+          "file": "skills__ig-caption-writer__SKILL.md",
+          "sha256": "d8d2f5732d2ab9555843a2e384b5f9d1970fcbb418a18927ab98caf344526989",
+          "chars": 6919
+        },
+        {
+          "role": "repurposer",
+          "source_path": "skills/ig-repurposer/SKILL.md",
+          "file": "skills__ig-repurposer__SKILL.md",
+          "sha256": "92acb84fb4453e01162eea8b322c95ecf4beee428056a4125cfa8ea0ef493bf9",
+          "chars": 8703
+        },
+        {
+          "role": "humanizer",
+          "source_path": "skills/ig-humanizer/SKILL.md",
+          "file": "skills__ig-humanizer__SKILL.md",
+          "sha256": "afc1d4d5428c11c27cb37f494bf5f188b0b038db47cd4d58c83389ac628ce5ae",
+          "chars": 16128
+        },
+        {
+          "role": "hashtags",
+          "source_path": "skills/ig-hashtag-strategist/SKILL.md",
+          "file": "skills__ig-hashtag-strategist__SKILL.md",
+          "sha256": "07dafa7511c102d25cf2f77a7b8f54d5be723e3764bab5d76a5f8521fbb72128",
+          "chars": 4511
+        },
+        {
+          "role": "carousel",
+          "source_path": "skills/ig-carousel-planner/SKILL.md",
+          "file": "skills__ig-carousel-planner__SKILL.md",
+          "sha256": "d08b53023f5cc19f10299b323018b04a693afb88fe318fe63660b52faceb0c1b",
+          "chars": 7548
+        },
+        {
+          "role": "licence",
+          "source_path": "LICENSE",
+          "file": "LICENSE",
+          "sha256": "1a21cf7c208981ef516dcf2edb4517dab907b8dc94c2cfc523565c794ea8e148",
+          "chars": 1070
+        }
+      ]
+    },
+    {
+      "platform": "threads",
+      "repo": "https://github.com/sergebulaev/threads-skills",
+      "commit": "37199b9fe705e175ad578421d338672e779b2a1c",
+      "licence": "MIT",
+      "roles": {
+        "writer": "threads-post-writer",
+        "repurposer": "threads-repurposer",
+        "humanizer": "threads-humanizer"
+      },
+      "files": [
+        {
+          "role": "writer",
+          "source_path": "skills/threads-post-writer/SKILL.md",
+          "file": "skills__threads-post-writer__SKILL.md",
+          "sha256": "50d222b9f0f88e3b949d7acfa3980bd29c1e246370a471d514f9a46e556a3ef1",
+          "chars": 10079
+        },
+        {
+          "role": "repurposer",
+          "source_path": "skills/threads-repurposer/SKILL.md",
+          "file": "skills__threads-repurposer__SKILL.md",
+          "sha256": "77e463b69d3a416803ab9192a2b1a9708e7aaabe53ce9d3206288e6896c1d307",
+          "chars": 8403
+        },
+        {
+          "role": "humanizer",
+          "source_path": "skills/threads-humanizer/SKILL.md",
+          "file": "skills__threads-humanizer__SKILL.md",
+          "sha256": "aecdb5e43d928f342f239db9500977b1d115219e711d6c99139c6b63908af8c7",
+          "chars": 17138
+        },
+        {
+          "role": "licence",
+          "source_path": "LICENSE",
+          "file": "LICENSE",
+          "sha256": "1a21cf7c208981ef516dcf2edb4517dab907b8dc94c2cfc523565c794ea8e148",
+          "chars": 1070
+        }
+      ]
+    },
+    {
+      "platform": "x",
+      "repo": "https://github.com/sergebulaev/x-skills",
+      "commit": "f52d7c64258de02a990eceee4378cef2c87c5600",
+      "licence": "MIT",
+      "roles": {
+        "writer": "x-post-writer",
+        "repurposer": "x-repurposer",
+        "humanizer": "x-humanizer",
+        "thread": "x-thread-builder"
+      },
+      "files": [
+        {
+          "role": "writer",
+          "source_path": "skills/x-post-writer/SKILL.md",
+          "file": "skills__x-post-writer__SKILL.md",
+          "sha256": "0be6f448eebe345e2c823612685f8ac24df48fb691d2ba8bed0f98285b2d63b5",
+          "chars": 7244
+        },
+        {
+          "role": "repurposer",
+          "source_path": "skills/x-repurposer/SKILL.md",
+          "file": "skills__x-repurposer__SKILL.md",
+          "sha256": "30720e51aaacdebe53a2e097e7cbc2115f7ef284dc4822bce0033fc338e31cfb",
+          "chars": 6631
+        },
+        {
+          "role": "humanizer",
+          "source_path": "skills/x-humanizer/SKILL.md",
+          "file": "skills__x-humanizer__SKILL.md",
+          "sha256": "76aef7f64f5fe0911d118c3f9528294d8fcba3c96a2a3b0514aef88b21313397",
+          "chars": 16720
+        },
+        {
+          "role": "thread",
+          "source_path": "skills/x-thread-builder/SKILL.md",
+          "file": "skills__x-thread-builder__SKILL.md",
+          "sha256": "e3a6c1322d73bb856c3ecfefe021053cc6aedf798d92db66d0f1e48db927c203",
+          "chars": 7147
+        },
+        {
+          "role": "licence",
+          "source_path": "LICENSE",
+          "file": "LICENSE",
+          "sha256": "1a21cf7c208981ef516dcf2edb4517dab907b8dc94c2cfc523565c794ea8e148",
+          "chars": 1070
+        }
+      ]
+    }
+  ]
+}

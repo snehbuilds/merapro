@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agents · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="agents"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Agents" data-sub="11 agents · $1.84 today"></header>
+
+    <main class="page">
+
+      <div class="split">
+        <div class="stack">
+
+          <!-- Run viewer: per-account attribution is the point -->
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Run 01JABC</h2>
+              <span class="tag tag--outline">draft_from_content</span>
+              <span class="spacer"></span>
+              <span class="status status--ok"><i class="status__dot"></i>Succeeded</span>
+              <span class="small subtle num">38.1s</span>
+              <span class="small mono">$0.1623</span>
+            </div>
+
+            <div style="padding:11px 14px;border-bottom:1px solid var(--border)" class="row">
+              <span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span>
+              <span class="sep subtle">·</span>
+              <span class="small muted">4 accounts</span>
+              <span class="sep subtle">·</span>
+              <span class="small muted">Postgres 18 ships async I/O</span>
+              <span class="topbar__spacer"></span>
+              <button class="btn btn--sm">Retry from step</button>
+              <button class="btn btn--sm btn--danger">Abort</button>
+            </div>
+
+            <div class="tl">
+              <div class="tl__row"><span class="tl__n">1</span><span class="small">research</span><span class="small muted truncate">anthropic/claude-haiku-4-5 · summarize and classify</span><span class="small mono subtle">$0.0008</span></div>
+              <div class="tl__row"><span class="tl__n">2</span><span class="small">media</span><span class="small muted truncate">og_image_fetch · 3 renditions derived</span><span class="small mono subtle">$0</span></div>
+              <div class="tl__row"><span class="tl__n">3</span><span class="small">media</span><span class="small muted truncate">alt text, per rendition</span><span class="small mono subtle">$0.0011</span></div>
+
+              <div class="tl__row"><span class="tl__n">4</span><span class="small">writer</span><span class="small muted truncate">→ Work LinkedIn</span><span class="small mono subtle">$0.0310</span></div>
+              <div class="tl__row"><span class="tl__n">5</span><span class="small">writer</span><span class="small muted truncate">→ Acme Page</span><span class="small mono subtle">$0.0298</span></div>
+              <div class="tl__row"><span class="tl__n">6</span><span class="small">writer</span><span class="small muted truncate">→ X @main</span><span class="small mono subtle">$0.0221</span></div>
+              <div class="tl__row" style="background:var(--warn-bg)">
+                <span class="tl__n">7</span><span class="small">writer</span>
+                <span class="small truncate" style="color:var(--warn)">→ X @tech · fell back to openai/gpt-5, primary rate limited</span>
+                <span class="small mono subtle">$0.0265</span>
+              </div>
+
+              <div class="tl__row" style="background:var(--warn-bg)">
+                <span class="tl__n">8</span><span class="small">guardrail</span>
+                <span class="small truncate" style="color:var(--warn)">cross_account_duplicate · WARN 0.84 · X @main vs X @tech</span>
+                <span class="small subtle">no cost</span>
+              </div>
+              <div class="tl__row"><span class="tl__n">9</span><span class="small">writer</span><span class="small muted truncate">→ X @tech · differentiate mode</span><span class="small mono subtle">$0.0198</span></div>
+              <div class="tl__row" style="background:var(--ok-bg)">
+                <span class="tl__n">10</span><span class="small">guardrail</span>
+                <span class="small truncate" style="color:var(--ok)">cross_account_duplicate · PASS 0.41</span>
+                <span class="small subtle">no cost</span>
+              </div>
+
+              <div class="tl__row"><span class="tl__n">11</span><span class="small">hashtag</span><span class="small muted truncate">openai/gpt-5-mini · ×4 accounts</span><span class="small mono subtle">$0.0004</span></div>
+              <div class="tl__row"><span class="tl__n">12</span><span class="small">editor</span><span class="small muted truncate">→ Work LinkedIn · confidence 0.84</span><span class="small mono subtle">$0.0083</span></div>
+              <div class="tl__row"><span class="tl__n">13</span><span class="small">editor</span><span class="small muted truncate">→ Acme Page · confidence 0.91</span><span class="small mono subtle">$0.0079</span></div>
+              <div class="tl__row"><span class="tl__n">14</span><span class="small">editor</span><span class="small muted truncate">→ X @main · confidence 0.77</span><span class="small mono subtle">$0.0071</span></div>
+              <div class="tl__row"><span class="tl__n">15</span><span class="small">editor</span><span class="small muted truncate">→ X @tech · confidence 0.73</span><span class="small mono subtle">$0.0075</span></div>
+              <div class="tl__row"><span class="tl__n">16</span><span class="small">guardrail</span><span class="small muted truncate">duplicate · WARN 0.87 · Work LinkedIn vs 14 Oct</span><span class="small subtle">no cost</span></div>
+              <div class="tl__row"><span class="tl__n">17</span><span class="small">guardrail</span><span class="small muted truncate">pii · PASS ×4</span><span class="small subtle">no cost</span></div>
+              <div class="tl__row"><span class="tl__n">18</span><span class="small">handoff</span><span class="small muted truncate">approval_request 01JXYZ · 4 variants</span><span class="small subtle">no cost</span></div>
+            </div>
+
+            <div class="panel__foot">
+              Every step records which account it served, so cost and failure are both
+              attributable per target. Step 7's fallback is labelled, because otherwise that
+              variant reading differently would look like a mystery.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Agent configuration</h2></div>
+            <table class="table">
+              <thead><tr><th scope="col">Agent</th><th scope="col">Model</th><th scope="col">Fallback</th><th scope="col" class="r">Temp</th><th scope="col" class="r">30-day cost</th></tr></thead>
+              <tbody>
+                <tr><td class="strong">Research</td><td class="mono xs">anthropic/claude-haiku-4-5</td><td class="mono xs subtle">openai/gpt-5-mini</td><td class="r num">0.2</td><td class="r mono">$1.12</td></tr>
+                <tr><td class="strong">Writer</td><td class="mono xs">anthropic/claude-sonnet-4-5</td><td class="mono xs subtle">openai/gpt-5</td><td class="r num">0.8</td><td class="r mono">$18.40</td></tr>
+                <tr><td class="strong">Editor</td><td class="mono xs">anthropic/claude-sonnet-4-5</td><td class="mono xs subtle">openai/gpt-5</td><td class="r num">0.1</td><td class="r mono">$6.08</td></tr>
+                <tr><td class="strong">Hashtag</td><td class="mono xs">openai/gpt-5-mini</td><td class="xs subtle">none</td><td class="r num">0.2</td><td class="r mono">$0.21</td></tr>
+                <tr><td class="strong">Media</td><td class="mono xs">anthropic/claude-haiku-4-5</td><td class="xs subtle">none</td><td class="r num">0.7</td><td class="r mono">$0.64</td></tr>
+                <tr><td class="strong">Engagement</td><td class="mono xs">openai/gpt-5-mini</td><td class="xs subtle">none</td><td class="r num">0.3</td><td class="r mono">$2.90</td></tr>
+                <tr><td class="strong">Analytics</td><td class="mono xs">anthropic/claude-sonnet-4-5</td><td class="xs subtle">none</td><td class="r num">0.4</td><td class="r mono">$0.88</td></tr>
+                <tr><td class="strong">Publisher</td><td class="subtle xs">No model: deterministic code</td><td class="xs subtle">none</td><td class="r subtle">none</td><td class="r mono">$0</td></tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              Every call routes through LiteLLM, so the provider is this string and nothing
+              else. The Publisher has no model at all: the component that can speak publicly
+              in your name contains no language model.
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Aside -->
+        <div class="stack">
+          <section class="panel">
+            <div class="panel__head"><h2>Cost</h2></div>
+            <div class="panel__body stack">
+              <div>
+                <div class="row row--between" style="margin-bottom:6px"><span class="small">Today</span><span class="mono">$1.84 / $5.00</span></div>
+                <div class="bar"><i style="width:37%"></i></div>
+              </div>
+              <div>
+                <div class="row row--between" style="margin-bottom:6px"><span class="small">This month</span><span class="mono">$31.20 / $50.00</span></div>
+                <div class="bar"><i class="warn" style="width:62%"></i></div>
+              </div>
+              <div class="divider"></div>
+              <dl class="dl">
+                <dt>Per published post</dt><dd class="mono">$0.061</dd>
+                <dt>Per post set</dt><dd class="mono">$0.162</dd>
+                <dt>Most expensive account</dt><dd>X @tech</dd>
+              </dl>
+              <p class="caption">X @tech costs more because it is regenerated most often to stay distinct from @main.</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Recent runs</h2></div>
+            <div class="panel__body--flush">
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">draft_from_content</span><span class="xs subtle">4 accounts · 38.1s</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>OK</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">triage_comment</span><span class="xs subtle">X @main · 2.1s</span></span>
+                <span class="status status--ok"><i class="status__dot"></i>OK</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">revise_post</span><span class="xs subtle">X @tech · awaiting human</span></span>
+                <span class="status status--warn"><i class="status__dot status__dot--half"></i>Paused</span>
+              </div>
+              <div class="variant" style="grid-template-columns:minmax(0,1fr) auto;padding:10px 14px">
+                <span><span class="small truncate" style="display:block">draft_from_content</span><span class="xs subtle">Acme IG · blocked</span></span>
+                <span class="status status--danger"><i class="status__dot"></i>Failed</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Guardrails</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between"><span class="small">Cross-account duplicate</span><span class="mono xs">block ≥ 0.90</span></div>
+              <div class="row row--between"><span class="small">Same-account duplicate</span><span class="mono xs">block ≥ 0.95</span></div>
+              <div class="row row--between"><span class="small">Toxicity</span><span class="mono xs">block ≥ 0.70</span></div>
+              <div class="row row--between"><span class="small">Daily cap</span><span class="mono xs">3 per account</span></div>
+              <div class="row row--between"><span class="small">Stagger required</span><span class="tag tag--ok">On</span></div>
+              <div class="divider"></div>
+              <p class="caption">Guardrails run outside the agents, so an agent cannot influence its own gate.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

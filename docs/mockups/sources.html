@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="sources"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Sources" data-sub="9 configured · 1 failing" data-action="Add source" data-action-href="#"></header>
+
+    <main class="page">
+
+      <section class="panel">
+        <div class="filters">
+          <button class="chip" aria-pressed="true">All</button>
+          <button class="chip" aria-pressed="false">Failing<span class="subtle">1</span></button>
+          <button class="chip" aria-pressed="false">Paused<span class="subtle">1</span></button>
+          <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+          <button class="chip"><svg class="icon icon--sm"><use href="#i-filter"/></svg>Group</button>
+          <span class="topbar__spacer"></span>
+          <span class="small subtle">A source with no group feeds the whole workspace.</span>
+        </div>
+
+        <table class="table table--sortable">
+          <thead>
+            <tr>
+              <th scope="col"><button>Source</button></th>
+              <th scope="col">Type</th>
+              <th scope="col">Feeds</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="r">Every</th>
+              <th scope="col" class="r"><button>Items / 7d</button></th>
+              <th scope="col" class="r">Drafted</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="strong">PostgreSQL News</span><br><span class="xs subtle mono">postgresql.org/news.rss</span></td>
+              <td class="small muted">RSS</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span></td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+              <td class="r small">1h</td>
+              <td class="r">14</td>
+              <td class="r">6</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Hacker News · top</span><br><span class="xs subtle mono">score &gt; 200</span></td>
+              <td class="small muted">Hacker News</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span></td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+              <td class="r small">30m</td>
+              <td class="r">212</td>
+              <td class="r">9</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">LWN.net</span><br><span class="xs subtle mono">lwn.net/headlines/rss</span></td>
+              <td class="small muted">RSS</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span></td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+              <td class="r small">2h</td>
+              <td class="r">31</td>
+              <td class="r">4</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">r/devops</span><br><span class="xs subtle mono">reddit.com/r/devops</span></td>
+              <td class="small muted">Reddit</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-tech"></span><span class="small">Tech News</span></span></td>
+              <td><span class="status status--danger"><i class="status__dot"></i>Failing</span></td>
+              <td class="r small">1h</td>
+              <td class="r">0</td>
+              <td class="r">0</td>
+              <td class="r"><button class="btn btn--sm">Retry</button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Acme Engineering Blog</span><br><span class="xs subtle mono">acme.dev/feed.xml</span></td>
+              <td class="small muted">RSS</td>
+              <td><span class="row" style="gap:5px"><span class="gdot g-corp"></span><span class="small">Company</span></span></td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+              <td class="r small">6h</td>
+              <td class="r">2</td>
+              <td class="r">2</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Google News · "postgres"</span><br><span class="xs subtle mono">lang:en region:global</span></td>
+              <td class="small muted">Google News</td>
+              <td class="small subtle">Workspace</td>
+              <td><span class="status status--neutral"><i class="status__dot status__dot--ring"></i>Paused</span></td>
+              <td class="r small">4h</td>
+              <td class="r subtle">—</td>
+              <td class="r subtle">—</td>
+              <td class="r"><button class="btn btn--sm">Resume</button></td>
+            </tr>
+            <tr>
+              <td><span class="strong">Newsletter ingest</span><br><span class="xs subtle mono">acme-feed@in.mera.app</span></td>
+              <td class="small muted">Email</td>
+              <td class="small subtle">Workspace</td>
+              <td><span class="status status--ok"><i class="status__dot"></i>Active</span></td>
+              <td class="r small">On receipt</td>
+              <td class="r">7</td>
+              <td class="r">1</td>
+              <td class="r"><button class="btn btn--icon btn--sm btn--ghost" aria-label="More"><svg class="icon icon--sm"><use href="#i-more"/></svg></button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="panel__foot">
+          Items are scored separately for each group a source feeds — the same article can
+          be a 0.9 for one group's pillars and a 0.2 for another's.
+        </div>
+      </section>
+
+      <div class="grid grid--2" style="margin-top:14px">
+
+        <section class="panel">
+          <div class="panel__head"><h2>r/devops</h2><span class="spacer"></span><span class="status status--danger"><i class="status__dot"></i>Failing</span></div>
+          <div class="panel__body stack">
+            <div class="notice notice--danger">
+              <svg class="icon"><use href="#i-alert"/></svg>
+              <div>
+                <strong>HTTP 403 since 8 Nov, 06:00.</strong>
+                <p class="small" style="margin-top:3px">
+                  12 consecutive failures. Reddit requires an authenticated app for this
+                  endpoint. Ingestion has backed off to hourly and will stop retrying after
+                  48 hours.
+                </p>
+              </div>
+            </div>
+            <dl class="dl">
+              <dt>Last success</dt><dd>7 Nov, 23:00</dd>
+              <dt>Consecutive failures</dt><dd>12</dd>
+              <dt>Next attempt</dt><dd>11:30</dd>
+            </dl>
+            <div class="row">
+              <button class="btn btn--sm">Retry now</button>
+              <button class="btn btn--sm">Edit credentials</button>
+              <button class="btn btn--sm btn--danger">Pause source</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head"><h2>Add a source</h2></div>
+          <div class="panel__body stack">
+            <div class="field">
+              <label for="st">Type</label>
+              <select class="select" id="st">
+                <option>RSS / Atom</option><option>Hacker News</option><option>Reddit</option>
+                <option>Google News query</option><option>YouTube channel</option>
+                <option>News API</option><option>Email ingest</option><option>MCP server</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="su">Feed URL</label>
+              <input class="input" id="su" placeholder="https://example.com/feed.xml">
+            </div>
+            <div class="row" style="gap:10px">
+              <div class="field" style="flex:1">
+                <label for="sin">Include keywords</label>
+                <input class="input" id="sin" placeholder="postgres, database">
+              </div>
+              <div class="field" style="flex:1">
+                <label for="sex">Exclude</label>
+                <input class="input" id="sex" placeholder="webinar, sponsored">
+              </div>
+            </div>
+            <div class="field">
+              <label>Feeds which groups</label>
+              <div class="wrap">
+                <button class="chip" aria-pressed="true"><span class="gdot g-tech"></span>Tech News</button>
+                <button class="chip" aria-pressed="false"><span class="gdot g-corp"></span>Company Official</button>
+                <button class="chip" aria-pressed="false"><span class="gdot g-launch"></span>Product Launch</button>
+              </div>
+              <span class="field__hint">Leave all unselected to feed the whole workspace.</span>
+            </div>
+            <div class="row">
+              <button class="btn btn--sm">Test feed</button>
+              <span class="topbar__spacer"></span>
+              <button class="btn btn--sm btn--primary">Add source</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

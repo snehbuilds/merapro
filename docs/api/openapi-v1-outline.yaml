@@ -1,0 +1,1820 @@
+openapi: 3.1.0
+
+# ---------------------------------------------------------------------------
+# Mera public API - v1 OUTLINE
+#
+# This file is a DESIGN ARTIFACT, not the shipping specification. The
+# authoritative spec is generated from FastAPI's Pydantic models at build time
+# and served from /api/v1/openapi.json.
+#
+# Purpose: agree on resource shapes, the approval contract, and the error
+# model before any code exists. Paths here are representative rather than
+# exhaustive; the full endpoint list is in ../04-api-contract.md section 4.
+# ---------------------------------------------------------------------------
+
+info:
+  title: Mera API
+  version: "1.0.0-draft"
+  summary: AI-powered social media manager with human approval via messaging bots.
+  description: |
+    The single source of truth for every Mera client: the web UI, the Telegram and
+    WhatsApp approval bots, the MCP server, and future mobile and desktop apps.
+
+    Two invariants this API enforces:
+
+    1. Nothing is published without an approval bound to an immutable post version
+       and its content hash. See the `/approval-requests/{id}/decisions` operation
+       and the `ApprovalRequest` schema.
+    2. Every unit of work is one **target account**. A post set fans out into one
+       `PostVariant` per account, and that variant is what gets drafted, approved,
+       scheduled, published, and measured. There is no operation that approves or
+       publishes a whole set atomically.
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.mera.local/api/v1
+    description: Local development
+  - url: https://{host}/api/v1
+    description: Self-hosted
+    variables:
+      host:
+        default: mera.example.com
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+  - name: workspaces
+  - name: social-accounts
+  - name: account-groups
+    description: Named sets of accounts that may mix platforms. The targeting unit.
+  - name: sources
+  - name: content
+  - name: post-sets
+    description: One source item fanned out to one variant per target account.
+  - name: media
+    description: Upload or generate images and video. Generation is an async job.
+  - name: hashtags
+  - name: approvals
+    description: The approval lifecycle. The most contract-sensitive part of the API.
+  - name: publishing
+  - name: engagement
+  - name: analytics
+  - name: agents
+  - name: automation
+  - name: integrations
+  - name: webhooks
+  - name: events
+
+# ===========================================================================
+# PATHS
+# ===========================================================================
+paths:
+
+  # ---------------------------------------------------------------- auth ---
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                totp_code: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Token pair issued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenPair" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      operationId: refreshToken
+      security: []
+      description: |
+        Rotates the refresh token. Presenting a token that has already been rotated
+        is treated as theft and revokes the entire token chain.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenPair" }
+          description: New token pair
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      operationId: getCurrentPrincipal
+      responses:
+        "200":
+          description: The authenticated principal and its workspace memberships
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Principal" }
+
+  # ---------------------------------------------------------- workspaces ---
+  /workspaces:
+    get:
+      tags: [workspaces]
+      operationId: listWorkspaces
+      responses:
+        "200":
+          description: Workspaces the principal can access
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/Workspace" }
+
+  # ---------------------------------------------------- account groups ---
+  /workspaces/{workspace_id}/account-groups:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    get:
+      tags: [account-groups]
+      operationId: listAccountGroups
+      responses:
+        "200":
+          description: Account groups with their members
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/AccountGroup" }
+    post:
+      tags: [account-groups]
+      operationId: createAccountGroup
+      description: |
+        Creates a named group. An account may belong to several groups, so membership is
+        a join rather than a field on the account, and removing a group never disconnects
+        the accounts inside it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountGroupCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountGroup" }
+
+  /workspaces/{workspace_id}/account-groups/{group_id}/settings:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - name: group_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [account-groups]
+      operationId: getResolvedGroupSettings
+      description: |
+        Returns each effective setting together with the level it was inherited from
+        (`post`, `account`, `group`, `workspace`, `system`). The provenance is part of the
+        contract: a user who cannot see where a setting came from will eventually be
+        surprised by it.
+
+        Note that `autopilot_mode` and `approval_policy` resolve to the **strictest**
+        applicable value rather than the most specific, so an account pinned to `manual`
+        stays `manual` inside a group running `full`.
+      responses:
+        "200":
+          description: Resolved settings with provenance
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ResolvedSettings" }
+
+  # ------------------------------------------------------------- sources ---
+  /workspaces/{workspace_id}/sources:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    get:
+      tags: [sources]
+      operationId: listSources
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Configured sources
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/Source" }
+    post:
+      tags: [sources]
+      operationId: createSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SourceCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Source" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  # ------------------------------------------------------------- content ---
+  /workspaces/{workspace_id}/content-items/trending:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    get:
+      tags: [content]
+      operationId: listTrendingContent
+      description: |
+        Content items ranked by a deterministic blend of relevance to the workspace's
+        content pillars, freshness decay, and engagement potential. Duplicates are
+        collapsed; `covered_by_source_count` reports how many sources carried the story.
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+        - name: min_relevance
+          in: query
+          schema: { type: number, minimum: 0, maximum: 1 }
+      responses:
+        "200":
+          description: Ranked content items
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/ContentItem" }
+
+  # ----------------------------------------------------------- post sets ---
+  /workspaces/{workspace_id}/post-sets:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    post:
+      tags: [post-sets]
+      operationId: createPostSet
+      description: |
+        Creates a post set and expands its targets into one `PostVariant` per account.
+
+        Targets may be account groups, individual accounts, or both. Expansion is
+        deduplicated, so an account reachable through two selected groups yields one
+        variant. Each variant records the group it was routed through, which determines
+        which group-level settings apply to it.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PostSetCreate" }
+      responses:
+        "201":
+          description: Set created with its variants
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PostSet" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  /workspaces/{workspace_id}/post-sets/{post_set_id}/variants/{variant_id}/versions:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - $ref: "#/components/parameters/PostSetId"
+      - $ref: "#/components/parameters/VariantId"
+    post:
+      tags: [post-sets]
+      operationId: createPostVersion
+      description: |
+        Creates a NEW immutable version **for one target account**. There is no endpoint
+        anywhere in this API that mutates the content of an existing version.
+
+        Creating a version supersedes any pending approval bound to the prior version of
+        this variant, and invalidates any set-level "approve all" approval because the
+        set's composite hash changes. Approvals already granted to *sibling* variants are
+        unaffected, since their content did not change.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PostVersionCreate" }
+      responses:
+        "201":
+          description: Version frozen, content_hash computed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PostVersion" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  /workspaces/{workspace_id}/post-sets/{post_set_id}/rewrite:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - $ref: "#/components/parameters/PostSetId"
+    post:
+      tags: [post-sets, agents]
+      operationId: rewritePostSet
+      description: |
+        Runs the Writer agent in revision mode. Omit `variant_ids` to fan the instruction
+        out to every enabled variant, each producing its own new version; supply them to
+        rewrite only those accounts. The bot's Edit button uses the narrow form.
+
+        The instruction is treated as untrusted data: it is delimited inside the prompt
+        and the Writer agent has no publishing tool available to it regardless of what the
+        instruction says.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [instruction]
+              properties:
+                instruction:
+                  type: string
+                  maxLength: 2000
+                  examples: ["make it shorter and lead with a question"]
+                variant_ids:
+                  type: array
+                  nullable: true
+                  items: { type: string, format: uuid }
+                  description: Null means every enabled variant in the set.
+      responses:
+        "202":
+          description: Accepted, an agent run was started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentRunAccepted" }
+
+  # --------------------------------------------------------------- media ---
+  /workspaces/{workspace_id}/media/generate:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    post:
+      tags: [media]
+      operationId: generateMedia
+      description: |
+        Requests image or video generation and returns immediately with a tracked job.
+
+        Generation is never awaited inline. Image generation resolves in seconds; **video
+        generation takes minutes and costs dollars per clip**, so the job is a first-class
+        resource with its own state, cost record, and cancel operation. A worker restart
+        mid-generation loses nothing.
+
+        On success the resulting master asset is stored, per-platform renditions are
+        derived deterministically, and alt text is written. Attaching the asset to a
+        variant creates a new post version, because media sits inside the content hash.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaGenerationCreate" }
+      responses:
+        "202":
+          description: Job queued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MediaJob" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+
+  # ------------------------------------------------------------ hashtags ---
+  /workspaces/{workspace_id}/post-sets/{post_set_id}/variants/{variant_id}/hashtags/suggest:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - $ref: "#/components/parameters/PostSetId"
+      - $ref: "#/components/parameters/VariantId"
+    post:
+      tags: [hashtags, agents]
+      operationId: suggestHashtags
+      description: |
+        Runs the Hashtag agent for one target account. Suggestions combine the post's
+        content, the platform's conventions from the capability matrix, and this
+        account's own observed performance per tag.
+
+        Every suggestion carries `sample_size` and `basis`. A tag recommended from three
+        prior posts and one recommended from sixty are not the same claim, and the
+        response never collapses that distinction.
+      responses:
+        "202":
+          description: Accepted, an agent run was started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentRunAccepted" }
+
+  # ----------------------------------------------------------- approvals ---
+  /workspaces/{workspace_id}/approval-requests:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    get:
+      tags: [approvals]
+      operationId: listApprovalRequests
+      parameters:
+        - name: filter[state]
+          in: query
+          schema: { $ref: "#/components/schemas/ApprovalState" }
+        - name: filter[subject_type]
+          in: query
+          schema: { $ref: "#/components/schemas/ApprovalSubjectType" }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Approval requests
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/ApprovalRequest" }
+
+  /workspaces/{workspace_id}/approval-requests/{approval_request_id}/decisions:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - name: approval_request_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [approvals]
+      operationId: submitApprovalDecision
+      summary: Record an approval decision from any surface
+      description: |
+        The single decision endpoint. Two authentication paths converge here:
+
+        * A logged-in user acting from the web UI or MCP, identified by their JWT or
+          API key. `approval_token` is omitted.
+        * A bot button tap, carrying a signed single-use `approval_token`. The bot
+          service forwards it; the API validates signature, expiry, jti reuse,
+          approver allowlisting, and the bound content hash.
+
+        Validation order, all of which must pass:
+          1. token signature valid and not expired (bot path only)
+          2. token jti unused and not revoked (bot path only)
+          3. approver is permitted by the request's policy snapshot
+          4. request state is PENDING or AWAITING_EDIT
+          5. token content_hash equals the subject's current content_hash
+          6. second factor satisfied if the policy requires one for this action
+          7. kill switch not engaged
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApprovalDecisionCreate" }
+      responses:
+        "200":
+          description: Decision recorded; the request may or may not have resolved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApprovalRequest" }
+        "403":
+          description: Approver not authorized, or second factor required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "409":
+          description: Already decided, or superseded by a newer version
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "410":
+          description: Expired, or the token was revoked or already used
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "422":
+          description: approval_content_mismatch - the post changed after this token was minted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  # ---------------------------------------------------------- publishing ---
+  /workspaces/{workspace_id}/scheduled-posts:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    post:
+      tags: [publishing]
+      operationId: schedulePost
+      description: |
+        Requires a valid, unexpired approval bound to this exact post version, unless the
+        target account's autopilot mode permits unattended publishing and every guardrail
+        cleared. Returns 403 `approval_required` otherwise. This is the API-level
+        expression of the system's core invariant.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [post_variant_id]
+              properties:
+                post_variant_id:
+                  type: string
+                  format: uuid
+                  description: |
+                    One target account. The version and account are read from the variant,
+                    so there is no request shape in which an approval for one account
+                    could be applied to another.
+                scheduled_for:
+                  type: string
+                  format: date-time
+                  description: Omit to use the next best-time slot for this account.
+      responses:
+        "201":
+          description: Queued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScheduledPost" }
+        "403":
+          description: approval_required, or kill_switch_engaged
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  # ---------------------------------------------------------- automation ---
+  /workspaces/{workspace_id}/automation/kill-switch:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    post:
+      tags: [automation]
+      operationId: setKillSwitch
+      description: |
+        Immediately halts all automated activity. Available to approvers and above,
+        deliberately: the person watching the output is the person who needs to stop it,
+        and stopping is always safe. Reachable from the web UI, the API, MCP, and the
+        bot `/kill` command.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [engaged, scope_type]
+              properties:
+                engaged: { type: boolean }
+                scope_type:
+                  type: string
+                  enum: [workspace, account_group, social_account]
+                scope_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: |
+                    Null at workspace scope. Engaging above an account stops that account;
+                    engaging on an account stops only itself.
+                reason: { type: string }
+      responses:
+        "200":
+          description: Updated automation state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AutomationState" }
+
+  # -------------------------------------------------------------- events ---
+  /workspaces/{workspace_id}/events:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    get:
+      tags: [events]
+      operationId: streamEvents
+      summary: Server-Sent Events stream
+      description: |
+        Long-lived `text/event-stream`. Send `Last-Event-ID` to replay missed events from
+        the durable event table; a dropped notification therefore costs latency, not data.
+        Authorization is re-evaluated per event, so a role downgrade takes effect mid-stream.
+      parameters:
+        - name: types
+          in: query
+          description: Comma-separated globs, for example `approval.*,agent_run.*`
+          schema: { type: string }
+        - name: Last-Event-ID
+          in: header
+          schema: { type: string }
+      responses:
+        "200":
+          description: Event stream
+          content:
+            text/event-stream:
+              schema: { type: string }
+
+  # ---------------------------------------------------- integrations ---
+  /workspaces/{workspace_id}/mcp-servers:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    get:
+      tags: [integrations]
+      operationId: listMcpServers
+      parameters:
+        - name: filter[status]
+          in: query
+          schema: { $ref: "#/components/schemas/McpServerStatus" }
+      responses:
+        "200":
+          description: Registered external MCP servers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/McpServer" } }
+    post:
+      tags: [integrations]
+      operationId: registerMcpServer
+      description: |
+        Admin only. Creates a registration in `pending_review` with every tool disabled.
+        stdio packages must name an exact version or image digest; unpinned specifiers
+        and shell wrappers are rejected with 422. Credentials are set separately through
+        the write-only credentials endpoint or the OAuth flow.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/McpServerCreate" }
+      responses:
+        "201":
+          description: Registration created, pending review
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpServer" }
+
+  /workspaces/{workspace_id}/mcp-servers/import:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+    post:
+      tags: [integrations]
+      operationId: importMcpServers
+      description: |
+        Accepts the `mcpServers` object used by Claude Desktop and Claude Code. Returns one
+        draft per entry with the version each unpinned package resolved to, for the Admin
+        to confirm. Values from `env` and `headers` are moved into encrypted credentials
+        and never echoed back.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mcpServers]
+              properties:
+                mcpServers: { type: object, additionalProperties: { type: object } }
+      responses:
+        "200":
+          description: Drafts with proposed pins and per-entry errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts: { type: array, items: { $ref: "#/components/schemas/McpServer" } }
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string }
+                        reason: { type: string }
+
+  /workspaces/{workspace_id}/mcp-servers/{mcp_server_id}/test:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - name: mcp_server_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [integrations]
+      operationId: testMcpServer
+      description: |
+        Detects the protocol era (`server/discover` on stdio, a modern request with legacy
+        fallback on HTTP), authenticates, and lists tools. Changes no permission.
+      responses:
+        "200":
+          description: Connection test result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  protocol_era: { type: string, enum: [modern, legacy] }
+                  protocol_version: { type: string, examples: ["2026-07-28"] }
+                  server_info: { type: object }
+                  latency_ms: { type: integer }
+                  tool_count: { type: integer }
+                  error: { type: string, nullable: true }
+
+  /workspaces/{workspace_id}/mcp-servers/{mcp_server_id}/tools/{tool_name}:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - name: mcp_server_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: tool_name
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [integrations]
+      operationId: reviewMcpTool
+      description: |
+        Admin only. Enabling a `write` or `destructive` tool, or setting
+        `approval_policy: auto` on one, requires a second factor and otherwise returns
+        403 `second_factor_required`. A tool whose `state` is `changed` cannot be enabled
+        until its diff has been reviewed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled: { type: boolean }
+                risk_class: { $ref: "#/components/schemas/McpRiskClass" }
+                approval_policy: { type: string, enum: [always, auto, blocked] }
+                cost_per_call_usd: { type: number, minimum: 0 }
+                acknowledge_screening_flags: { type: boolean }
+      responses:
+        "200":
+          description: Updated tool
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpTool" }
+
+  /workspaces/{workspace_id}/agents/{agent_key}/mcp-bindings:
+    parameters:
+      - $ref: "#/components/parameters/WorkspaceId"
+      - name: agent_key
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [integrations]
+      operationId: setAgentMcpBindings
+      description: |
+        Replaces the agent's external tool bindings. Rejected with 422 for `publisher` and
+        `approval`, and for any tool that is not enabled.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [mcp_tool_id]
+                properties:
+                  mcp_tool_id: { type: string, format: uuid }
+                  max_calls_per_run: { type: integer, minimum: 1 }
+      responses:
+        "204":
+          description: Bindings replaced
+
+  # ------------------------------------------------- inbound bot hooks ----
+  /webhooks/telegram:
+    post:
+      tags: [webhooks]
+      operationId: telegramWebhook
+      security: []
+      description: |
+        Verified by the `X-Telegram-Bot-Api-Secret-Token` header, which is set when the
+        webhook is registered. Returns 200 immediately and queues the work, because
+        Telegram retries aggressively on anything else.
+      parameters:
+        - name: X-Telegram-Bot-Api-Secret-Token
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: Telegram Update object }
+      responses:
+        "200": { description: Accepted and queued }
+        "401": { description: Secret token mismatch }
+
+  /webhooks/whatsapp:
+    get:
+      tags: [webhooks]
+      operationId: whatsappVerify
+      security: []
+      description: Meta's subscription verification handshake.
+      parameters:
+        - name: hub.mode
+          in: query
+          schema: { type: string }
+        - name: hub.challenge
+          in: query
+          schema: { type: string }
+        - name: hub.verify_token
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Echoes hub.challenge
+          content:
+            text/plain:
+              schema: { type: string }
+    post:
+      tags: [webhooks]
+      operationId: whatsappWebhook
+      security: []
+      description: Verified by `X-Hub-Signature-256` over the raw request body.
+      parameters:
+        - name: X-Hub-Signature-256
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: WhatsApp Cloud API change notification }
+      responses:
+        "200": { description: Accepted and queued }
+        "401": { description: Signature mismatch }
+
+# ===========================================================================
+# COMPONENTS
+# ===========================================================================
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: A user JWT access token, or a workspace API key prefixed `mera_sk_`.
+    oauth2:
+      type: oauth2
+      description: Used by the MCP server. Scopes mirror API key scopes.
+      flows:
+        authorizationCode:
+          authorizationUrl: /api/v1/auth/oauth/authorize
+          tokenUrl: /api/v1/auth/oauth/token
+          scopes:
+            sources:read: Read source configuration
+            sources:write: Manage sources
+            content:read: Read content items and trending
+            accounts:read: Read connected accounts, health, and capabilities
+            accounts:write: Connect, disconnect, and configure accounts
+            groups:read: Read account groups
+            groups:write: Manage account groups and membership
+            drafts:read: Read post sets, variants, and versions
+            drafts:write: Create and revise post sets and variants
+            media:write: Upload media and request generation
+            approvals:read: View approval requests
+            approvals:decide: Approve, reject, edit, reschedule
+            publishing:read: Read scheduled and published posts
+            publishing:write: Schedule, publish, delete
+            engagement:read: Read the unified inbox
+            engagement:write: Reply and moderate
+            analytics:read: Read metrics and insights
+            automation:write: Change autopilot mode and kill switch
+            agents:read: Read agent definitions and runs
+            agents:write: Manage agent definitions
+            admin: Workspace administration
+
+  parameters:
+    WorkspaceId:
+      name: workspace_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PostSetId:
+      name: post_set_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    VariantId:
+      name: variant_id
+      in: path
+      required: true
+      description: A post variant, which is to say one target account's copy of the post.
+      schema: { type: string, format: uuid }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, default: 50, minimum: 1, maximum: 200 }
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor from `page.next_cursor`.
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Required on every request with an external side effect. A replay with the same
+        body returns the original response; a replay with a different body returns 409.
+      schema: { type: string, maxLength: 255 }
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid credential
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    Forbidden:
+      description: Authenticated but not permitted
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    NotFound:
+      description: |
+        Not found. Resources in another workspace are deliberately indistinguishable
+        from resources that do not exist.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    UnprocessableEntity:
+      description: Semantically invalid, including platform limit violations and guardrail blocks
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After: { schema: { type: integer } }
+        X-RateLimit-Limit: { schema: { type: integer } }
+        X-RateLimit-Remaining: { schema: { type: integer } }
+        X-RateLimit-Reset: { schema: { type: integer } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  schemas:
+
+    # ------------------------------------------------------- primitives ---
+    Platform:
+      type: string
+      enum: [linkedin, x, threads, instagram, facebook, bluesky, mastodon, youtube, reddit]
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, request_id]
+          properties:
+            code:
+              type: string
+              description: Stable machine-readable identifier. Clients branch on this.
+              examples: [approval_content_mismatch, approval_expired, kill_switch_engaged]
+            message: { type: string, description: Safe to display to an end user }
+            detail: { type: string, nullable: true }
+            field_errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string }
+                  code: { type: string }
+                  message: { type: string }
+            request_id: { type: string }
+            docs_url: { type: string, format: uri, nullable: true }
+
+    PaginatedEnvelope:
+      type: object
+      required: [data, page]
+      properties:
+        data: { type: array, items: {} }
+        page:
+          type: object
+          required: [has_more, limit]
+          properties:
+            next_cursor: { type: string, nullable: true }
+            has_more: { type: boolean }
+            limit: { type: integer }
+
+    TokenPair:
+      type: object
+      required: [access_token, refresh_token, expires_in, token_type]
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string }
+        token_type: { type: string, const: Bearer }
+        expires_in: { type: integer, description: Access token lifetime in seconds }
+
+    Principal:
+      type: object
+      properties:
+        user_id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        display_name: { type: string }
+        memberships:
+          type: array
+          items:
+            type: object
+            properties:
+              workspace_id: { type: string, format: uuid }
+              workspace_name: { type: string }
+              role: { type: string, enum: [viewer, approver, editor, admin, owner] }
+
+    Workspace:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        workspace_type: { type: string, enum: [personal, team, agency] }
+        timezone: { type: string, description: IANA timezone name }
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            Archived workspaces are read-only with automation stopped. Distinct from
+            deletion, which begins an erasure walk after a grace period.
+        account_count: { type: integer }
+        group_count: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    # -------------------------------------------- accounts and groups ---
+    SocialAccount:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        platform: { $ref: "#/components/schemas/Platform" }
+        handle: { type: string }
+        nickname:
+          type: string
+          description: |
+            User-facing label, for example "Work LinkedIn". With several accounts on one
+            platform, the handle alone is not enough to tell them apart in a picker.
+        display_name: { type: string }
+        avatar_url: { type: string, format: uri, nullable: true }
+        account_type: { type: string, enum: [personal, page, organization, business] }
+        status: { type: string, enum: [active, needs_reauth, suspended, disconnected] }
+        token_expires_at: { type: string, format: date-time, nullable: true }
+        default_brand_voice_id: { type: string, format: uuid, nullable: true }
+        group_ids:
+          type: array
+          items: { type: string, format: uuid }
+          description: An account may belong to several groups, or to none.
+        health:
+          type: object
+          properties:
+            token_valid: { type: boolean }
+            scopes_ok: { type: boolean }
+            rate_remaining: { type: integer, nullable: true }
+            last_checked_at: { type: string, format: date-time }
+            last_error: { type: string, nullable: true }
+
+    AccountGroup:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, examples: ["Tech News"] }
+        description: { type: string, nullable: true }
+        color: { type: string, description: Calendar colour coding }
+        default_brand_voice_id: { type: string, format: uuid, nullable: true }
+        content_pillar_ids: { type: array, items: { type: string, format: uuid } }
+        stagger_mode:
+          type: string
+          enum: [none, fixed, random_spread]
+          description: |
+            How publishing is spread across the group's accounts. `none` is permitted but
+            is blocked by the cross-account guardrail when two accounts share a platform,
+            because simultaneous near-identical posting is what platform automation rules
+            prohibit.
+        stagger_min_seconds: { type: integer }
+        stagger_max_seconds: { type: integer }
+        members:
+          type: array
+          items:
+            type: object
+            properties:
+              social_account_id: { type: string, format: uuid }
+              platform: { $ref: "#/components/schemas/Platform" }
+              nickname: { type: string }
+              position: { type: integer, description: Publish order within the group }
+              enabled_by_default: { type: boolean }
+
+    AccountGroupCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        color: { type: string }
+        social_account_ids: { type: array, items: { type: string, format: uuid } }
+        default_brand_voice_id: { type: string, format: uuid }
+        content_pillar_ids: { type: array, items: { type: string, format: uuid } }
+        stagger_mode: { type: string, enum: [none, fixed, random_spread], default: random_spread }
+        stagger_min_seconds: { type: integer, default: 180 }
+        stagger_max_seconds: { type: integer, default: 900 }
+
+    ResolvedSettings:
+      type: object
+      description: |
+        Each effective value together with the level it came from, so the UI can say
+        "inherited from group Tech News" rather than presenting an unexplained value.
+      additionalProperties:
+        type: object
+        properties:
+          value: {}
+          source_level:
+            type: string
+            enum: [post, account, group, workspace, system]
+          source_id: { type: string, format: uuid, nullable: true }
+          resolution:
+            type: string
+            enum: [most_specific, strictest]
+            description: |
+              `strictest` applies to `autopilot_mode` and `approval_policy`, where
+              permissiveness deliberately does not inherit downward.
+
+    # ----------------------------------------------------------- sources ---
+    Source:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        source_type:
+          type: string
+          enum: [rss, newsapi, gnews, google_news, reddit, youtube, hackernews, email, mcp]
+        name: { type: string }
+        config: { type: object, description: Shape depends on source_type }
+        include_keywords: { type: array, items: { type: string } }
+        exclude_keywords: { type: array, items: { type: string } }
+        language: { type: string, nullable: true }
+        region: { type: string, nullable: true }
+        fetch_interval_seconds: { type: integer }
+        status: { type: string, enum: [active, paused, failing] }
+        last_fetched_at: { type: string, format: date-time, nullable: true }
+        last_error: { type: string, nullable: true }
+
+    SourceCreate:
+      type: object
+      required: [source_type, name, config]
+      properties:
+        source_type: { $ref: "#/components/schemas/Source/properties/source_type" }
+        name: { type: string }
+        config: { type: object }
+        include_keywords: { type: array, items: { type: string } }
+        exclude_keywords: { type: array, items: { type: string } }
+        language: { type: string }
+        region: { type: string }
+        fetch_interval_seconds: { type: integer, default: 3600, minimum: 300 }
+
+    ContentItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        source_id: { type: string, format: uuid }
+        url: { type: string, format: uri }
+        title: { type: string }
+        author: { type: string, nullable: true }
+        published_at: { type: string, format: date-time, nullable: true }
+        summary: { type: string }
+        language: { type: string }
+        topics: { type: array, items: { type: string } }
+        relevance_score: { type: number, minimum: 0, maximum: 1 }
+        freshness_score: { type: number }
+        engagement_potential: { type: number }
+        covered_by_source_count:
+          type: integer
+          description: How many sources carried this story. A relevance signal in itself.
+        og_image_url: { type: string, format: uri, nullable: true }
+
+    # ------------------------------------------------------------ posts ---
+    PostSet:
+      type: object
+      description: |
+        The editorial unit: one source item or idea, fanned out to one variant per target
+        account. Mutable. Its state is a summary derived from its variants.
+      properties:
+        id: { type: string, format: uuid }
+        content_item_id: { type: string, format: uuid, nullable: true }
+        title: { type: string }
+        origin: { type: string, enum: [agent, manual, mcp, bot, recycled] }
+        state:
+          type: string
+          enum: [drafting, needs_approval, partially_approved, scheduled, published, partially_published, rejected, blocked, archived]
+          description: |
+            `partially_approved` and `partially_published` are normal terminal outcomes,
+            not errors. One account failing or being rejected never holds up its siblings.
+        target_account_group_ids:
+          type: array
+          items: { type: string, format: uuid }
+        composite_hash:
+          type: string
+          description: |
+            Hex SHA-256 over the enabled variants' content hashes paired with their
+            account IDs. This is what an "Approve all" button names. Editing or disabling
+            any variant changes it, which supersedes a set-level approval while leaving
+            per-account approvals intact.
+        variants:
+          type: array
+          items: { $ref: "#/components/schemas/PostVariant" }
+        created_at: { type: string, format: date-time }
+
+    PostSetCreate:
+      type: object
+      required: [targets]
+      properties:
+        content_item_id: { type: string, format: uuid }
+        topic: { type: string, description: Free-text brief when there is no source article. }
+        title: { type: string }
+        targets:
+          type: object
+          description: Expanded server-side into one variant per distinct account.
+          properties:
+            account_group_ids: { type: array, items: { type: string, format: uuid } }
+            social_account_ids: { type: array, items: { type: string, format: uuid } }
+            exclude_social_account_ids: { type: array, items: { type: string, format: uuid } }
+        generate: { type: boolean, default: true, description: Run the Writer immediately. }
+
+    PostVariant:
+      type: object
+      description: |
+        One target account's copy of the post. Mutable container; the unit that is
+        drafted, approved, scheduled, published, and measured.
+      properties:
+        id: { type: string, format: uuid }
+        post_set_id: { type: string, format: uuid }
+        platform: { $ref: "#/components/schemas/Platform" }
+        social_account_id: { type: string, format: uuid }
+        account_nickname: { type: string, description: For display; handles repeat across accounts. }
+        via_account_group_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: |
+            Which group routed this account into the set. Determines which group-level
+            settings apply, and is recorded so the choice stays deterministic when an
+            account belongs to several groups.
+        brand_voice_id: { type: string, format: uuid, description: Resolved at creation. }
+        enabled:
+          type: boolean
+          description: Disabling drops the variant from the composite hash; it will not publish.
+        state:
+          type: string
+          enum: [drafting, needs_approval, approved, scheduled, publishing, published, failed, rejected, blocked, skipped]
+        current_version: { $ref: "#/components/schemas/PostVersion" }
+        variant_label: { type: string, nullable: true, description: "A or B for A/B tests" }
+        scheduled_for: { type: string, format: date-time, nullable: true }
+        stagger_offset_seconds:
+          type: integer
+          description: |
+            Computed once at scheduling time and stored, so the calendar, the approval
+            card, and any retry all agree on when this account posts.
+
+    PostVersion:
+      type: object
+      description: |
+        Immutable snapshot of ONE variant's content. Insert-only, enforced by a database
+        trigger. `content_hash` is the anchor the entire approval guarantee hangs on, and
+        it includes the target account, so a version approved for one account cannot
+        publish to another.
+      properties:
+        id: { type: string, format: uuid }
+        post_variant_id: { type: string, format: uuid }
+        version_no: { type: integer }
+        content_hash:
+          type: string
+          description: |
+            Hex SHA-256 over this variant's canonical JSON: platform, social_account_id,
+            body, thread parts, sorted hashtags, link, and media **checksums**. Media is
+            hashed by content rather than by ID, so swapping the bytes behind an asset
+            invalidates the approval.
+        parent_version_id: { type: string, format: uuid, nullable: true }
+        revision_instruction: { type: string, nullable: true }
+        body: { type: string }
+        thread_parts:
+          type: array
+          nullable: true
+          items: { type: string }
+          description: Ordered parts for threaded platforms such as X and Threads.
+        hashtags: { type: array, items: { type: string } }
+        link_url: { type: string, format: uri, nullable: true }
+        media:
+          type: array
+          items:
+            type: object
+            properties:
+              media_asset_id: { type: string, format: uuid }
+              rendition_key: { type: string, examples: ["instagram:1x1"] }
+              media_type: { type: string, enum: [image, video] }
+              alt_text: { type: string }
+              checksum: { type: string }
+              url: { type: string, format: uri, description: Short-lived presigned URL }
+        confidence_score: { type: number, minimum: 0, maximum: 1, nullable: true }
+        compliance_flags:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                examples: [fact_check, tone, brand_safety, pii, copyright, platform_policy, cross_account_duplicate]
+              outcome: { type: string, enum: [pass, warn, block] }
+              score: { type: number, nullable: true }
+              note: { type: string, nullable: true }
+        validation:
+          type: array
+          items:
+            type: object
+            properties:
+              severity: { type: string, enum: [info, warning, error] }
+              code: { type: string }
+              message: { type: string }
+        created_at: { type: string, format: date-time }
+
+    PostVersionCreate:
+      type: object
+      required: [body]
+      description: Content for one target account. The account is implied by the variant in the path.
+      properties:
+        body: { type: string }
+        thread_parts: { type: array, items: { type: string } }
+        hashtags: { type: array, items: { type: string } }
+        link_url: { type: string, format: uri }
+        media:
+          type: array
+          items:
+            type: object
+            properties:
+              media_asset_id: { type: string, format: uuid }
+              alt_text: { type: string }
+        variant_label: { type: string }
+
+    # --------------------------------------------------------- media ---
+    MediaGenerationCreate:
+      type: object
+      required: [kind, prompt]
+      properties:
+        kind: { type: string, enum: [image, video] }
+        prompt: { type: string, maxLength: 2000 }
+        post_set_id: { type: string, format: uuid, nullable: true }
+        post_variant_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Omit to generate one master asset shared by every variant in the set.
+        parameters:
+          type: object
+          properties:
+            aspect_ratio: { type: string, examples: ["16:9", "1:1", "4:5"] }
+            duration_seconds: { type: integer, description: Video only. }
+            style: { type: string }
+            seed: { type: integer, description: Supply to make a regeneration reproducible. }
+        provider: { type: string, nullable: true, description: Omit to use the workspace default. }
+
+    MediaJob:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [image, video] }
+        state: { type: string, enum: [queued, running, succeeded, failed, cancelled, timed_out] }
+        provider: { type: string }
+        model: { type: string }
+        estimated_cost_usd: { type: number }
+        actual_cost_usd: { type: number, nullable: true }
+        result_asset_id: { type: string, format: uuid, nullable: true }
+        error: { type: string, nullable: true }
+        stream_url: { type: string, description: SSE endpoint filtered to this job's events. }
+        started_at: { type: string, format: date-time, nullable: true }
+        finished_at: { type: string, format: date-time, nullable: true }
+
+    # ------------------------------------------------------ hashtags ---
+    HashtagSuggestion:
+      type: object
+      properties:
+        tag: { type: string, examples: ["postgres"] }
+        rank: { type: integer }
+        basis:
+          type: string
+          enum: [history, platform_convention, content_only]
+          description: |
+            `history` means this account has used the tag enough times to measure.
+            Anything else means the suggestion is a convention or a content match, and the
+            UI must not present it as evidence.
+        sample_size: { type: integer, description: Posts behind the figure. Zero for a new tag. }
+        lift_vs_account_median:
+          type: number
+          nullable: true
+          description: Engagement rate relative to this account's own median. Null below the minimum sample.
+        rationale: { type: string }
+
+    # -------------------------------------------------------- approvals ---
+    ApprovalState:
+      type: string
+      enum: [pending, awaiting_edit, approved, partially_approved, rejected, expired, superseded, cancelled]
+      description: |
+        `expired` is terminal and non-publishing, at both the request and the variant
+        level. There is no transition from `expired` to `approved`, and no configuration
+        that makes a timeout publish.
+
+        `partially_approved` is a normal terminal outcome, not an error: it is what
+        "approve both LinkedIn accounts, reject X @tech" resolves to.
+
+    ApprovalSubjectType:
+      type: string
+      enum: [post_set, post_variant, comment_reply, post_deletion, comment_deletion, agent_action, mcp_tool_call]
+
+    ApprovalAction:
+      type: string
+      enum: [approve, reject, edit_requested, regenerate, reschedule]
+
+    ApprovalRequest:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        subject_type: { $ref: "#/components/schemas/ApprovalSubjectType" }
+        subject_id: { type: string, format: uuid }
+        content_hash:
+          type: string
+          description: Copied from the subject at creation. A mismatch at decision time rejects.
+        account_group_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: The group this set was routed through. Shown on the card for context.
+        state: { $ref: "#/components/schemas/ApprovalState" }
+        required_count: { type: integer }
+        quorum_mode: { type: string, enum: [any_of, all_of] }
+        variant_states:
+          type: array
+          description: |
+            One entry per target account. Quorum is counted per variant, so "approve
+            LinkedIn, reject X" resolves two entries differently within one request.
+          items:
+            type: object
+            properties:
+              post_variant_id: { type: string, format: uuid }
+              post_version_id: { type: string, format: uuid }
+              social_account_id: { type: string, format: uuid }
+              account_nickname: { type: string }
+              platform: { $ref: "#/components/schemas/Platform" }
+              content_hash: { type: string }
+              state:
+                type: string
+                enum: [pending, approved, rejected, superseded, expired, cancelled]
+              approve_count: { type: integer }
+              reject_count: { type: integer }
+              decided_at: { type: string, format: date-time, nullable: true }
+        remind_at: { type: string, format: date-time, nullable: true }
+        escalate_at: { type: string, format: date-time, nullable: true }
+        expires_at: { type: string, format: date-time }
+        escalation_level: { type: integer }
+        approved_at: { type: string, format: date-time, nullable: true }
+        superseded_by: { type: string, format: uuid, nullable: true }
+        scheduled_for: { type: string, format: date-time, nullable: true }
+        preview:
+          $ref: "#/components/schemas/ApprovalPreview"
+        decisions:
+          type: array
+          items: { $ref: "#/components/schemas/ApprovalDecision" }
+
+    ApprovalPreview:
+      type: object
+      description: Everything an approver needs to decide without opening the web app.
+      properties:
+        workspace_name: { type: string, description: One bot serves every workspace, so cards are labelled. }
+        account_group_name: { type: string, nullable: true }
+        variants:
+          type: array
+          description: One entry per target account, each with its own text, media, and flags.
+          items: { $ref: "#/components/schemas/PostVariant" }
+        source:
+          type: object
+          nullable: true
+          properties:
+            title: { type: string }
+            url: { type: string, format: uri }
+            source_name: { type: string }
+            summary: { type: string }
+        target_accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              social_account_id: { type: string, format: uuid }
+              post_variant_id: { type: string, format: uuid }
+              platform: { $ref: "#/components/schemas/Platform" }
+              handle: { type: string }
+              nickname: { type: string }
+              account_type: { type: string, enum: [personal, page, organization, business] }
+              scheduled_for: { type: string, format: date-time, nullable: true }
+              confidence_score: { type: number, nullable: true }
+        compliance_flags:
+          type: array
+          items: { type: object }
+        deep_link:
+          type: string
+          format: uri
+          description: Opens this request in the web app for complex edits.
+
+    ApprovalDecisionCreate:
+      type: object
+      required: [action]
+      properties:
+        action: { $ref: "#/components/schemas/ApprovalAction" }
+        approval_token:
+          type: string
+          nullable: true
+          description: |
+            Required when the decision originates from a bot button tap. Signed,
+            single-use, expiring, and bound to the request, the approver, the action,
+            and the content hash. Omitted when an authenticated user acts from the
+            web UI or MCP.
+        variant_scope:
+          type: array
+          nullable: true
+          items: { type: string, format: uuid }
+          description: |
+            Post variant IDs, not platforms. Null means every enabled variant.
+
+            Supplying a subset is how partial approval works, for example approving both
+            LinkedIn accounts while rejecting X @tech. IDs rather than platforms, because
+            two accounts on the same platform must be separately decidable.
+
+            A scope naming a variant the approver's member scope excludes fails whole
+            rather than silently applying to the subset they can act on.
+        scheduled_for: { type: string, format: date-time, nullable: true }
+        reason: { type: string, nullable: true, maxLength: 1000 }
+        second_factor:
+          type: object
+          nullable: true
+          description: Required for high-risk actions when the policy says so.
+          properties:
+            type: { type: string, enum: [pin, web_confirmation] }
+            value: { type: string }
+
+    ApprovalDecision:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        approver_user_id: { type: string, format: uuid }
+        approver_label: { type: string }
+        action: { $ref: "#/components/schemas/ApprovalAction" }
+        channel_type: { type: string, enum: [telegram, whatsapp, web, api, mcp] }
+        reason: { type: string, nullable: true }
+        instruction_text: { type: string, nullable: true }
+        variant_scope: { type: array, nullable: true, items: { type: string } }
+        decided_at: { type: string, format: date-time }
+
+    ApprovalPolicy:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        scope_type:
+          type: string
+          enum: [workspace, account_group, social_account]
+          description: |
+            Policies exist at three levels and resolve to the **strictest** applicable
+            value rather than the most specific one. A company page requiring two
+            approvers keeps requiring two inside a group that requires one.
+        scope_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null at workspace scope.
+        subject_types:
+          type: array
+          items: { $ref: "#/components/schemas/ApprovalSubjectType" }
+        required_approver_count: { type: integer, minimum: 1 }
+        quorum_mode: { type: string, enum: [any_of, all_of] }
+        approver_user_ids: { type: array, items: { type: string, format: uuid } }
+        escalation_chain:
+          type: array
+          description: Ordered levels, each with its own delay and recipients.
+          items:
+            type: object
+            properties:
+              level: { type: integer }
+              after: { type: string, description: ISO 8601 duration }
+              user_ids: { type: array, items: { type: string, format: uuid } }
+        remind_after: { type: string, description: ISO 8601 duration, examples: ["PT2H"] }
+        escalate_after: { type: string, examples: ["PT4H"] }
+        expires_after: { type: string, examples: ["PT12H"] }
+        approval_validity_window:
+          type: string
+          examples: ["PT24H"]
+          description: How long an approval remains usable before publish must re-approve.
+        quiet_hours:
+          type: object
+          properties:
+            start: { type: string, examples: ["22:00"] }
+            end: { type: string, examples: ["07:00"] }
+            timezone: { type: string }
+        second_factor_actions:
+          type: array
+          items: { type: string }
+          description: Actions needing a PIN or web confirmation, for example publishing to a company page.
+        digest_mode: { type: string, enum: [immediate, digest, both] }
+
+    # ------------------------------------------------------- publishing ---
+    ScheduledPost:
+      type: object
+      description: |
+        One target account's queued publish. A set produces one of these per approved
+        variant; they are independently retried and independently fail.
+      properties:
+        id: { type: string, format: uuid }
+        post_set_id: { type: string, format: uuid }
+        post_variant_id: { type: string, format: uuid }
+        post_version_id: { type: string, format: uuid }
+        social_account_id: { type: string, format: uuid }
+        account_group_id: { type: string, format: uuid, nullable: true }
+        approval_request_id: { type: string, format: uuid, nullable: true }
+        scheduled_for:
+          type: string
+          format: date-time
+          description: Already includes this account's stagger offset.
+        stagger_offset_seconds: { type: integer }
+        state:
+          type: string
+          enum: [queued, publishing, published, failed, dead_lettered, cancelled]
+        attempt_count: { type: integer }
+        last_error: { type: string, nullable: true }
+
+    # ------------------------------------------------------- automation ---
+    AutomationState:
+      type: object
+      properties:
+        workspace_id: { type: string, format: uuid }
+        scope_type: { type: string, enum: [workspace, account_group, social_account] }
+        scope_id: { type: string, format: uuid, nullable: true }
+        autopilot_mode:
+          type: string
+          enum: [manual, assisted, full]
+          description: |
+            `manual` requires approval for everything. `assisted` publishes only above
+            the confidence threshold with all guardrails clear. `full` runs unattended
+            inside the configured guardrails.
+
+            Resolves to the **strictest** value across the three levels, not the most
+            specific. An account pinned to `manual` stays `manual` inside a group running
+            `full`, which is what makes "the company page always requires approval" a
+            property of the system rather than a setting everyone must remember.
+        assisted_confidence_threshold: { type: number, minimum: 0, maximum: 1 }
+        kill_switch_engaged: { type: boolean }
+        kill_switch_at: { type: string, format: date-time, nullable: true }
+        kill_switch_surface:
+          type: string
+          nullable: true
+          enum: [web, api, mcp, telegram, whatsapp]
+        daily_post_cap: { type: integer, nullable: true }
+        blocked_keywords: { type: array, items: { type: string } }
+        allowed_topics: { type: array, items: { type: string } }
+
+    # ---------------------------------------------------- integrations ---
+    McpServerStatus:
+      type: string
+      enum: [pending_review, active, degraded, auth_required, disabled]
+
+    McpRiskClass:
+      type: string
+      enum: [read, write, destructive]
+
+    McpServerCreate:
+      type: object
+      required: [slug, name, transport]
+      properties:
+        slug: { type: string, pattern: "^[a-z0-9-]{2,24}$", description: Prefixes tool names shown to agents. }
+        name: { type: string }
+        transport: { type: string, enum: [streamable_http, stdio] }
+        url: { type: string, format: uri, description: streamable_http only. }
+        package:
+          type: object
+          description: stdio only.
+          properties:
+            registry: { type: string, enum: [npm, pypi, oci] }
+            identifier: { type: string }
+            version: { type: string, description: Exact version or image digest. }
+        auth_type: { type: string, enum: [none, bearer, headers, env, oauth2] }
+        egress_allowlist: { type: array, items: { type: string } }
+        scope_account_group_ids:
+          type: array
+          items: { type: string, format: uuid }
+          description: Empty for workspace-wide.
+        timeout_ms: { type: integer, default: 30000 }
+        rate_limit_per_minute: { type: integer, default: 60 }
+
+    McpServer:
+      allOf:
+        - $ref: "#/components/schemas/McpServerCreate"
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            status: { $ref: "#/components/schemas/McpServerStatus" }
+            origin: { type: string, enum: [form, json_import, catalog, mcp_tool] }
+            protocol_era: { type: string, enum: [modern, legacy], nullable: true }
+            protocol_version: { type: string, nullable: true }
+            credential:
+              type: object
+              nullable: true
+              description: Describes the stored credential. Never contains a secret.
+              properties:
+                kind: { type: string }
+                issuer: { type: string, nullable: true }
+                expires_at: { type: string, format: date-time, nullable: true }
+            tool_counts:
+              type: object
+              properties:
+                discovered: { type: integer }
+                enabled: { type: integer }
+                changed: { type: integer }
+            last_health_at: { type: string, format: date-time, nullable: true }
+
+    McpTool:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        exposed_name: { type: string, examples: ["notion__create_page"] }
+        title: { type: string, nullable: true }
+        description: { type: string }
+        input_schema: { type: object }
+        output_schema: { type: object, nullable: true }
+        annotations:
+          type: object
+          description: Server-supplied hints. Untrusted unless the server is curated.
+        risk_class: { $ref: "#/components/schemas/McpRiskClass" }
+        approval_policy: { type: string, enum: [always, auto, blocked] }
+        enabled: { type: boolean }
+        state: { type: string, enum: [new, reviewed, changed, gone] }
+        screening_flags: { type: array, items: { type: string } }
+        bound_agent_keys: { type: array, items: { type: string } }
+
+    # ----------------------------------------------------------- agents ---
+    AgentRunAccepted:
+      type: object
+      properties:
+        agent_run_id: { type: string, format: uuid }
+        state: { type: string, enum: [queued, running] }
+        stream_url:
+          type: string
+          description: SSE endpoint filtered to this run's events.
+
+    AgentRun:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        workflow_key: { type: string }
+        trigger: { type: string, enum: [schedule, event, manual, mcp, bot] }
+        state:
+          type: string
+          enum: [queued, running, awaiting_human, succeeded, failed, aborted]
+        tokens_in: { type: integer }
+        tokens_out: { type: integer }
+        cost_usd: { type: number }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time, nullable: true }
+        error: { type: string, nullable: true }

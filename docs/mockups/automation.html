@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automation · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="automation"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Automation" data-sub="Manual everywhere"></header>
+
+    <main class="page">
+
+      <div class="split">
+        <div class="stack">
+
+          <section class="panel">
+            <div class="panel__head">
+              <h2>Autopilot mode</h2>
+              <span class="spacer"></span>
+              <span class="small subtle">Resolves to the strictest applicable value</span>
+            </div>
+            <table class="table">
+              <thead><tr><th scope="col">Scope</th><th scope="col">Set to</th><th scope="col">Effective</th><th scope="col" class="r">Daily cap</th><th scope="col"></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="strong">Workspace · Acme</span></td>
+                  <td><span class="tag tag--outline">Manual</span></td>
+                  <td><span class="tag">Manual</span></td>
+                  <td class="r">3 / account</td>
+                  <td class="r"><button class="btn btn--sm">Change</button></td>
+                </tr>
+                <tr>
+                  <td><span class="row" style="gap:6px"><span class="gdot g-tech"></span>Tech News</span></td>
+                  <td><span class="tag tag--outline">Inherit</span></td>
+                  <td><span class="tag">Manual</span></td>
+                  <td class="r">3 / account</td>
+                  <td class="r"><button class="btn btn--sm">Change</button></td>
+                </tr>
+                <tr>
+                  <td><span class="row" style="gap:6px"><span class="gdot g-corp"></span>Company Official</span></td>
+                  <td><span class="tag tag--outline">Manual</span></td>
+                  <td><span class="tag">Manual</span></td>
+                  <td class="r">2 / account</td>
+                  <td class="r"><button class="btn btn--sm">Change</button></td>
+                </tr>
+                <tr>
+                  <td style="padding-left:30px"><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="acct__name">Acme Page</span></span></td>
+                  <td><span class="tag tag--warn">Manual · pinned</span></td>
+                  <td><span class="tag">Manual</span></td>
+                  <td class="r">2</td>
+                  <td class="r"><button class="btn btn--sm">Change</button></td>
+                </tr>
+                <tr>
+                  <td><span class="acct"><span class="acct__mark"><svg><use href="#p-bluesky"/></svg></span><span class="acct__name">Acme Bluesky</span><span class="xs subtle">ungrouped</span></span></td>
+                  <td><span class="tag tag--outline">Assisted</span></td>
+                  <td><span class="tag">Manual</span></td>
+                  <td class="r">5</td>
+                  <td class="r"><button class="btn btn--sm">Change</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="panel__foot">
+              Acme Bluesky is set to Assisted but runs Manual, because the workspace is
+              Manual and the <strong>strictest</strong> value wins. Loosening it means
+              changing the workspace, which is deliberately a visible act.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Modes</h2></div>
+            <div class="panel__body col">
+              <div class="notice">
+                <svg class="icon"><use href="#i-approvals"/></svg>
+                <div><strong>Manual</strong><p class="small muted" style="margin-top:2px">Every post waits for a human. The default, and the only mode enabled in Phase 1.</p></div>
+              </div>
+              <div class="notice">
+                <svg class="icon"><use href="#i-bolt"/></svg>
+                <div><strong>Assisted</strong><p class="small muted" style="margin-top:2px">Publishes unattended above a confidence threshold with every guardrail clear. Everything else goes to the bot.</p></div>
+              </div>
+              <div class="notice">
+                <svg class="icon"><use href="#i-automation"/></svg>
+                <div><strong>Full autopilot</strong><p class="small muted" style="margin-top:2px">End to end within guardrails: daily caps, allowed topics, quiet hours, blocked keywords. Optional notice in the bot.</p></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Guardrails</h2></div>
+            <div class="panel__body stack">
+              <div class="grid grid--2">
+                <div class="field"><label for="g1">Cross-account duplicate — block above</label><input class="input" id="g1" value="0.90"></div>
+                <div class="field"><label for="g2">Same-account duplicate — block above</label><input class="input" id="g2" value="0.95"></div>
+                <div class="field"><label for="g3">Toxicity — block above</label><input class="input" id="g3" value="0.70"></div>
+                <div class="field"><label for="g4">Assisted confidence threshold</label><input class="input" id="g4" value="0.85"></div>
+              </div>
+              <div class="field">
+                <label for="bk">Blocked keywords</label>
+                <input class="input" id="bk" value="layoffs, acquisition, lawsuit, earnings">
+              </div>
+              <div class="field">
+                <label for="qh">Quiet hours</label>
+                <input class="input" id="qh" value="22:00 – 07:00 · Asia/Kolkata">
+                <span class="field__hint">Shifts timers rather than consuming them — a reminder due at 02:00 fires at 07:00 and expiry moves with it.</span>
+              </div>
+              <div class="divider"></div>
+              <div class="row row--between">
+                <div><div class="small strong">Require staggering within a group</div><div class="xs subtle">Blocks "all at once" when two accounts share a platform</div></div>
+                <button class="switch" role="switch" aria-checked="true" aria-label="Require staggering"></button>
+              </div>
+              <div class="row row--between">
+                <div><div class="small strong">Approval for deletions</div><div class="xs subtle">Applies even in Full autopilot</div></div>
+                <button class="switch" role="switch" aria-checked="true" aria-label="Approval for deletions"></button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="stack">
+
+          <section class="panel" style="border-color:color-mix(in srgb, var(--danger) 34%, transparent)">
+            <div class="panel__head"><h2 style="color:var(--danger)">Kill switch</h2></div>
+            <div class="panel__body stack">
+              <p class="small muted">
+                Stops ingestion, agent runs, scheduling and publishing immediately. Pending
+                approvals are cancelled; queued posts are held. Nothing is lost.
+              </p>
+              <button class="killswitch" style="justify-content:center">
+                <svg class="icon"><use href="#i-power"/></svg>
+                Stop everything in Acme
+              </button>
+              <div class="divider"></div>
+              <div class="col">
+                <div class="row row--between">
+                  <span class="small row" style="gap:6px"><span class="gdot g-tech"></span>Tech News</span>
+                  <button class="btn btn--sm btn--danger">Stop</button>
+                </div>
+                <div class="row row--between">
+                  <span class="small row" style="gap:6px"><span class="gdot g-corp"></span>Company Official</span>
+                  <button class="btn btn--sm btn--danger">Stop</button>
+                </div>
+                <div class="row row--between">
+                  <span class="small row" style="gap:6px"><span class="gdot g-launch"></span>Product Launch</span>
+                  <button class="btn btn--sm btn--danger">Stop</button>
+                </div>
+              </div>
+              <p class="caption">
+                Engaging needs no confirmation — hesitation in an emergency stop is a design
+                flaw. Resuming needs an Admin role and your PIN.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Reachable from</h2></div>
+            <div class="panel__body col">
+              <div class="row row--between"><span class="small">Web UI</span><span class="status status--ok"><i class="status__dot"></i>Here</span></div>
+              <div class="row row--between"><span class="small">Telegram</span><span class="mono xs">/kill</span></div>
+              <div class="row row--between"><span class="small">REST API</span><span class="mono xs">POST /automation/kill-switch</span></div>
+              <div class="row row--between"><span class="small">MCP</span><span class="mono xs">pause_automation</span></div>
+              <p class="caption">Available to approvers and above, not just admins — the person watching the output is the one who needs to stop it.</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__head"><h2>Today</h2></div>
+            <div class="panel__body">
+              <dl class="dl">
+                <dt>Published unattended</dt><dd>0</dd>
+                <dt>Held for approval</dt><dd>7</dd>
+                <dt>Blocked by guardrails</dt><dd>3</dd>
+                <dt>At daily cap</dt><dd>1 account</dd>
+              </dl>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

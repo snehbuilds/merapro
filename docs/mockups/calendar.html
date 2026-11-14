@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Calendar · Mera</title>
+<link rel="stylesheet" href="assets/mera.css">
+<script>try{var t=localStorage.getItem('mera-theme');document.documentElement.setAttribute('data-theme',t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
+<script src="assets/mera.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" data-nav="calendar"></aside>
+
+  <div class="main">
+    <header class="topbar" data-title="Content Calendar" data-sub="10–16 Nov" data-action="New post"></header>
+
+    <main class="page">
+
+      <section class="panel">
+        <div class="filters">
+          <div class="btngroup">
+            <button class="btn btn--sm btn--icon" aria-label="Previous week"><svg class="icon icon--sm" style="transform:rotate(180deg)"><use href="#i-chevright"/></svg></button>
+            <button class="btn btn--sm">Today</button>
+            <button class="btn btn--sm btn--icon" aria-label="Next week"><svg class="icon icon--sm"><use href="#i-chevright"/></svg></button>
+          </div>
+          <span class="seg">
+            <button aria-pressed="true">Week</button>
+            <button aria-pressed="false">Month</button>
+          </span>
+          <span style="width:1px;height:20px;background:var(--border-strong)"></span>
+          <button class="chip" aria-pressed="true"><span class="gdot g-tech"></span>Tech News</button>
+          <button class="chip" aria-pressed="true"><span class="gdot g-corp"></span>Company Official</button>
+          <button class="chip" aria-pressed="true"><span class="gdot g-launch"></span>Product Launch</button>
+          <span class="topbar__spacer"></span>
+          <span class="small subtle">Colour is the group. Status is the icon and label.</span>
+        </div>
+
+        <div class="calwrap">
+          <div class="cal">
+            <div class="cal__hd"><span class="sr">Time</span></div>
+            <div class="cal__hd">Mon 10</div>
+            <div class="cal__hd">Tue 11</div>
+            <div class="cal__hd">Wed 12</div>
+            <div class="cal__hd">Thu 13</div>
+            <div class="cal__hd">Fri 14</div>
+            <div class="cal__hd">Sat 15</div>
+            <div class="cal__hd">Sun 16</div>
+
+            <!-- 09:00 -->
+            <div class="cal__time">09:00</div>
+            <div class="cal__cell">
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-linkedin"/></svg>
+                <span class="truncate">Postgres 18</span>
+                <span class="mono">09:00</span>
+              </button>
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-linkedin"/></svg>
+                <span class="truncate">Postgres 18</span>
+                <span class="mono">09:04</span>
+              </button>
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-x"/></svg>
+                <span class="truncate">Postgres 18</span>
+                <span class="mono">09:08</span>
+              </button>
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-x"/></svg>
+                <span class="truncate">Postgres 18</span>
+                <span class="mono">09:13</span>
+              </button>
+            </div>
+            <div class="cal__cell">
+              <button class="cal__ev is-corp" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-instagram"/></svg>
+                <span class="truncate">Team photo</span>
+                <span class="mono">09:30</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell">
+              <button class="cal__ev is-launch" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-linkedin"/></svg>
+                <span class="truncate">v4 launch</span>
+                <span class="mono">09:00</span>
+              </button>
+              <button class="cal__ev is-launch" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-x"/></svg>
+                <span class="truncate">v4 launch</span>
+                <span class="mono">09:06</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+
+            <!-- 11:00 -->
+            <div class="cal__time">11:00</div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell">
+              <button class="cal__ev is-corp" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-linkedin"/></svg>
+                <span class="truncate">Hiring</span>
+                <span class="mono">11:30</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell">
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-mastodon"/></svg>
+                <span class="truncate">Weekly roundup</span>
+                <span class="mono">11:00</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+
+            <!-- 14:00 -->
+            <div class="cal__time">14:00</div>
+            <div class="cal__cell">
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-linkedin"/></svg>
+                <span class="truncate">Kafka 4.0</span>
+                <span class="mono">14:00</span>
+              </button>
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-x"/></svg>
+                <span class="truncate">Kafka 4.0</span>
+                <span class="mono">14:08</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell">
+              <button class="cal__ev is-tech" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-bluesky"/></svg>
+                <span class="truncate">Conference link</span>
+                <span class="mono">14:20</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+
+            <!-- 17:00 -->
+            <div class="cal__time">17:00</div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell">
+              <button class="cal__ev is-corp" draggable="true">
+                <svg class="icon icon--sm"><use href="#p-facebook"/></svg>
+                <span class="truncate">Office move</span>
+                <span class="mono">17:00</span>
+              </button>
+            </div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+            <div class="cal__cell"></div>
+          </div>
+        </div>
+
+        <div class="panel__foot row row--between">
+          <span>Drag an item to reschedule, or select it (<kbd>Enter</kbd>) to pick a new day and time. Rescheduling does not invalidate an approval — only a content change does.</span>
+          <span class="row" style="gap:12px">
+            <span class="status status--info"><i class="status__dot"></i>Scheduled</span>
+            <span class="status status--ok"><i class="status__dot"></i>Published</span>
+            <span class="status status--warn"><i class="status__dot status__dot--half"></i>Awaiting approval</span>
+          </span>
+        </div>
+      </section>
+
+      <div class="grid grid--3" style="margin-top:14px">
+        <section class="panel">
+          <div class="panel__head"><h2>This week</h2></div>
+          <div class="panel__body">
+            <dl class="dl">
+              <dt>Scheduled</dt><dd>14</dd>
+              <dt>Published</dt><dd>9</dd>
+              <dt>Awaiting approval</dt><dd>7</dd>
+              <dt>Failed</dt><dd>1</dd>
+            </dl>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel__head"><h2>Per account</h2></div>
+          <div class="panel__body col">
+            <div class="row row--between"><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="small">Work LinkedIn</span></span><span class="small num">4</span></div>
+            <div class="row row--between"><span class="acct"><span class="acct__mark"><svg><use href="#p-linkedin"/></svg></span><span class="small">Acme Page</span></span><span class="small num">5</span></div>
+            <div class="row row--between"><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @main</span></span><span class="small num">6</span></div>
+            <div class="row row--between"><span class="acct"><span class="acct__mark"><svg><use href="#p-x"/></svg></span><span class="small">X @tech</span></span><span class="small num">3</span></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel__head"><h2>Best times</h2><span class="spacer"></span><span class="tag tag--outline">From history</span></div>
+          <div class="panel__body col">
+            <div class="row row--between"><span class="small">Work LinkedIn</span><span class="small num">Tue 09:00</span></div>
+            <div class="row row--between"><span class="small">Acme Page</span><span class="small num">Wed 11:00</span></div>
+            <div class="row row--between"><span class="small">X @main</span><span class="small num">Thu 17:30</span></div>
+            <div class="row row--between"><span class="small">X @tech</span><span class="small subtle">Platform norm</span></div>
+            <p class="caption">Slots without enough history are labelled as a platform norm rather than presented as a finding.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

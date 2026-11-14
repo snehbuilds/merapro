@@ -1,0 +1,17 @@
+{
+  "name": "mera",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter @mera/sdk typecheck && pnpm --filter web typecheck",
+    "test": "pnpm --filter web test",
+    "sdk": "pnpm --filter @mera/sdk generate",
+    "sdk:check": "pnpm --filter @mera/sdk check"
+  }
+}
