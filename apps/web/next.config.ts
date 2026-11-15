@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/docs",
-        destination: `${apiInternal}/docs`,
+        destination: `${apiInternal}/api/v1/docs`,
       },
       {
         source: "/redoc",
