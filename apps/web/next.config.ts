@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
         destination: `${apiInternal}/api/v1/:path*`,
       },
       {
+        source: "/healthz",
+        destination: `${apiInternal}/healthz`,
+      },
+      {
+        source: "/readyz",
+        destination: `${apiInternal}/readyz`,
+      },
+      {
         source: "/docs",
         destination: `${apiInternal}/api/v1/docs`,
       },
