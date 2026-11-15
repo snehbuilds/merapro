@@ -147,7 +147,8 @@ services:
       retries: 10
 
   litellm:
-    image: ghcr.io/berriai/litellm:main-latest
+    build:
+      context: ./infra/litellm
     restart: unless-stopped
     expose:
       - "4000"
@@ -163,9 +164,6 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
     depends_on:
       postgres: { condition: service_healthy }
-    volumes:
-      - ./infra/litellm/config.yaml:/app/config.yaml:ro
-    command: ["--config", "/app/config.yaml", "--port", "4000"]
 
   mcp-sandbox:
     # Third-party stdio MCP servers (P2-M9, docs/05 §2.4). No database, no API, no route
@@ -216,14 +214,13 @@ services:
     expose: ["3000"]
 
   gateway:
-    image: nginx:alpine
+    build:
+      context: ./infra/nginx
     restart: unless-stopped
     depends_on:
       web: { condition: service_started }
       api: { condition: service_healthy }
       bots: { condition: service_healthy }
-    volumes:
-      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     expose:
       - "80"
     healthcheck:
