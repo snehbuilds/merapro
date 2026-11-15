@@ -41,15 +41,27 @@ class UnsafeDatabaseRole(RuntimeError):
 
 
 async def ensure_app_role(settings: Settings) -> None:
-    migration_url = settings.database_migration_url
-    if not migration_url or migration_url == settings.database_url:
-        return
+    migration_url = (
+        settings.database_migration_url
+        or os.environ.get("DATABASE_MIGRATION_URL")
+        or f"postgresql+asyncpg://mera:{os.environ.get('POSTGRES_PASSWORD', 'mera-dev-owner')}@postgres:5432/mera"
+    )
+    db_url = (
+        settings.database_url
+        or os.environ.get("DATABASE_URL")
+        or f"postgresql+asyncpg://mera_app:{os.environ.get('MERA_APP_DB_PASSWORD', 'mera-dev-app')}@postgres:5432/mera"
+    )
+    import sys
+    print(f"[ensure_app_role] START: migration_url={migration_url}, db_url={db_url}", file=sys.stderr, flush=True)
     try:
         from sqlalchemy.engine import make_url
-        target_pw = make_url(settings.database_url).password
-        if not target_pw:
-            return
+        target_pw = (
+            (make_url(db_url).password if db_url else None)
+            or os.environ.get("MERA_APP_DB_PASSWORD")
+            or "mera-dev-app"
+        )
         safe_pw = target_pw.replace("'", "''")
+        print(f"[ensure_app_role] Connecting to migration_url to configure mera_app role...", file=sys.stderr, flush=True)
         owner_engine = create_engine(settings, url=migration_url)
         async with owner_engine.begin() as conn:
             await conn.execute(
@@ -73,8 +85,9 @@ async def ensure_app_role(settings: Settings) -> None:
             await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mera_app;"))
             await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO mera_app;"))
         await owner_engine.dispose()
-    except Exception:
-        pass
+        print("[ensure_app_role] SUCCESS: mera_app role created/updated and privileges granted!", file=sys.stderr, flush=True)
+    except Exception as exc:
+        print(f"[ensure_app_role] FAILED: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
 
 
 async def assert_rls_bound(engine: AsyncEngine) -> None:
