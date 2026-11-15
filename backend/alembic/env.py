@@ -6,6 +6,7 @@ import asyncio
 import os
 
 from alembic import context
+from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -41,6 +42,24 @@ def _run(connection: Connection) -> None:
 
 async def _run_async() -> None:
     engine = create_async_engine(_url())
+    app_pw = os.environ.get("MERA_APP_DB_PASSWORD")
+    if app_pw:
+        async with engine.begin() as conn:
+            safe_pw = app_pw.replace("'", "''")
+            await conn.execute(
+                text(
+                    f"""
+                    DO $$
+                    BEGIN
+                      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
+                        CREATE ROLE mera_app LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                      ELSE
+                        ALTER ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                      END IF;
+                    END $$;
+                    """
+                )
+            )
     async with engine.connect() as conn:
         await conn.run_sync(_run)
     await engine.dispose()

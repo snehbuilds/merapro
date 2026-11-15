@@ -85,7 +85,7 @@ async def _check_database_role(engine: AsyncEngine, settings: Settings) -> None:
     except Exception as exc:
         if settings.mera_env is not Env.DEVELOPMENT:
             raise
-        log.warning("database.role_check_skipped", error_type=type(exc).__name__)
+        log.warning("database.role_check_skipped", error_type=type(exc).__name__, error=str(exc))
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
