@@ -46,13 +46,13 @@ async def ensure_app_role(settings: Settings) -> None:
     db_url = (
         settings.database_url
         or os.environ.get("DATABASE_URL")
-        or f"postgresql+asyncpg://mera_app:{os.environ.get('MERA_APP_DB_PASSWORD', 'mera-dev-app')}@postgres:5432/mera"
+        or f"postgresql+asyncpg://mera_app:{os.environ.get('MERA_APP_DB_PASSWORD', 'mera-dev-app')}@mera-db:5432/mera"
     )
     import sys
     try:
         from sqlalchemy.engine import make_url
         parsed_db = make_url(db_url)
-        db_host = parsed_db.host or "postgres"
+        db_host = parsed_db.host or "mera-db"
         target_pw = (
             parsed_db.password
             or os.environ.get("MERA_APP_DB_PASSWORD")
@@ -62,16 +62,25 @@ async def ensure_app_role(settings: Settings) -> None:
         owner_pw = os.environ.get("POSTGRES_PASSWORD", "mera-dev-owner")
         safe_owner_pw = owner_pw.replace("'", "''")
 
-        candidate_urls = [
-            f"postgresql+asyncpg://mera@{db_host}:5432/mera",
-            f"postgresql+asyncpg://mera:{owner_pw}@{db_host}:5432/mera",
-            f"postgresql+asyncpg://mera:mera@{db_host}:5432/mera",
-            f"postgresql+asyncpg://postgres@{db_host}:5432/postgres",
-            f"postgresql+asyncpg://postgres:postgres@{db_host}:5432/postgres",
-        ]
+        hosts_to_try = [db_host]
+        if db_host != "mera-db":
+            hosts_to_try.append("mera-db")
+        if db_host != "postgres":
+            hosts_to_try.append("postgres")
+
+        candidate_urls = []
         migration_url = settings.database_migration_url or os.environ.get("DATABASE_MIGRATION_URL")
         if migration_url:
-            candidate_urls.insert(0, migration_url)
+            candidate_urls.append(migration_url)
+
+        for h in hosts_to_try:
+            candidate_urls.extend([
+                f"postgresql+asyncpg://mera:{owner_pw}@{h}:5432/mera",
+                f"postgresql+asyncpg://mera@{h}:5432/mera",
+                f"postgresql+asyncpg://mera:mera@{h}:5432/mera",
+                f"postgresql+asyncpg://postgres@{h}:5432/postgres",
+                f"postgresql+asyncpg://postgres:postgres@{h}:5432/postgres",
+            ])
 
         connected = False
         for url in candidate_urls:
