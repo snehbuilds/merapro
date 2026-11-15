@@ -1,0 +1,94 @@
+# MCP Server, Sandbox Execution & LiteLLM Proxy Stack
+# Deploys only when MCP tools, sandbox configuration, or LLM proxy settings change.
+
+x-backend-env: &backend-env
+  env_file:
+    - path: .env.example
+    - path: .env
+      required: false
+  environment: &backend-environment
+    MERA_ENV: ${MERA_ENV:-development}
+    MERA_MASTER_KEY: ${MERA_MASTER_KEY}
+    MERA_SECRET_KEY: ${MERA_SECRET_KEY}
+    MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-https://drtea.cloud}
+    MERA_API_URL: ${MERA_API_URL:-http://api:8000}
+    MERA_PUBLIC_API_URL: ${MERA_PUBLIC_API_URL:-https://drtea.cloud/api/v1}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD}
+    DATABASE_URL: postgresql+asyncpg://mera_app:${MERA_APP_DB_PASSWORD}@mera-db:5432/mera
+    DATABASE_MIGRATION_URL: postgresql+asyncpg://mera:${POSTGRES_PASSWORD}@mera-db:5432/mera
+    WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
+    SANDBOX_LLM: ${SANDBOX_LLM:-true}
+    MEDIA_ROOT: /var/lib/mera/media
+    FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+
+services:
+  mcp:
+    build: { context: ./backend, target: mcp, secrets: [corp_ca] }
+    <<: *backend-env
+    expose: ["8002"]
+    networks:
+      coolify:
+        aliases:
+          - mcp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  litellm:
+    build:
+      context: ./infra/litellm
+    restart: unless-stopped
+    expose:
+      - "4000"
+    environment:
+      - PORT=4000
+      - DATABASE_URL=postgresql://mera:${POSTGRES_PASSWORD}@mera-db:5432/litellm
+      - STORE_MODEL_IN_DB=True
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-mera-litellm-admin-key}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-mera-litellm-salt-key-secure-2026}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+    networks:
+      coolify:
+        aliases:
+          - litellm
+
+  mcp-sandbox:
+    build: { context: ./backend, target: mcp-sandbox, secrets: [corp_ca] }
+    runtime: ${MCP_SANDBOX_RUNTIME:-runc}
+    expose: ["8010"]
+    environment:
+      MERA_ENV: ${MERA_ENV:-development}
+      MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+    networks:
+      coolify:
+        aliases:
+          - mcp-sandbox
+
+  mcp-egress:
+    build: { context: ./backend, target: mcp-egress, secrets: [corp_ca] }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    expose: ["3128", "3129"]
+    environment:
+      MERA_ENV: ${MERA_ENV:-development}
+      MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+    networks:
+      coolify:
+        aliases:
+          - mcp-egress
+
+secrets:
+  corp_ca:
+    file: ${CORP_CA_BUNDLE:-./infra/certs/none.pem}
+
+networks:
+  coolify:
+    name: coolify
+    external: true

@@ -1,0 +1,40 @@
+# Standalone Database Service: PostgreSQL 16 with pgvector extension
+# Runs 24/7 independently of application code deployments.
+
+services:
+  mera-db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mera}
+      POSTGRES_USER: ${POSTGRES_USER:-mera}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD:?set MERA_APP_DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    command: >
+      postgres -c max_connections=200
+               -c shared_preload_libraries=pg_stat_statements
+    volumes:
+      - pgdata_v2:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      coolify:
+        aliases:
+          - mera-db
+          - postgres
+    expose: ["5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mera -d mera"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  coolify:
+    name: coolify
+    external: true
+
+volumes:
+  pgdata_v2:
+    name: pvjn6cqpxzd9ji1q49sl9eew_pgdata-v2
+    external: true

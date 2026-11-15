@@ -1,0 +1,47 @@
+# Approval Bots Service: Telegram and WhatsApp interactive sign-off handlers (port 8001)
+# Deploys only when approval bot logic changes.
+
+x-backend-env: &backend-env
+  env_file:
+    - path: .env.example
+    - path: .env
+      required: false
+  environment: &backend-environment
+    MERA_ENV: ${MERA_ENV:-development}
+    MERA_MASTER_KEY: ${MERA_MASTER_KEY}
+    MERA_SECRET_KEY: ${MERA_SECRET_KEY}
+    MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-https://drtea.cloud}
+    MERA_API_URL: ${MERA_API_URL:-http://api:8000}
+    MERA_PUBLIC_API_URL: ${MERA_PUBLIC_API_URL:-https://drtea.cloud/api/v1}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD}
+    DATABASE_URL: postgresql+asyncpg://mera_app:${MERA_APP_DB_PASSWORD}@mera-db:5432/mera
+    DATABASE_MIGRATION_URL: postgresql+asyncpg://mera:${POSTGRES_PASSWORD}@mera-db:5432/mera
+    WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
+    SANDBOX_LLM: ${SANDBOX_LLM:-true}
+    MEDIA_ROOT: /var/lib/mera/media
+    FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+
+services:
+  bots:
+    build: { context: ./backend, target: bots, secrets: [corp_ca] }
+    <<: *backend-env
+    expose: ["8001"]
+    networks:
+      coolify:
+        aliases:
+          - bots
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+secrets:
+  corp_ca:
+    file: ${CORP_CA_BUNDLE:-./infra/certs/none.pem}
+
+networks:
+  coolify:
+    name: coolify
+    external: true
