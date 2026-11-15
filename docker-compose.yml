@@ -48,7 +48,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
-    ports: ["${POSTGRES_HOST_PORT:-5432}:5432"]
+    expose: ["5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mera -d mera"]
       interval: 5s
@@ -69,7 +69,7 @@ services:
       <<: [*backend-environment, *sandbox-client-env]
     depends_on:
       migrate: { condition: service_completed_successfully }
-    ports: ["8000:8000"]
+    expose: ["8000"]
     volumes: ["media:/var/lib/mera/media"]
     # sandbox_rpc: to reach mcp-sandbox and the egress grant API (server discovery).
     networks: [default, sandbox_rpc]
@@ -114,7 +114,7 @@ services:
     <<: *backend-env
     depends_on:
       api: { condition: service_healthy }
-    ports: ["8001:8001"]
+    expose: ["8001"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')"]
       interval: 10s
@@ -139,7 +139,7 @@ services:
       LOG_FORMAT: ${LOG_FORMAT:-json}
     depends_on:
       api: { condition: service_healthy }
-    ports: ["8002:8002"]
+    expose: ["8002"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/healthz')"]
       interval: 10s
@@ -149,8 +149,8 @@ services:
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
     restart: unless-stopped
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     environment:
       - PORT=4000
       - DATABASE_URL=postgresql://mera:${POSTGRES_PASSWORD}@postgres:5432/litellm
@@ -213,7 +213,24 @@ services:
       MERA_WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
     depends_on:
       api: { condition: service_healthy }
-    ports: ["3000:3000"]
+    expose: ["3000"]
+
+  gateway:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      web: { condition: service_started }
+      api: { condition: service_healthy }
+      bots: { condition: service_healthy }
+    volumes:
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/healthz || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
 secrets:
   # Corporate TLS proxies: export CORP_CA_BUNDLE=/path/to/ca.pem before `make up`.
