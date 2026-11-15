@@ -42,7 +42,7 @@ services:
       postgres -c max_connections=200
                -c shared_preload_libraries=pg_stat_statements
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_v2:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
     expose: ["5432"]
     healthcheck:
@@ -196,5 +196,5 @@ networks:
     internal: true
 
 volumes:
-  pgdata: {}
+  pgdata_v2: {}
   media: {}

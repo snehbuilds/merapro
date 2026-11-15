@@ -10,6 +10,14 @@ set -eu
 # Password passed as a psql variable and quoted with :'pw', so quotes in it are safe.
 psql -v ON_ERROR_STOP=1 -v pw="$MERA_APP_DB_PASSWORD" \
   --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<'SQL'
-CREATE ROLE mera_app LOGIN NOSUPERUSER NOBYPASSRLS;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
+    CREATE ROLE mera_app LOGIN NOSUPERUSER NOBYPASSRLS;
+  ELSE
+    ALTER ROLE mera_app LOGIN NOSUPERUSER NOBYPASSRLS;
+  END IF;
+END $$;
 ALTER ROLE mera_app PASSWORD :'pw';
+GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app;
 SQL
