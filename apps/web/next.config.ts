@@ -27,11 +27,11 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/redoc",
-        destination: `${apiInternal}/redoc`,
+        destination: `${apiInternal}/api/v1/redoc`,
       },
       {
         source: "/openapi.json",
-        destination: `${apiInternal}/openapi.json`,
+        destination: `${apiInternal}/api/v1/openapi.json`,
       },
     ];
   },
