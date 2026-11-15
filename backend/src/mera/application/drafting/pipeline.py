@@ -404,26 +404,30 @@ class Drafting:
             tags = list(t.prior_content.hashtags)
             suggestions: list[dict[str, Any]] = []
         else:
-            tag_out = await self.hashtag.run(
-                ctx,
-                HashtagRequest(
-                    account=t.account,
-                    platform=spec,
-                    body=body,
-                    topics=source.topics if source else (),
-                    banned_tags=(*t.voice.banned_words, *t.banned_tags),
-                    preferred_tags=t.preferred_tags,
-                    playbook=skills.playbook(t.platform, "hashtags"),
-                    evidence=t.evidence,
-                ),
-                post_variant_id=t.variant_id,
-            )
-            ranked = apply_evidence(tag_out.tags, t.evidence)
-            suggestions = [x.model_dump() for x in ranked]
-            ceiling = min(spec.conventional_hashtags[1], spec.max_hashtags or 99)
-            # The model is told the banned list; it is not trusted to obey it.
-            never = {b.lower() for b in t.banned_tags}
-            tags = [x.tag for x in ranked if x.tag.lstrip("#").lower() not in never][:ceiling]
+            try:
+                tag_out = await self.hashtag.run(
+                    ctx,
+                    HashtagRequest(
+                        account=t.account,
+                        platform=spec,
+                        body=body,
+                        topics=source.topics if source else (),
+                        banned_tags=(*t.voice.banned_words, *t.banned_tags),
+                        preferred_tags=t.preferred_tags,
+                        playbook=skills.playbook(t.platform, "hashtags"),
+                        evidence=t.evidence,
+                    ),
+                    post_variant_id=t.variant_id,
+                )
+                ranked = apply_evidence(tag_out.tags, t.evidence)
+                suggestions = [x.model_dump() for x in ranked]
+                ceiling = min(spec.conventional_hashtags[1], spec.max_hashtags or 99)
+                never = {b.lower() for b in t.banned_tags}
+                tags = [x.tag for x in ranked if x.tag.lstrip("#").lower() not in never][:ceiling]
+            except Exception as exc:
+                log.warning("drafting.hashtag_failed", error=str(exc))
+                tags = []
+                suggestions = []
         review: EditorOutput = await self.editor.run(
             ctx,
             EditRequest(

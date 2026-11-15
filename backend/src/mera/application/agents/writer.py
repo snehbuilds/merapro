@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from mera.application.agents.base import Agent
 from mera.application.agents.contracts import DraftRequest
@@ -39,6 +39,24 @@ class DraftedPost(BaseModel):
 class WriterOutput(BaseModel):
     post: DraftedPost
     source_attribution: str = Field(default="", max_length=300)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_post(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "post" not in data and "body" in data:
+                return {
+                    "post": {
+                        "body": data.get("body", ""),
+                        "thread_parts": data.get("thread_parts"),
+                        "link_url": data.get("link_url"),
+                        "hook_type": data.get("hook_type", "announcement"),
+                        "angle": data.get("angle", ""),
+                        "self_critique": data.get("self_critique", ""),
+                    },
+                    "source_attribution": data.get("source_attribution", ""),
+                }
+        return data
 
 
 SYSTEM = """\

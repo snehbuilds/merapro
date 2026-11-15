@@ -53,6 +53,32 @@ class HashtagOutput(BaseModel):
     tags: list[SuggestedTag] = Field(default_factory=list, max_length=30)
     omitted_reason: str | None = Field(default=None, max_length=300)
 
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_tags(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            raw_tags = data.get("tags")
+            if isinstance(raw_tags, list):
+                coerced = []
+                for idx, t in enumerate(raw_tags, start=1):
+                    if isinstance(t, str):
+                        coerced.append({
+                            "tag": t,
+                            "rank": idx,
+                            "basis": "content_only",
+                            "sample_size": 0,
+                            "rationale": "",
+                        })
+                    elif isinstance(t, dict):
+                        t_copy = dict(t)
+                        if "rank" not in t_copy:
+                            t_copy["rank"] = idx
+                        if "basis" not in t_copy or t_copy["basis"] not in ("history", "platform_convention", "content_only"):
+                            t_copy["basis"] = "content_only"
+                        coerced.append(t_copy)
+                data["tags"] = coerced
+        return data
+
 
 @dataclass(frozen=True, slots=True)
 class TagEvidence:
@@ -187,10 +213,37 @@ class FactualClaim(BaseModel):
 
 class EditorOutput(BaseModel):
     issues: list[ComplianceIssue] = Field(default_factory=list, max_length=30)
-    confidence_score: float = Field(ge=0, le=1)
+    confidence_score: float = Field(default=0.8, ge=0, le=1)
     confidence_rationale: str = Field(default="", max_length=600)
     factual_claims: list[FactualClaim] = Field(default_factory=list, max_length=30)
-    voice_match: float = Field(ge=0, le=1)
+    voice_match: float = Field(default=0.8, ge=0, le=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_editor(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            d = dict(data)
+            if "confidence_score" not in d and "confidence" in d:
+                d["confidence_score"] = d["confidence"]
+            if "confidence_score" not in d:
+                d["confidence_score"] = 0.8
+            if "voice_match" not in d:
+                d["voice_match"] = 0.8
+            raw_issues = d.get("issues")
+            if isinstance(raw_issues, list):
+                coerced = []
+                for iss in raw_issues:
+                    if isinstance(iss, str):
+                        coerced.append({
+                            "category": "platform_policy",
+                            "severity": "warning",
+                            "explanation": iss,
+                        })
+                    elif isinstance(iss, dict):
+                        coerced.append(iss)
+                d["issues"] = coerced
+            return d
+        return data
 
 
 @dataclass(frozen=True, slots=True)

@@ -41,6 +41,7 @@ from mera.infrastructure.llm import pricing
 T = TypeVar("T", bound=BaseModel)
 log = structlog.get_logger(__name__)
 _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.DOTALL)
+_THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 _MAX_ERROR_CHARS = 800
 
 _litellm: ModuleType | None = None
@@ -168,7 +169,7 @@ class LiteLLMProvider:
                         model=model,
                         messages=convo,
                         temperature=config.temperature,
-                        max_tokens=config.max_tokens,
+                        max_tokens=max(config.max_tokens or 1024, 4096),
                         timeout=config.timeout_seconds,
                         response_format=fmt,
                         **_extra_kwargs(model, llm_config),
@@ -187,6 +188,12 @@ class LiteLLMProvider:
                 try:
                     value = schema.model_validate_json(_strip_fence(content))
                 except ValidationError as exc:
+                    log.warning(
+                        "llm.validation_error",
+                        schema=schema.__name__,
+                        errors=_errors(exc),
+                        content=content[:500],
+                    )
                     last_error, last_kind = (
                         f"output did not match {schema.__name__}",
                         "invalid_output",
@@ -313,8 +320,9 @@ def _content(resp: Any) -> str:
 
 
 def _strip_fence(text: str) -> str:
-    m = _FENCE.match(text)
-    return m.group(1) if m else text.strip()
+    cleaned = _THINK.sub("", text).strip()
+    m = _FENCE.match(cleaned)
+    return m.group(1).strip() if m else cleaned
 
 
 def _errors(exc: ValidationError) -> str:
