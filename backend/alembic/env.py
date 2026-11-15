@@ -7,7 +7,7 @@ import os
 
 from alembic import context
 from sqlalchemy import text
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine import Connection, make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from mera.infrastructure.db import models  # noqa: F401  (register metadata)
@@ -42,7 +42,12 @@ def _run(connection: Connection) -> None:
 
 async def _run_async() -> None:
     engine = create_async_engine(_url())
-    app_pw = os.environ.get("MERA_APP_DB_PASSWORD")
+    db_url = os.environ.get("DATABASE_URL")
+    app_pw = (
+        os.environ.get("MERA_APP_DB_PASSWORD")
+        or (make_url(db_url).password if db_url else None)
+        or "mera-dev-app"
+    )
     if app_pw:
         async with engine.begin() as conn:
             safe_pw = app_pw.replace("'", "''")
@@ -60,6 +65,12 @@ async def _run_async() -> None:
                     """
                 )
             )
+            await conn.execute(text("GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app;"))
+            await conn.execute(text("GRANT ALL ON SCHEMA public TO mera_app;"))
+            await conn.execute(text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mera_app;"))
+            await conn.execute(text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mera_app;"))
+            await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mera_app;"))
+            await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO mera_app;"))
     async with engine.connect() as conn:
         await conn.run_sync(_run)
     await engine.dispose()
