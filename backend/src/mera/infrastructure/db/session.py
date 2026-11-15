@@ -7,6 +7,8 @@ next request that borrows the pooled connection. Never use a session-level ``SET
 
 from __future__ import annotations
 
+import os
+import sys
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
