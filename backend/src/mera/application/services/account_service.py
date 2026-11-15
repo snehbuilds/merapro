@@ -122,7 +122,15 @@ class AccountService(WorkspaceScopedService):
     def callback_uri(self, platform: Platform) -> str:
         # One fixed URI per platform: platforms only accept pre-registered redirect URIs,
         # so it cannot carry the workspace (deliberate deviation from docs/04 §4.2).
-        return f"{self._api_url}/api/v1/social-accounts/oauth/{platform.value}/callback"
+        import os
+        pub_api = os.environ.get("MERA_PUBLIC_API_URL")
+        if pub_api:
+            base = pub_api.rstrip("/").removesuffix("/api/v1")
+        elif "api:" in self._api_url or "localhost" in self._api_url:
+            base = self._public_url
+        else:
+            base = self._api_url
+        return f"{base.rstrip('/')}/api/v1/social-accounts/oauth/{platform.value}/callback"
 
     def connector(self, platform: Platform) -> PlatformConnector:
         c = self._connectors.get(platform)

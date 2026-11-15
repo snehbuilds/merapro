@@ -77,7 +77,15 @@ class OAuthService:
         return p
 
     def callback_uri(self, provider: str) -> str:
-        return f"{self._api_url}/api/v1/auth/oauth/{provider}/callback"
+        import os
+        pub_api = os.environ.get("MERA_PUBLIC_API_URL")
+        if pub_api:
+            base = pub_api.rstrip("/").removesuffix("/api/v1")
+        elif "api:" in self._api_url or "localhost" in self._api_url:
+            base = self._public_url
+        else:
+            base = self._api_url
+        return f"{base.rstrip('/')}/api/v1/auth/oauth/{provider}/callback"
 
     async def authorize(
         self, provider: str, *, redirect_uri: str, code_challenge: str, method: str

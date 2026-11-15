@@ -62,11 +62,27 @@ def _is_local(url: str) -> bool:
 
 
 def callback_url(settings: Settings, platform: str) -> str:
-    return f"{settings.mera_api_url.rstrip('/')}/api/v1/social-accounts/oauth/{platform}/callback"
+    import os
+    pub_api = os.environ.get("MERA_PUBLIC_API_URL")
+    if pub_api:
+        base = pub_api.rstrip("/").removesuffix("/api/v1")
+    elif "api:" in settings.mera_api_url or "localhost" in settings.mera_api_url:
+        base = settings.mera_public_url
+    else:
+        base = settings.mera_api_url
+    return f"{base.rstrip('/')}/api/v1/social-accounts/oauth/{platform}/callback"
 
 
 def webhook_url(settings: Settings) -> str:
-    return f"{settings.mera_api_url.rstrip('/')}/api/v1/webhooks/telegram"
+    import os
+    pub_api = os.environ.get("MERA_PUBLIC_API_URL")
+    if pub_api:
+        base = pub_api.rstrip("/").removesuffix("/api/v1")
+    elif "api:" in settings.mera_api_url or "localhost" in settings.mera_api_url:
+        base = settings.mera_public_url
+    else:
+        base = settings.mera_api_url
+    return f"{base.rstrip('/')}/api/v1/webhooks/telegram"
 
 
 def config_checks(settings: Settings, environ: Mapping[str, str] | None = None) -> list[Check]:
