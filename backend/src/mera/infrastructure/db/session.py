@@ -41,53 +41,77 @@ class UnsafeDatabaseRole(RuntimeError):
 
 
 async def ensure_app_role(settings: Settings) -> None:
-    migration_url = (
-        settings.database_migration_url
-        or os.environ.get("DATABASE_MIGRATION_URL")
-        or f"postgresql+asyncpg://mera:{os.environ.get('POSTGRES_PASSWORD', 'mera-dev-owner')}@postgres:5432/mera"
-    )
     db_url = (
         settings.database_url
         or os.environ.get("DATABASE_URL")
         or f"postgresql+asyncpg://mera_app:{os.environ.get('MERA_APP_DB_PASSWORD', 'mera-dev-app')}@postgres:5432/mera"
     )
     import sys
-    print(f"[ensure_app_role] START: migration_url={migration_url}, db_url={db_url}", file=sys.stderr, flush=True)
     try:
         from sqlalchemy.engine import make_url
+        parsed_db = make_url(db_url)
+        db_host = parsed_db.host or "postgres"
         target_pw = (
-            (make_url(db_url).password if db_url else None)
+            parsed_db.password
             or os.environ.get("MERA_APP_DB_PASSWORD")
             or "mera-dev-app"
         )
         safe_pw = target_pw.replace("'", "''")
-        print(f"[ensure_app_role] Connecting to migration_url to configure mera_app role...", file=sys.stderr, flush=True)
-        owner_engine = create_engine(settings, url=migration_url)
-        async with owner_engine.begin() as conn:
-            await conn.execute(
-                text(
-                    f"""
-                    DO $$
-                    BEGIN
-                      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
-                        CREATE ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
-                      ELSE
-                        ALTER ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
-                      END IF;
-                    END $$;
-                    """
-                )
-            )
-            await conn.execute(text("GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app;"))
-            await conn.execute(text("GRANT ALL ON SCHEMA public TO mera_app;"))
-            await conn.execute(text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mera_app;"))
-            await conn.execute(text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mera_app;"))
-            await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mera_app;"))
-            await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO mera_app;"))
-        await owner_engine.dispose()
-        print("[ensure_app_role] SUCCESS: mera_app role created/updated and privileges granted!", file=sys.stderr, flush=True)
+        owner_pw = os.environ.get("POSTGRES_PASSWORD", "mera-dev-owner")
+        safe_owner_pw = owner_pw.replace("'", "''")
+
+        candidate_urls = [
+            f"postgresql+asyncpg://mera@{db_host}:5432/mera",
+            f"postgresql+asyncpg://mera:{owner_pw}@{db_host}:5432/mera",
+            f"postgresql+asyncpg://mera:mera@{db_host}:5432/mera",
+            f"postgresql+asyncpg://postgres@{db_host}:5432/postgres",
+            f"postgresql+asyncpg://postgres:postgres@{db_host}:5432/postgres",
+        ]
+        migration_url = settings.database_migration_url or os.environ.get("DATABASE_MIGRATION_URL")
+        if migration_url:
+            candidate_urls.insert(0, migration_url)
+
+        connected = False
+        for url in candidate_urls:
+            try:
+                owner_engine = create_engine(settings, url=url)
+                async with owner_engine.begin() as conn:
+                    await conn.execute(
+                        text(
+                            f"""
+                            DO $$
+                            BEGIN
+                              IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera') THEN
+                                CREATE ROLE mera WITH LOGIN SUPERUSER PASSWORD '{safe_owner_pw}';
+                              ELSE
+                                ALTER ROLE mera WITH LOGIN SUPERUSER PASSWORD '{safe_owner_pw}';
+                              END IF;
+                              IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
+                                CREATE ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                              ELSE
+                                ALTER ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                              END IF;
+                            END $$;
+                            """
+                        )
+                    )
+                    await conn.execute(text("GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app;"))
+                    await conn.execute(text("GRANT ALL ON SCHEMA public TO mera_app;"))
+                    await conn.execute(text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mera_app;"))
+                    await conn.execute(text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mera_app;"))
+                    await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mera_app;"))
+                    await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO mera_app;"))
+                await owner_engine.dispose()
+                connected = True
+                print(f"[ensure_app_role] SUCCESS: configured roles using candidate url", file=sys.stderr, flush=True)
+                break
+            except Exception as e:
+                print(f"[ensure_app_role] Candidate failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+
+        if not connected:
+            print("[ensure_app_role] WARNING: could not connect with any candidate URL", file=sys.stderr, flush=True)
     except Exception as exc:
-        print(f"[ensure_app_role] FAILED: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+        print(f"[ensure_app_role] UNEXPECTED ERROR: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
 
 
 async def assert_rls_bound(engine: AsyncEngine) -> None:

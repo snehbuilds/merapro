@@ -37,6 +37,7 @@ services:
       POSTGRES_USER: mera
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD:?set MERA_APP_DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     command: >
       postgres -c max_connections=200
                -c shared_preload_libraries=pg_stat_statements
