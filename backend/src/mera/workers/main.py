@@ -13,7 +13,7 @@ import sys
 import structlog
 
 from mera.config import get_settings
-from mera.infrastructure.db.session import assert_rls_bound, create_engine
+from mera.infrastructure.db.session import assert_rls_bound, create_engine, ensure_app_role
 from mera.infrastructure.queue.app import QUEUES, build_app
 from mera.observability import configure_logging
 from mera.workers.health import HEARTBEAT_PATH, heartbeat
@@ -40,6 +40,7 @@ def _parse(argv: list[str] | None) -> argparse.Namespace:
 
 async def _run(queues: list[str], concurrency: int) -> None:
     settings = get_settings()
+    await ensure_app_role(settings)
     engine = create_engine(settings)
     try:
         await assert_rls_bound(engine)  # workers hold the same RLS obligations as the API

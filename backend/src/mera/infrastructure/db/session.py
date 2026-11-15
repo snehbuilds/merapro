@@ -40,6 +40,43 @@ class UnsafeDatabaseRole(RuntimeError):
     """The app connection could bypass row-level security."""
 
 
+async def ensure_app_role(settings: Settings) -> None:
+    migration_url = settings.database_migration_url
+    if not migration_url or migration_url == settings.database_url:
+        return
+    try:
+        from sqlalchemy.engine import make_url
+        target_pw = make_url(settings.database_url).password
+        if not target_pw:
+            return
+        safe_pw = target_pw.replace("'", "''")
+        owner_engine = create_engine(settings, url=migration_url)
+        async with owner_engine.begin() as conn:
+            await conn.execute(
+                text(
+                    f"""
+                    DO $$
+                    BEGIN
+                      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
+                        CREATE ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                      ELSE
+                        ALTER ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                      END IF;
+                    END $$;
+                    """
+                )
+            )
+            await conn.execute(text("GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app;"))
+            await conn.execute(text("GRANT ALL ON SCHEMA public TO mera_app;"))
+            await conn.execute(text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mera_app;"))
+            await conn.execute(text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mera_app;"))
+            await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mera_app;"))
+            await conn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO mera_app;"))
+        await owner_engine.dispose()
+    except Exception:
+        pass
+
+
 async def assert_rls_bound(engine: AsyncEngine) -> None:
     """Refuse to run as a role that bypasses RLS.
 

@@ -60,6 +60,7 @@ from mera.infrastructure.db.session import (
     assert_rls_bound,
     create_engine,
     create_sessionmaker,
+    ensure_app_role,
 )
 from mera.infrastructure.media.generators import build_media_generator
 from mera.infrastructure.notify import build_notifier
@@ -94,6 +95,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        await ensure_app_role(settings)
         engine = create_engine(settings)
         await _check_database_role(engine, settings)
         app.state.engine = engine
