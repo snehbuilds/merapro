@@ -10,7 +10,7 @@ COPY packages/sdk/package.json packages/sdk/
 # secret (CORP_CA_BUNDLE, see docker-compose.yml). Node trusts it only through
 # NODE_EXTRA_CA_CERTS, for the steps that reach the network: corepack fetching pnpm,
 # the install, and the build. It never ends up in the image.
-RUN --mount=type=secret,id=corp_ca,required=false     if [ -s /run/secrets/corp_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/corp_ca; fi;     pnpm install --frozen-lockfile
+RUN --mount=type=secret,id=corp_ca,required=false     if [ -s /run/secrets/corp_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/corp_ca; fi;     pnpm install --frozen-lockfile --prod=false
 COPY apps/web apps/web
 COPY packages packages
 RUN --mount=type=secret,id=corp_ca,required=false     if [ -s /run/secrets/corp_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/corp_ca; fi;     pnpm --filter web build
