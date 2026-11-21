@@ -35,7 +35,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
   const path = { workspace_id: workspace.id };
   const [detail, keys, sfPolicy, spend, security] = await Promise.all([
     getWorkspaceDetail(workspace.id, here),
-    isAdmin ? getApiKeys(workspace.id, here) : Promise.resolve([]),
+    isAdmin ? optional(getApiKeys(workspace.id, here)).then((k) => k ?? []) : Promise.resolve([]),
     optional(unwrap(getSecondFactorPolicy({ client, path }), here)),
     optional(unwrap(mediaSpend({ client, path }), here)),
     optional(unwrap(securityStatus({ client }), here)),
