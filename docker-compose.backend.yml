@@ -129,16 +129,13 @@ services:
       - "4000"
     environment:
       - PORT=4000
-      - DATABASE_URL=postgresql://mera:${POSTGRES_PASSWORD}@mera-db:5432/litellm
-      - STORE_MODEL_IN_DB=True
+      - STORE_MODEL_IN_DB=False
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-mera-litellm-admin-key}
       - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-mera-litellm-salt-key-secure-2026}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-    depends_on:
-      mera-db: { condition: service_healthy }
 
   mcp-sandbox:
     build: { context: ./backend, target: mcp-sandbox, secrets: [corp_ca] }
