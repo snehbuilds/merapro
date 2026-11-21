@@ -59,9 +59,11 @@ MERA_MASTER_KEY=k2R3Rlh6S3pXZVZoMEF0SmZzM1VyY2VvM1dIdmF3eGk=
 MERA_PUBLIC_URL=https://drtea.cloud
 MERA_API_URL=http://api:8000
 MERA_PUBLIC_API_URL=https://drtea.cloud
-DATABASE_URL=postgresql+asyncpg://neondb_owner:npg_R2yWfSw0JXgt@ep-summer-hall-bcp6a1ox.c-16.us-east-1.aws.neon.tech/neondb?ssl=require
+DATABASE_URL=postgresql+asyncpg://mera_app:npg_R2yWfSw0JXgt@ep-summer-hall-bcp6a1ox.c-16.us-east-1.aws.neon.tech/neondb?ssl=require
 DATABASE_MIGRATION_URL=postgresql+asyncpg://neondb_owner:npg_R2yWfSw0JXgt@ep-summer-hall-bcp6a1ox.c-16.us-east-1.aws.neon.tech/neondb?ssl=require
+MERA_APP_DB_PASSWORD=npg_R2yWfSw0JXgt
 WEB_PROXY_SECRET=emujPEoZnCEqHNQ8As4u51KUVh0+sUMh+UN/5HjRvJs=
+MERA_WEB_PROXY_SECRET=emujPEoZnCEqHNQ8As4u51KUVh0+sUMh+UN/5HjRvJs=
 SANDBOX_MODE=false
 SANDBOX_LLM=false
 RATE_LIMIT_ENABLED=true

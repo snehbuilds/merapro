@@ -340,7 +340,10 @@ class Settings(BaseSettings):
     @property
     def libpq_dsn(self) -> str:
         """DSN for psycopg (procrastinate), derived from the asyncpg URL."""
-        return self.database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+        url = self.database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+        if "ssl=require" in url and "sslmode" not in url:
+            url = url.replace("ssl=require", "sslmode=require")
+        return url
 
 
 @lru_cache(maxsize=1)
