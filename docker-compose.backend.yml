@@ -23,6 +23,10 @@ x-backend-env: &backend-env
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
     LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
     LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+    TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+    TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+    TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+    TELEGRAM_MODE: ${TELEGRAM_MODE:-webhook}
 
 x-sandbox-client-env: &sandbox-client-env
   MCP_SANDBOX_URL: http://mcp-sandbox:8010
@@ -133,6 +137,8 @@ services:
     <<: *backend-env
     depends_on:
       api: { condition: service_healthy }
+    ports:
+      - "127.0.0.1:8001:8001"
     expose: ["8001"]
     networks: [default]
     healthcheck:
