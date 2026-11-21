@@ -31,14 +31,14 @@ def upgrade() -> None:
         DO $$
         BEGIN
           IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
-            CREATE ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+            CREATE ROLE mera_app WITH LOGIN PASSWORD '{safe_pw}';
           ELSE
-            ALTER ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+            ALTER ROLE mera_app WITH LOGIN PASSWORD '{safe_pw}';
           END IF;
         END $$;
         """
     )
-    op.execute("GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app")
+    op.execute("DO $$ BEGIN EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO mera_app', current_database()); END $$;")
     op.execute("GRANT ALL ON SCHEMA public TO mera_app")
     op.execute("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mera_app")
     op.execute("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mera_app")

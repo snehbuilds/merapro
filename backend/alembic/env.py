@@ -57,15 +57,15 @@ async def _run_async() -> None:
                     DO $$
                     BEGIN
                       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mera_app') THEN
-                        CREATE ROLE mera_app LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                        CREATE ROLE mera_app LOGIN PASSWORD '{safe_pw}';
                       ELSE
-                        ALTER ROLE mera_app WITH LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '{safe_pw}';
+                        ALTER ROLE mera_app WITH LOGIN PASSWORD '{safe_pw}';
                       END IF;
                     END $$;
                     """
                 )
             )
-            await conn.execute(text("GRANT ALL PRIVILEGES ON DATABASE mera TO mera_app;"))
+            await conn.execute(text("DO $$ BEGIN EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO mera_app', current_database()); END $$;"))
             await conn.execute(text("GRANT ALL ON SCHEMA public TO mera_app;"))
             await conn.execute(text("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mera_app;"))
             await conn.execute(text("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mera_app;"))
