@@ -30,9 +30,35 @@ x-sandbox-client-env: &sandbox-client-env
   MCP_EGRESS_PROXY: mcp-egress:3128
 
 services:
+  mera-db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mera
+      POSTGRES_USER: mera
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    command: >
+      postgres -c max_connections=200
+               -c shared_preload_libraries=pg_stat_statements
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - default
+    expose: ["5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mera -d mera"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
   migrate:
     build: { context: ./backend, target: migrate, secrets: [corp_ca] }
     <<: *backend-env
+    depends_on:
+      mera-db: { condition: service_healthy }
     restart: "no"
 
   api:
@@ -201,3 +227,4 @@ networks:
 
 volumes:
   media: {}
+  pgdata: {}
