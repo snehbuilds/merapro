@@ -53,9 +53,15 @@ services:
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.services.api.loadbalancer.server.port=8000"
     volumes: ["media:/var/lib/mera/media"]
-    networks: [default, coolify, sandbox_rpc]
+    networks: [default, sandbox_rpc]
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')",
+        ]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -65,12 +71,18 @@ services:
     <<: *backend-env
     environment:
       <<: [*backend-environment, *sandbox-client-env]
-    command: ["python", "-m", "mera.workers.main",
-              "--queues", "ingest,agents,media,publish,accounts,metrics,approvals,notify,integrations"]
+    command:
+      [
+        "python",
+        "-m",
+        "mera.workers.main",
+        "--queues",
+        "ingest,agents,media,publish,accounts,metrics,approvals,notify,integrations",
+      ]
     depends_on:
       migrate: { condition: service_completed_successfully }
     volumes: ["media:/var/lib/mera/media"]
-    networks: [default, coolify, sandbox_rpc]
+    networks: [default, sandbox_rpc]
     stop_grace_period: 60s
     healthcheck:
       test: ["CMD", "python", "-m", "mera.workers.health"]
@@ -94,9 +106,15 @@ services:
     depends_on:
       api: { condition: service_healthy }
     expose: ["8001"]
-    networks: [default, coolify]
+    networks: [default]
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8001/healthz')",
+        ]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -114,9 +132,15 @@ services:
     depends_on:
       api: { condition: service_healthy }
     expose: ["8002"]
-    networks: [default, coolify]
+    networks: [default]
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/healthz')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8002/healthz')",
+        ]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -170,9 +194,6 @@ secrets:
 
 networks:
   default: {}
-  coolify:
-    name: coolify
-    external: true
   sandbox:
     internal: true
   sandbox_rpc:
