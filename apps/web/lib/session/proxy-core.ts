@@ -33,6 +33,7 @@ export const FORWARD_REQUEST_HEADERS = [
   "if-match",
   "if-none-match",
   "last-event-id",
+  "traceparent",
   "x-request-id",
   // A single-use grant for one high-risk action (P2-M2.5); bound to the user server-side.
   "x-mera-second-factor",
@@ -125,6 +126,9 @@ async function send(req: ProxyRequest, url: string, accessToken: string | undefi
     const value = req.headers.get(name);
     if (value !== null) headers[name] = value;
   }
+  // Start a W3C trace for browser actions when the client has not supplied one. The API's
+  // FastAPI instrumentation continues it, and HTTPX then propagates it to platform calls.
+  if (!headers.traceparent) headers.traceparent = newTraceparent();
   Object.assign(headers, trustedHeaders(req.headers, deps.proxySecret));
   if (accessToken) headers.authorization = `Bearer ${accessToken}`;
   const method = req.method.toUpperCase();
@@ -165,6 +169,12 @@ async function send(req: ProxyRequest, url: string, accessToken: string | undefi
     status: upstream.status,
     code: errorCode(error),
   };
+}
+
+function newTraceparent(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
+  return `00-${hex.slice(0, 32)}-${hex.slice(32)}-01`;
 }
 
 function signedOut(): Response {
