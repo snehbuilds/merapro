@@ -21,7 +21,8 @@ export const PROXY_BASE = "/api/mera";
 
 /** Server-side base URL of the API. Compose sets MERA_API_URL=http://api:8000. */
 export function apiBaseUrl(): string {
-  return (process.env.MERA_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
+  const fallback = process.env.NODE_ENV === "production" ? "https://api.drtea.cloud" : "http://localhost:8000";
+  return (process.env.MERA_API_URL ?? process.env.MERA_PUBLIC_API_URL ?? fallback).replace(/\/+$/, "");
 }
 
 export function isProduction(): boolean {
