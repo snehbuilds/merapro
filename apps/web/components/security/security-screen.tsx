@@ -10,6 +10,7 @@ import {
   setPin,
   type SecurityOut,
 } from "@mera/sdk";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Topbar } from "@/components/shell/topbar";
@@ -52,7 +53,7 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
   );
 }
 
-function TwoStep({ status }: { status: SecurityOut }) {
+function TwoStep({ status, workspaceSlug }: { status: SecurityOut; workspaceSlug: string }) {
   const router = useRouter();
   const [setup, setSetup] = useState<{ secret: string; uri: string } | null>(null);
   const [code, setCode] = useState("");
@@ -135,7 +136,11 @@ function TwoStep({ status }: { status: SecurityOut }) {
         ) : null}
         {!status.mfa_enabled && status.mfa_required ? (
           <Notice tone="warn" role="status">
-            This server requires two-step sign-in for Admins and Owners. Until you turn it on, your access is limited to an Editor&apos;s.
+            This server requires two-step sign-in for Admins and Owners. Until you turn it on, your access is limited to an Editor&apos;s. You can still open{" "}
+            <Link className="font-medium text-accent underline" href={`/w/${workspaceSlug}/settings`}>
+              Workspace settings
+            </Link>
+            ; admin-only controls will appear after you enable two-step sign-in.
           </Notice>
         ) : null}
         {status.mfa_enabled ? (
@@ -354,7 +359,7 @@ export function SecurityScreen(props: SecurityScreenProps) {
     <>
       <Topbar title="Your security" sub="Two-step sign-in, approval PIN, out of office" />
       <main id="main" tabIndex={-1} className="grid flex-1 content-start gap-3.5 p-6 outline-none max-rail:p-4">
-        <TwoStep status={props.status} />
+        <TwoStep status={props.status} workspaceSlug={props.workspace.slug} />
         <ApprovalPin status={props.status} />
         <OutOfOffice workspace={props.workspace} me={props.me} delegates={props.delegates} />
       </main>

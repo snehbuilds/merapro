@@ -216,7 +216,7 @@ export const SCREENS: Readonly<Record<ScreenId, Screen>> = {
   },
   settings: {
     id: "settings",
-    navLabel: "Settings",
+    navLabel: "Workspace settings",
     icon: "settings",
     title: "Settings",
     sub: "Acme workspace",
