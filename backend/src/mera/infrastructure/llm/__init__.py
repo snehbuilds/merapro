@@ -51,8 +51,15 @@ class SmartLLMProvider:
             or os.getenv("ANTHROPIC_API_KEY")
         )
 
-        # If sandbox is explicitly turned off or any live provider key is provided
-        if not bool(sandbox_val) or (has_keys and not config.model.startswith("sandbox/")):
+        has_custom_url = bool(
+            cfg.get("custom_base_url")
+            or os.getenv("OPENAI_BASE_URL")
+            or os.getenv("LITELLM_PROXY_URL")
+        )
+        can_call_real = has_keys or has_custom_url
+
+        # Only attempt real LLM calls if keys or custom endpoints are actually available
+        if can_call_real and (not bool(sandbox_val) or not config.model.startswith("sandbox/")):
             return await self._real.structured(config, messages, schema, llm_config=cfg)
         return await self._fake.structured(config, messages, schema)
 

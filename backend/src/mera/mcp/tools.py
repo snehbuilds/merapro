@@ -215,24 +215,58 @@ async def create_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any
     accounts = list(a.get("social_account_ids") or [])
     if not groups and not accounts:
         raise ValueError("Name the target groups or accounts explicitly; Mera never guesses.")
-    brief = str(a["topic"]).strip()
+    
+    body = a.get("body") or a.get("content") or a.get("text")
+    brief = str(a.get("topic") or body or "").strip()
+    if not brief:
+        raise ValueError("Provide 'body' (the drafted post text) or 'topic' (a brief for drafting).")
     if a.get("link"):
         brief = f"{brief}\n\nLink to write about: {a['link']}"
+
+    # If body is provided, the MCP client (e.g. Claude) already drafted the post;
+    # do NOT invoke Mera's internal LLM. If generate is explicitly set, honor it.
+    generate = a.get("generate")
+    if generate is None:
+        generate = False if body is not None else True
+
     ps = await api.post(
         _w(ws, "/post-sets"),
         {
             "topic": brief[:2000],
             "title": a.get("title"),
             "targets": {"account_group_ids": groups, "social_account_ids": accounts},
-            "generate": True,
+            "generate": bool(generate),
         },
     )
+
+    # When drafted content is supplied, attach it as the draft version on all targets
+    content_to_save = body or (brief if not generate else None)
+    if content_to_save and ps.get("variants"):
+        for v in ps.get("variants") or []:
+            vid = v.get("id")
+            if vid:
+                try:
+                    await api.post(
+                        _w(ws, f"/post-sets/{ps['id']}/variants/{vid}/versions"),
+                        {
+                            "body": content_to_save,
+                            "link_url": a.get("link"),
+                            "hashtags": a.get("hashtags") or [],
+                        },
+                    )
+                except Exception:
+                    pass
+
     return {
         "post_set_id": ps["id"],
         "state": ps.get("state"),
         "accounts": [v.get("nickname") for v in ps.get("variants") or []],
-        "next": "Drafting is queued. Call get_post_set to read the drafts, then "
-        "request_approval. Nothing is published without an approval.",
+        "next": (
+            "Draft created with your text. Call get_post_set to review or request_approval to send for human approval."
+            if content_to_save
+            else "Drafting is queued. Call get_post_set to read the drafts, then "
+            "request_approval. Nothing is published without an approval."
+        ),
     }
 
 
@@ -410,19 +444,34 @@ TOOLS: tuple[Tool, ...] = (
     ),
     Tool(
         "create_post",
-        "Draft a post",
-        "Create a post set for the named groups and/or accounts and queue drafting, one "
-        "text per account in its own voice. Targets are required; nothing is published.",
+        "Create a post",
+        "Create a post set for the named groups and/or accounts. When you (Claude / the MCP client) "
+        "have drafted the post text, provide it in 'body' so Mera saves your draft directly without "
+        "needing internal LLM generation. If 'body' is omitted, Mera queues its internal Writer agent. "
+        "Targets are required; nothing is published without human approval.",
         _obj(
             {
                 **WS_ARG,
-                "topic": {"type": "string", "minLength": 3, "maxLength": 1800},
+                "body": {
+                    "type": "string",
+                    "maxLength": 6000,
+                    "description": "The drafted post text written by Claude. Saves directly to the post.",
+                },
+                "topic": {
+                    "type": "string",
+                    "maxLength": 1800,
+                    "description": "Topic or brief. Optional when body is provided.",
+                },
                 "link": {"type": "string", "format": "uri", "maxLength": 2048},
                 "title": {"type": "string", "maxLength": 200},
+                "hashtags": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
                 "account_group_ids": {"type": "array", "items": UUID, "maxItems": 20},
                 "social_account_ids": {"type": "array", "items": UUID, "maxItems": 50},
+                "generate": {
+                    "type": "boolean",
+                    "description": "Set to true only if you want Mera's internal Writer agent to draft the post from topic.",
+                },
             },
-            ["topic"],
         ),
         create_post,
         "drafts:write",
