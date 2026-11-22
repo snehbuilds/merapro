@@ -124,6 +124,17 @@ export function ChannelsScreen({ workspace, status, bindings, canManage }: Chann
                   .
                 </Notice>
               ) : null}
+              {!tg.configured ? (
+                <div className="grid gap-2 text-sm text-fg-muted">
+                  <p className="font-semibold text-fg">Set up the Telegram bot</p>
+                  <ol className="list-decimal space-y-1 pl-5">
+                    <li>Open <a className="underline" href="https://t.me/BotFather" target="_blank" rel="noreferrer">@BotFather</a> in Telegram, send <code>/newbot</code>, and follow the prompts.</li>
+                    <li>Give your deployment administrator the bot token and username privately. They must configure <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_BOT_USERNAME</code>, and a webhook secret on the API, worker, and bot services.</li>
+                    <li>Once the bot is configured, enable Telegram above, pair your chat below, and send a test message.</li>
+                  </ol>
+                  <p>Bot credentials are configured on the server and cannot currently be saved on this screen.</p>
+                </div>
+              ) : null}
               <DescriptionList
                 items={[
                   { term: "Bot", detail: tg.bot_username ? `@${tg.bot_username}` : "Sandbox" },

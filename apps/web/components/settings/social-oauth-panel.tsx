@@ -16,6 +16,13 @@ const PROVIDERS = {
   x: "X",
 };
 
+const PROVIDER_HELP = {
+  linkedin: { url: "https://www.linkedin.com/developers/apps", steps: "Create an app, open Auth, and copy its Client ID and Client Secret. Add the redirect URL shown below under authorized redirect URLs and request the products and permissions your account needs." },
+  meta: { url: "https://developers.facebook.com/apps/", steps: "Create a Meta developer app and add the products needed for Facebook and Instagram. Copy the App ID and App Secret from app settings, then add the redirect URL below to Facebook Login's valid OAuth redirect URIs." },
+  threads: { url: "https://developers.facebook.com/apps/", steps: "Create a Meta developer app with the Threads use case. Copy the Threads App ID and App Secret, and add the redirect URL below in the Threads API settings." },
+  x: { url: "https://developer.x.com/en/portal/dashboard", steps: "Create a project and app in the developer portal. Enable OAuth 2.0 user authentication, add the redirect URL below, and copy the OAuth 2.0 Client ID and Client Secret." },
+};
+
 export function SocialOAuthPanel({ workspaceId, archived }: { workspaceId: string; archived: boolean }) {
   const [apps, setApps] = useState<OAuthAppOut[]>();
   const [loadFailed, setLoadFailed] = useState(false);
@@ -96,6 +103,11 @@ function OAuthAppForm({ app, workspaceId, archived }: { app: OAuthAppOut; worksp
       <ul className="grid gap-1">
         {app.redirect_uris.map((uri) => <li key={uri}><code className="break-all text-caption">{uri}</code></li>)}
       </ul>
+      <details className="text-sm text-fg-muted">
+        <summary className="cursor-pointer font-semibold">How to find these credentials</summary>
+        <p className="mt-2">{PROVIDER_HELP[app.provider].steps}</p>
+        <a className="underline" href={PROVIDER_HELP[app.provider].url} target="_blank" rel="noreferrer">Open {PROVIDERS[app.provider]} developer portal</a>
+      </details>
       {archived ? null : (
         <>
           <div className="grid gap-3 sm:grid-cols-2">
