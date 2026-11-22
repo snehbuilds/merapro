@@ -1,0 +1,82 @@
+name: deploy-backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.backend.yml'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Backend to Hostinger VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key or password
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          HOST="${{ secrets.HOSTINGER_SSH_HOST || '76.13.247.87' }}"
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          if [ -n "${{ secrets.HOSTINGER_SSH_KEY }}" ]; then
+            echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+            echo "AUTH_MODE=key" >> $GITHUB_ENV
+          elif [ -n "${{ secrets.HOSTINGER_SSH_PASSWORD }}" ]; then
+            sudo apt-get update && sudo apt-get install -y sshpass
+            echo "AUTH_MODE=password" >> $GITHUB_ENV
+          else
+            echo "::error::Neither HOSTINGER_SSH_KEY nor HOSTINGER_SSH_PASSWORD secret is configured."
+            exit 1
+          fi
+
+      - name: Sync Backend Files to VPS
+        env:
+          SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+        run: |
+          HOST="${{ secrets.HOSTINGER_SSH_HOST || '76.13.247.87' }}"
+          USER="${{ secrets.HOSTINGER_SSH_USER || 'root' }}"
+
+          if [ "$AUTH_MODE" = "key" ]; then
+            SSH_CMD="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new"
+          else
+            SSH_CMD="sshpass -e ssh -o StrictHostKeyChecking=accept-new"
+          fi
+
+          rsync -avz -e "$SSH_CMD" \
+            --exclude='.env' \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='.venv' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.pytest_cache' \
+            --exclude='.mypy_cache' \
+            --exclude='.ruff_cache' \
+            --exclude='coverage.json' \
+            --exclude='.coverage' \
+            --exclude='var/' \
+            ./ ${USER}@${HOST}:/opt/merapro/
+
+      - name: Rebuild & Restart Docker Containers
+        env:
+          SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+        run: |
+          HOST="${{ secrets.HOSTINGER_SSH_HOST || '76.13.247.87' }}"
+          USER="${{ secrets.HOSTINGER_SSH_USER || 'root' }}"
+
+          if [ "$AUTH_MODE" = "key" ]; then
+            SSH_CMD="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new"
+          else
+            SSH_CMD="sshpass -e ssh -o StrictHostKeyChecking=accept-new"
+          fi
+
+          $SSH_CMD ${USER}@${HOST} "cd /opt/merapro && docker compose -f docker-compose.backend.yml up -d --build"
+          echo "✅ Backend containers successfully deployed and restarted!"
