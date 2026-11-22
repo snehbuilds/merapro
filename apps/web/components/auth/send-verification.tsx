@@ -3,6 +3,7 @@
 import { requestEmailVerification } from "@mera/sdk";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { browserApi, settle } from "@/lib/api/browser";
 import { displayMessage } from "@/lib/api/errors";
@@ -55,8 +56,9 @@ export function SendVerification({ surface = "page" }: { surface?: "page" | "rai
           role="menuitem"
           onClick={send}
           disabled={state.kind === "pending"}
-          className="flex h-7 items-center rounded-md px-2 text-left text-body text-rail-fg hover:bg-rail-active hover:text-rail-hi focus-visible:bg-rail-active focus-visible:text-rail-hi disabled:opacity-55"
+          className="flex h-7 items-center gap-2.5 rounded-md px-2 text-left text-body text-rail-fg hover:bg-rail-active hover:text-rail-hi focus-visible:bg-rail-active focus-visible:text-rail-hi disabled:opacity-55"
         >
+          <Icon name="refresh" size="sm" className="text-rail-subtle" />
           {state.kind === "pending" ? "Sending…" : "Send verification link"}
         </button>
       ) : (

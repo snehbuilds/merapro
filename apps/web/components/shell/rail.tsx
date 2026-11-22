@@ -58,9 +58,6 @@ export function Rail() {
         <div className="flex h-(--topbar-h) shrink-0 items-center gap-2 border-b border-rail-border px-4 font-label text-md font-semibold tracking-[0.14em] text-rail-hi uppercase">
           <i aria-hidden="true" className="size-[9px] shrink-0 rotate-45 rounded-[1px] bg-rail-accent" />
           Mera
-          <span className="ml-auto font-mono text-2xs font-normal tracking-normal text-rail-subtle normal-case">
-            phase 1
-          </span>
         </div>
 
         <div className="px-2.5 pt-2.5 pb-1">

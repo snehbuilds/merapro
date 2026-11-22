@@ -34,8 +34,12 @@ export function McpScreen({ workspace, clients, calls, endpoint, canManage, chil
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const apiUrl =
+    endpoint && !endpoint.includes("YOUR-")
+      ? endpoint.replace(/\/mcp\/?$/, "")
+      : "https://api.drtea.cloud";
   const stdio = JSON.stringify(
-    { mcpServers: { mera: { command: "python", args: ["-m", "mera.mcp"], env: { MERA_API_URL: "https://YOUR-MERA-API", MERA_API_KEY: "mera_sk_live_…" } } } },
+    { mcpServers: { mera: { command: "python", args: ["-m", "mera.mcp"], env: { MERA_API_URL: apiUrl, MERA_API_KEY: "mera_sk_live_…" } } } },
     null,
     2,
   );
@@ -66,7 +70,7 @@ export function McpScreen({ workspace, clients, calls, endpoint, canManage, chil
             <PanelHead title={<span id="mcp-connect">Use Mera from Claude</span>} />
             <PanelBody className="grid gap-3 text-sm">
               <p>
-                Remote clients connect to <span className="font-mono">{endpoint}</span> and sign in with OAuth: you choose the
+                Remote clients connect to <span className="font-mono rounded bg-surface-sunken px-1.5 py-0.5 text-xs text-accent font-medium select-all">{endpoint}</span> and sign in with OAuth: you choose the
                 workspace and what they may do. A client can draft and send for approval; it can never approve, publish, resume
                 automation or see a credential.
               </p>

@@ -116,47 +116,49 @@ export function UserMenu() {
           role="menu"
           aria-label="Account"
           onKeyDown={onMenuKey}
-          className="absolute inset-x-0 bottom-full z-30 mb-1 grid gap-0.5 rounded-md border border-rail-border bg-rail-bg p-1 shadow-popover"
+          className="absolute left-0 bottom-full z-40 mb-1.5 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-rail-border bg-rail-bg p-1.5 shadow-popover outline-none"
         >
-          <div className="flex items-center gap-2 px-2 pt-1 pb-1.5">
-            <span className="min-w-0 truncate font-mono text-2xs text-rail-subtle" title={user.email}>
+          <div className="flex items-center justify-between gap-2 border-b border-rail-border/60 px-2 pt-1 pb-2">
+            <span className="min-w-0 flex-1 truncate font-mono text-2xs text-rail-subtle" title={user.email}>
               {user.email}
             </span>
             {user.emailVerified ? null : (
-              <span className="ml-auto shrink-0 rounded-sm border border-rail-border px-1.5 font-label text-2xs tracking-[0.08em] text-rail-fg uppercase">
+              <span className="shrink-0 rounded-[3px] border border-rail-border bg-rail-active/60 px-1.5 py-0.5 font-label text-[10px] font-medium tracking-[0.08em] text-rail-fg uppercase">
                 Unverified
               </span>
             )}
           </div>
-          {user.emailVerified ? null : <SendVerification surface="rail" />}
-          <Link
-            href={`/w/${workspace.slug}/security`}
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="flex h-7 items-center gap-2.5 rounded-md px-2 text-left text-body text-rail-fg hover:bg-rail-active hover:text-rail-hi focus-visible:bg-rail-active focus-visible:text-rail-hi"
-          >
-            <Icon name="settings" size="sm" className="text-rail-subtle" />
-            Your security
-          </Link>
-          <button
-            type="button"
-            role="menuitem"
-            disabled={busy}
-            onClick={signOut}
-            className={cn(
-              "flex h-7 items-center gap-2.5 rounded-md px-2 text-left text-body text-rail-fg",
-              "hover:bg-rail-active hover:text-rail-hi focus-visible:bg-rail-active focus-visible:text-rail-hi",
-              "disabled:opacity-55",
-            )}
-          >
-            <Icon name="arrow" size="sm" className="text-rail-subtle" />
-            {busy ? "Signing out…" : "Sign out"}
-          </button>
-          {failed ? (
-            <p role="alert" className="px-2 pb-1 text-2xs text-rail-subtle">
-              Couldn&apos;t reach Mera. Try again.
-            </p>
-          ) : null}
+          <div className="grid gap-0.5 pt-1">
+            {user.emailVerified ? null : <SendVerification surface="rail" />}
+            <Link
+              href={`/w/${workspace.slug}/security`}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex h-7 items-center gap-2.5 rounded-md px-2 text-left text-body text-rail-fg hover:bg-rail-active hover:text-rail-hi focus-visible:bg-rail-active focus-visible:text-rail-hi"
+            >
+              <Icon name="settings" size="sm" className="text-rail-subtle" />
+              Your security
+            </Link>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={busy}
+              onClick={signOut}
+              className={cn(
+                "flex h-7 items-center gap-2.5 rounded-md px-2 text-left text-body text-rail-fg",
+                "hover:bg-rail-active hover:text-rail-hi focus-visible:bg-rail-active focus-visible:text-rail-hi",
+                "disabled:opacity-55",
+              )}
+            >
+              <Icon name="arrow" size="sm" className="text-rail-subtle" />
+              {busy ? "Signing out…" : "Sign out"}
+            </button>
+            {failed ? (
+              <p role="alert" className="px-2 pb-1 text-2xs text-rail-subtle">
+                Couldn&apos;t reach Mera. Try again.
+              </p>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>
