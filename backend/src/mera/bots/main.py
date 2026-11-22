@@ -20,7 +20,7 @@ from mera.api.errors import install_error_handlers
 from mera.api.middleware.request_id import RequestIdMiddleware
 from mera.config import Settings, get_settings
 from mera.infrastructure.queue.deferrer import Deferrer, ProcrastinateDeferrer
-from mera.observability import configure_logging
+from mera.observability import configure_logging, configure_tracing, instrument_fastapi
 
 TASK = "approvals:telegram_update"
 WA_TASK = "approvals:whatsapp_update"
@@ -53,7 +53,9 @@ def _too_large() -> JSONResponse:
 def create_bots_app(settings: Settings | None = None, deferrer: Deferrer | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings)
+    configure_tracing(settings, "mera-bots")
     app = FastAPI(title="Mera bots", docs_url=None, redoc_url=None, openapi_url=None)
+    instrument_fastapi(app)
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)
     app.state.deferrer = deferrer or ProcrastinateDeferrer(settings.libpq_dsn)

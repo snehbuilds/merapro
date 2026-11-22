@@ -411,7 +411,10 @@ MIN_SECONDS_BETWEEN_SAME_PLATFORM=120
 # ---- observability ----
 LOG_LEVEL=INFO
 LOG_FORMAT=json
+# OTLP/HTTP base URL; Mera appends /v1/logs and /v1/traces.
 OTEL_EXPORTER_OTLP_ENDPOINT=
+# Optional OTLP headers, including Grafana Cloud's Authorization=Basic%20... value.
+OTEL_EXPORTER_OTLP_HEADERS=
 SENTRY_DSN=
 ```
 

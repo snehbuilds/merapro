@@ -205,6 +205,9 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_format: str = Field(default="json", pattern="^(json|console)$")
     otel_exporter_otlp_endpoint: str | None = None
+    # Standard OTLP format, e.g. ``Authorization=Basic%20<base64(instance_id:token)>``.
+    # It is deliberately not written to application logs.
+    otel_exporter_otlp_headers: SecretStr | None = None
 
     @field_validator("mera_secret_key")
     @classmethod

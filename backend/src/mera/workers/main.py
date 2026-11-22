@@ -15,7 +15,7 @@ import structlog
 from mera.config import get_settings
 from mera.infrastructure.db.session import assert_rls_bound, create_engine, ensure_app_role
 from mera.infrastructure.queue.app import QUEUES, build_app
-from mera.observability import configure_logging
+from mera.observability import configure_logging, configure_tracing
 from mera.workers.health import HEARTBEAT_PATH, heartbeat
 
 log = structlog.get_logger(__name__)
@@ -58,7 +58,9 @@ async def _run(queues: list[str], concurrency: int) -> None:
 
 def main(argv: list[str] | None = None) -> None:
     args = _parse(argv)
-    configure_logging(get_settings())
+    settings = get_settings()
+    configure_logging(settings)
+    configure_tracing(settings, "mera-worker")
     if sys.platform == "win32":  # local dev only; psycopg async needs a selector loop
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(_run(args.queue_list, args.concurrency))

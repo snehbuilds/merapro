@@ -68,7 +68,12 @@ from mera.infrastructure.oauth.registry import build_providers
 from mera.infrastructure.platforms.connectors import build_connectors
 from mera.infrastructure.platforms.engagement import build_engagement
 from mera.infrastructure.queue.deferrer import ProcrastinateDeferrer
-from mera.observability import configure_logging, configure_tracing
+from mera.observability import (
+    configure_logging,
+    configure_tracing,
+    instrument_fastapi,
+    instrument_sqlalchemy,
+)
 
 API_PREFIX = "/api/v1"
 log = structlog.get_logger(__name__)
@@ -92,11 +97,13 @@ async def _check_database_role(engine: AsyncEngine, settings: Settings) -> None:
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings)
+    configure_tracing(settings, "mera-api")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await ensure_app_role(settings)
         engine = create_engine(settings)
+        instrument_sqlalchemy(engine.sync_engine)
         await _check_database_role(engine, settings)
         app.state.engine = engine
         sessionmaker = create_sessionmaker(engine)
@@ -236,7 +243,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.privacy_service = PrivacyService(
             sessionmaker, object_store, deferrer, security=app.state.security_service
         )
-        configure_tracing(settings, "mera-api")
         try:
             yield
         finally:
@@ -253,6 +259,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         responses={"default": {"model": ErrorEnvelope, "description": "Error envelope"}},
     )
     app.state.settings = settings
+    instrument_fastapi(app)
     # Starlette wraps in reverse order of addition: RequestId is outermost, so the rate
     # limiter and idempotency layer can stamp request ids on the responses they produce.
     secret = settings.mera_secret_key.get_secret_value()
