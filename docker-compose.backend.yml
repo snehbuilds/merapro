@@ -76,8 +76,6 @@ services:
     depends_on:
       migrate: { condition: service_completed_successfully }
     expose: ["8000"]
-    ports:
-      - "8000:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.drtea.cloud`)"
@@ -138,8 +136,6 @@ services:
     <<: *backend-env
     depends_on:
       api: { condition: service_healthy }
-    ports:
-      - "127.0.0.1:8001:8001"
     expose: ["8001"]
     networks: [default]
     healthcheck:
