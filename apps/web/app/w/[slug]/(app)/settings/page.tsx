@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSecondFactorPolicy, mediaSpend, securityStatus } from "@mera/sdk";
 import { ApiKeysPanel } from "@/components/settings/api-keys-panel";
+import { WorkspaceAccessNotice } from "@/components/security/workspace-access-notice";
 import { DigestPanel, ExportsPanel, MyDataPanel, SecurityAlertsPanel, WebhooksPanel } from "@/components/settings/integrations-panels";
 import { LLMSettingsPanel } from "@/components/settings/llm-settings-panel";
 import { MediaSpendPanel } from "@/components/settings/media-spend-panel";
@@ -30,16 +31,17 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
   const workspace = findBySlug(session.workspaces, slug);
   if (!workspace) notFound();
 
-  const isAdmin = isAdminRole(workspace.role);
   const client = await serverClient();
   const path = { workspace_id: workspace.id };
+  const detailCall = getWorkspaceDetail(workspace.id, here);
   const [detail, keys, sfPolicy, spend, security] = await Promise.all([
-    getWorkspaceDetail(workspace.id, here),
-    isAdmin ? optional(getApiKeys(workspace.id, here)).then((k) => k ?? []) : Promise.resolve([]),
+    detailCall,
+    detailCall.then((view) => isAdminRole(view.role) ? optional(getApiKeys(workspace.id, here)) : undefined),
     optional(unwrap(getSecondFactorPolicy({ client, path }), here)),
     optional(unwrap(mediaSpend({ client, path }), here)),
     optional(unwrap(securityStatus({ client }), here)),
   ]);
+  const isAdmin = isAdminRole(detail.role);
   // Validated before use: the stored JSON is the API's, but the form trusts nothing it renders.
   const rawSettings: unknown = detail.settings;
   const settings = rawSettings && typeof rawSettings === "object" ? readLevelSettings(rawSettings) : null;
@@ -56,6 +58,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
     <>
       <Topbar title={SCREENS.settings.title} sub={`${workspace.name} workspace`} />
       <main id="main" tabIndex={-1} className="grid flex-1 content-start gap-3.5 p-6 outline-none max-rail:p-4">
+        {isAdminRole(workspace.role) && !isAdmin ? <WorkspaceAccessNotice slug={slug} /> : null}
         <WorkspaceProfilePanel workspace={view} canEdit={isAdmin} />
         <WorkspaceDefaultsPanel workspace={view} settings={settings} canEdit={isAdmin} />
         <LLMSettingsPanel workspaceId={workspace.id} canEdit={isAdmin} />
@@ -64,14 +67,14 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
             workspaceId={workspace.id}
             policy={sfPolicy.data}
             canEdit={isAdmin && !workspace.archived}
-            isOwner={workspace.role === "owner"}
+            isOwner={detail.role === "owner"}
           />
         ) : null}
 
         {spend ? <MediaSpendPanel workspaceId={workspace.id} spend={spend} canEdit={isAdmin && !workspace.archived} /> : null}
 
         {isAdmin ? (
-          <ApiKeysPanel workspaceId={workspace.id} keys={keys} tz={workspace.timezone} archived={workspace.archived} />
+          <ApiKeysPanel workspaceId={workspace.id} keys={keys ?? []} tz={workspace.timezone} archived={workspace.archived} />
         ) : (
           <Panel>
             <PanelHead title="API keys" />
@@ -91,7 +94,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
           </>
         ) : null}
 
-        <DangerZonePanel workspace={view} canArchive={isAdmin} canDelete={workspace.role === "owner"} />
+        <DangerZonePanel workspace={view} canArchive={isAdmin} canDelete={detail.role === "owner"} />
 
         {security ? (
           <MyDataPanel passwordSet={security.password_set !== false} mfaEnabled={Boolean(security.mfa_enabled)} />

@@ -107,14 +107,16 @@ export interface Session {
 }
 
 /** The signed-in user and their workspaces, once per request. */
-export const getSession = cache(async (next?: string): Promise<Session> => {
+const loadSession = cache(async () => {
   const client = await serverClient();
-  const [user, page] = await Promise.all([
-    unwrap(me({ client }), next),
-    unwrap(listWorkspaces({ client }), next),
-  ]);
-  return { user, workspaces: page.data };
+  return [me({ client }), listWorkspaces({ client })] as const;
 });
+
+export async function getSession(next?: string): Promise<Session> {
+  const [userCall, workspaceCall] = await loadSession();
+  const [user, page] = await Promise.all([unwrap(userCall, next), unwrap(workspaceCall, next)]);
+  return { user, workspaces: page.data };
+}
 
 export async function getMembers(workspaceId: string, next?: string): Promise<WorkspaceMember[]> {
   const client = await serverClient();
@@ -140,11 +142,15 @@ export async function getWorkspaceDetail(workspaceId: string, next?: string): Pr
 }
 
 /** Every social account in the workspace (the caller's scope applies server-side). Once per request. */
-export const getAccounts = cache(async (workspaceId: string, next?: string): Promise<AccountOut[]> => {
+const loadAccounts = cache(async (workspaceId: string) => {
   const client = await serverClient();
-  const page = await unwrap(listAccounts({ client, path: { workspace_id: workspaceId } }), next);
-  return page.data;
+  return { call: listAccounts({ client, path: { workspace_id: workspaceId } }) };
 });
+
+export async function getAccounts(workspaceId: string, next?: string): Promise<AccountOut[]> {
+  const { call } = await loadAccounts(workspaceId);
+  return (await unwrap(call, next)).data;
+}
 
 export const getGroups = cache(async (workspaceId: string, next?: string): Promise<GroupOut[]> => {
   const client = await serverClient();

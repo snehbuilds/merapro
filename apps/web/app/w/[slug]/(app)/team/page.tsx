@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Topbar } from "@/components/shell/topbar";
+import { WorkspaceAccessNotice } from "@/components/security/workspace-access-notice";
 import { InvitationsPanel } from "@/components/team/invitations-panel";
 import { MembersTable, type MemberRow } from "@/components/team/members-table";
 import { ScopeEditor } from "@/components/team/scope-editor";
 import { Panel, PanelBody, PanelFoot, PanelHead } from "@/components/ui/panel";
-import { getAccounts, getGroups, getInvitations, getMembers, getScopes, getSession, optional } from "@/lib/api/server";
+import { getAccounts, getGroups, getInvitations, getMembers, getScopes, getSession, getWorkspaceDetail, optional } from "@/lib/api/server";
 import { SCREENS } from "@/lib/nav";
 import { INVITE_FORM_ID, findBySlug, isAdminRole, scopeSummary } from "@/lib/workspace";
 
@@ -24,21 +25,23 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
   const workspace = findBySlug(session.workspaces, slug);
   if (!workspace) notFound();
 
-  const canManage = isAdminRole(workspace.role);
-  const [members, invitations] = await Promise.all([
-    getMembers(workspace.id, here),
-    canManage ? getInvitations(workspace.id, here) : Promise.resolve([]),
-  ]);
+  const assignedAdmin = isAdminRole(workspace.role);
+  const membersCall = getMembers(workspace.id, here);
+  const accessCall = assignedAdmin
+    ? getWorkspaceDetail(workspace.id, here).then((detail) => isAdminRole(detail.role))
+    : Promise.resolve(false);
+  const [members, canManage] = await Promise.all([membersCall, accessCall]);
   // Scopes are readable by Admin+ for anyone, and by each member for themself.
   const readable = members.filter((m) => m.scope_restricted && (canManage || m.user_id === session.user.id));
-  const [groups, accounts, scopes] =
+  const [groups, accounts, scopes, invitations] =
     readable.length > 0 || canManage
       ? await Promise.all([
           optional(getGroups(workspace.id, here)),
           optional(getAccounts(workspace.id, here)),
           Promise.all(readable.map((m) => optional(getScopes(workspace.id, m.user_id, here)))),
+          canManage ? getInvitations(workspace.id, here) : Promise.resolve([]),
         ])
-      : [undefined, undefined, []];
+      : [undefined, undefined, [], []];
   const scopeLabels = new Map<string, string>();
   readable.forEach((m, i) => {
     const s = scopes[i];
@@ -61,6 +64,7 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
     <>
       <Topbar title={screen.title} sub={`${members.length} ${members.length === 1 ? "member" : "members"}`} action={action} />
       <main id="main" tabIndex={-1} className="grid flex-1 content-start gap-3.5 p-6 outline-none max-rail:p-4">
+        {assignedAdmin && !canManage ? <WorkspaceAccessNotice slug={slug} /> : null}
         <Panel>
           <PanelHead title="Members" actions={<span className="text-caption text-fg-subtle">{workspace.name} workspace</span>} />
           <PanelBody flush>

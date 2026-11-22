@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { McpScreen } from "@/components/mcp/mcp-screen";
 import { RegistryPanel, type RegistryCall, type RegistryServer } from "@/components/mcp/registry-panel";
-import { getSession, serverClient } from "@/lib/api/server";
+import { WorkspaceAccessNotice } from "@/components/security/workspace-access-notice";
+import { getSession, getWorkspaceDetail, serverClient } from "@/lib/api/server";
 import { SCREENS } from "@/lib/nav";
 import { findBySlug, isAdminRole } from "@/lib/workspace";
 
@@ -49,12 +50,16 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
   if (!workspace) notFound();
   const client = await serverClient();
   const path = { workspace_id: workspace.id };
-  const admin = isAdminRole(workspace.role);
-  const [clients, calls, servers, pending] = await Promise.all([
+  const assignedAdmin = isAdminRole(workspace.role);
+  const accessCall = assignedAdmin
+    ? getWorkspaceDetail(workspace.id, here).then((detail) => isAdminRole(detail.role))
+    : Promise.resolve(false);
+  const [clients, calls, servers, pending, admin] = await Promise.all([
     listClients({ client, path }),
-    admin ? auditLog({ client, path, query: { surface: "mcp", limit: 20 } }) : Promise.resolve({ data: undefined }),
+    accessCall.then(async (allowed) => allowed ? auditLog({ client, path, query: { surface: "mcp", limit: 20 } }) : undefined),
     listServers({ client, path }),
     listCalls({ client, path, query: { state: "pending_approval" } }),
+    accessCall,
   ]);
   const registry = ((servers.data as { data?: RegistryServer[] } | undefined)?.data ?? []) as RegistryServer[];
   const waiting = ((pending.data as { data?: RegistryCall[] } | undefined)?.data ?? []) as RegistryCall[];
@@ -62,10 +67,11 @@ export default async function McpPage({ params }: { params: Promise<{ slug: stri
     <McpScreen
       workspace={{ id: workspace.id, slug: workspace.slug, timezone: workspace.timezone }}
       clients={clients.data?.data ?? []}
-      calls={calls.data?.data ?? []}
+      calls={calls?.data?.data ?? []}
       endpoint={resolveMcpEndpoint()}
       canManage={admin}
     >
+      {assignedAdmin && !admin ? <WorkspaceAccessNotice slug={slug} /> : null}
       <RegistryPanel
         workspace={{ id: workspace.id, timezone: workspace.timezone }}
         servers={registry}

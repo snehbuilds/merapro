@@ -2,9 +2,10 @@ import { auditLog } from "@mera/sdk";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuditScreen } from "@/components/audit/audit-screen";
+import { WorkspaceAccessNotice } from "@/components/security/workspace-access-notice";
 import { Topbar } from "@/components/shell/topbar";
 import { Notice } from "@/components/ui/notice";
-import { getAccounts, getSession, optional, serverClient, unwrap } from "@/lib/api/server";
+import { ApiRequestError, getAccounts, getSession, optional, serverClient, unwrap } from "@/lib/api/server";
 import { auditAction } from "@/lib/audit";
 import { SCREENS } from "@/lib/nav";
 import { findBySlug, isAdminRole } from "@/lib/workspace";
@@ -42,9 +43,22 @@ export default async function AuditPage({
     unwrap(
       auditLog({ client, path: { workspace_id: workspace.id }, query: { limit: 50, action: action || null, account_id: accountId } }),
       here,
-    ),
+    ).catch((error: unknown) => {
+      if (error instanceof ApiRequestError && error.apiError.status === 403) return null;
+      throw error;
+    }),
     optional(getAccounts(workspace.id, here)),
   ]);
+  if (!page) {
+    return (
+      <>
+        <Topbar title={SCREENS.audit.title} />
+        <main id="main" tabIndex={-1} className="p-6 outline-none">
+          <WorkspaceAccessNotice slug={slug} />
+        </main>
+      </>
+    );
+  }
   return (
     <AuditScreen
       workspace={{ id: workspace.id, slug: workspace.slug, timezone: workspace.timezone }}

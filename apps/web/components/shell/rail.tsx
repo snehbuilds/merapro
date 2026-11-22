@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Icon } from "@/components/icons";
 import { MOBILE_RAIL_QUERY, useMediaQuery } from "@/hooks/use-media-query";
-import { navCounts } from "@/lib/demo";
 import { screenFromPath, screenHref, visibleNav } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { KillSwitch } from "./kill-switch";
-import { useShell } from "./shell-provider";
+import { useShell, type NavCounts } from "./shell-provider";
 import { UserMenu } from "./user-menu";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
@@ -20,8 +19,9 @@ export const RAIL_ID = "app-rail";
  * it goes off-canvas; while closed there it is `inert` so its links are not
  * tab stops behind the page.
  */
-export function Rail() {
+export function Rail({ liveCounts }: { liveCounts?: NavCounts }) {
   const { workspace, workspaces, counts, railOpen, setRailOpen } = useShell();
+  const displayedCounts = liveCounts ?? counts;
   const pathname = usePathname();
   const current = screenFromPath(pathname);
   const isMobile = useMediaQuery(MOBILE_RAIL_QUERY);
@@ -78,8 +78,7 @@ export function Rail() {
               <ul aria-labelledby={`rail-group-${group.label.toLowerCase()}`}>
                 {group.items.map((item) => {
                   const isHere = item.id === current;
-                  // Live counts from the layout; DEMO counts (lib/demo.ts) for screens whose endpoint hasn't landed.
-                  const count = item.id in counts ? counts[item.id] : navCounts[item.id];
+                  const count = displayedCounts[item.id];
                   return (
                     <li key={item.id}>
                       <Link
