@@ -7,7 +7,6 @@ import { Icon } from "@/components/icons";
 import { MOBILE_RAIL_QUERY, useMediaQuery } from "@/hooks/use-media-query";
 import { screenFromPath, screenHref, visibleNav } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { KillSwitch } from "./kill-switch";
 import { useShell, type NavCounts } from "./shell-provider";
 import { UserMenu } from "./user-menu";
 import { WorkspaceSwitcher } from "./workspace-switcher";
@@ -115,7 +114,6 @@ export function Rail({ liveCounts }: { liveCounts?: NavCounts }) {
 
         <div className="grid gap-2 border-t border-rail-border p-2.5">
           <UserMenu />
-          <KillSwitch />
         </div>
       </aside>
     </>

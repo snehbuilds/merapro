@@ -1,4 +1,5 @@
 export { CommandPalette } from "./command-palette";
+export { CreateWorkspaceDialog } from "./create-workspace-dialog";
 export { KillSwitch } from "./kill-switch";
 export { Rail, RAIL_ID } from "./rail";
 export { ScreenPlaceholder } from "./screen-placeholder";

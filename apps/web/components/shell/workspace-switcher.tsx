@@ -6,6 +6,7 @@ import { Icon } from "@/components/icons";
 import { screenFromPath, screenHref } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import type { ShellWorkspace } from "@/lib/workspace";
+import { CreateWorkspaceDialog } from "./create-workspace-dialog";
 
 /*
  * mera.css .ws, made real: a button that opens a single-select listbox
@@ -23,6 +24,7 @@ export function WorkspaceSwitcher({
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [active, setActive] = useState(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -128,43 +130,65 @@ export function WorkspaceSwitcher({
       </button>
 
       {open ? (
-        <ul
-          ref={listRef}
-          id={listId}
-          role="listbox"
-          tabIndex={-1}
-          aria-label="Workspaces"
-          aria-activedescendant={optionId(active)}
-          onKeyDown={onListKey}
-          className="absolute inset-x-0 top-full z-30 mt-1 grid gap-0.5 rounded-md border border-rail-border bg-rail-bg p-1 shadow-popover outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
-        >
-          {workspaces.map((ws, i) => {
-            const selected = ws.slug === current.slug;
-            return (
-              // Keyboard handling lives on the listbox (aria-activedescendant pattern).
-              <li
-                key={ws.slug}
-                id={optionId(i)}
-                role="option"
-                aria-selected={selected}
-                onPointerMove={() => setActive(i)}
-                onClick={() => choose(ws)}
-                className={cn(
-                  "flex cursor-pointer items-center gap-2.5 rounded-md p-1.5 text-rail-fg",
-                  i === active && "bg-rail-active text-rail-hi",
-                )}
-              >
-                <WorkspaceMark ws={ws} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-body leading-[1.3] font-semibold text-rail-hi">{ws.name}</span>
-                  <span className="block truncate text-xs text-rail-subtle">{ws.meta}</span>
-                </span>
-                {selected ? <Icon name="check" size="sm" className="text-rail-accent" /> : null}
-              </li>
-            );
-          })}
-        </ul>
+        <div className="absolute inset-x-0 top-full z-30 mt-1 grid gap-0.5 rounded-md border border-rail-border bg-rail-bg p-1 shadow-popover outline-none">
+          <ul
+            ref={listRef}
+            id={listId}
+            role="listbox"
+            tabIndex={-1}
+            aria-label="Workspaces"
+            aria-activedescendant={optionId(active)}
+            onKeyDown={onListKey}
+            className="grid gap-0.5 outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            {workspaces.map((ws, i) => {
+              const selected = ws.slug === current.slug;
+              return (
+                // Keyboard handling lives on the listbox (aria-activedescendant pattern).
+                <li
+                  key={ws.slug}
+                  id={optionId(i)}
+                  role="option"
+                  aria-selected={selected}
+                  onPointerMove={() => setActive(i)}
+                  onClick={() => choose(ws)}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2.5 rounded-md p-1.5 text-rail-fg",
+                    i === active && "bg-rail-active text-rail-hi",
+                  )}
+                >
+                  <WorkspaceMark ws={ws} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-body leading-[1.3] font-semibold text-rail-hi">{ws.name}</span>
+                    <span className="block truncate text-xs text-rail-subtle">{ws.meta}</span>
+                  </span>
+                  {selected ? <Icon name="check" size="sm" className="text-rail-accent" /> : null}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="my-0.5 h-px bg-rail-border" />
+          <button
+            type="button"
+            onClick={() => {
+              close(false);
+              setCreateOpen(true);
+            }}
+            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md p-1.5 text-left text-rail-fg hover:bg-rail-hover hover:text-rail-hi"
+          >
+            <span
+              aria-hidden="true"
+              className="grid size-[26px] shrink-0 place-items-center rounded-sm border border-dashed border-rail-border font-label text-mono-xs text-rail-subtle"
+            >
+              <Icon name="plus" size="sm" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-body font-medium leading-[1.3]">Create workspace</span>
+            </span>
+          </button>
+        </div>
       ) : null}
+      <CreateWorkspaceDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }

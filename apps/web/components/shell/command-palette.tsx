@@ -83,6 +83,21 @@ export function CommandPalette() {
                 heading="Actions"
                 className={cn(groupClass, "[&_[cmdk-group-heading]]:pt-2.5")}
               >
+                <Command.Item
+                  value="create-workspace"
+                  keywords={["create workspace", "new workspace", "add workspace"]}
+                  onSelect={() => {
+                    setPaletteOpen(false);
+                    router.push("/welcome");
+                  }}
+                  className={itemClass}
+                >
+                  <strong className="flex items-center gap-2 text-body font-semibold">
+                    <Icon name="plus" size="sm" className="text-fg-subtle" />
+                    Create workspace
+                  </strong>
+                  <span className="text-caption text-fg-subtle">Set up a new workspace for your accounts and team</span>
+                </Command.Item>
                 {THEME_ACTIONS.map((a) => (
                   <Command.Item
                     key={a.pref}

@@ -44,7 +44,12 @@ const SERVER_ZONES: readonly string[] = ["UTC"];
  * edits it; the timezone defaults to the browser's IANA zone (read after
  * hydration, so server and client markup agree).
  */
-export function CreateWorkspaceForm() {
+export interface CreateWorkspaceFormProps {
+  onSuccess?: (slug: string) => void;
+  onCancel?: () => void;
+}
+
+export function CreateWorkspaceForm({ onSuccess, onCancel }: CreateWorkspaceFormProps = {}) {
   const router = useRouter();
   const detectedZone = useSyncExternalStore(noopSubscribe, browserTimeZone, () => null);
   const zones = useSyncExternalStore(noopSubscribe, zoneList, () => SERVER_ZONES);
@@ -73,8 +78,12 @@ export function CreateWorkspaceForm() {
       createWorkspace({ client: browserApi, headers: idempotencyHeaders(), body: { name: name.trim(), slug, timezone } }),
     );
     if (result.ok) {
-      router.push(screenHref(result.data.slug, "dashboard"));
-      router.refresh();
+      if (onSuccess) {
+        onSuccess(result.data.slug);
+      } else {
+        router.push(screenHref(result.data.slug, "dashboard"));
+        router.refresh();
+      }
       return;
     }
     setPending(false);
@@ -130,9 +139,21 @@ export function CreateWorkspaceForm() {
           ))}
         </Select>
       </Field>
-      <Button type="submit" variant="primary" disabled={pending || !name.trim()} className="w-full">
-        {pending ? "Creating workspace…" : "Create workspace"}
-      </Button>
+      <div className={onCancel ? "flex items-center justify-end gap-2 pt-1" : ""}>
+        {onCancel ? (
+          <Button type="button" variant="default" onClick={onCancel} disabled={pending}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={pending || !name.trim()}
+          className={onCancel ? "" : "w-full"}
+        >
+          {pending ? "Creating workspace…" : "Create workspace"}
+        </Button>
+      </div>
     </form>
   );
 }
