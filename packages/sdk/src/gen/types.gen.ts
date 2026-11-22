@@ -5639,6 +5639,16 @@ export type TargetsIn = {
 };
 
 /**
+ * TelegramBotIn
+ */
+export type TelegramBotIn = {
+    /**
+     * Token
+     */
+    token: string;
+};
+
+/**
  * TemplateIn
  */
 export type TemplateIn = {
@@ -9166,6 +9176,36 @@ export type SetTelegramResponses = {
 };
 
 export type SetTelegramResponse = SetTelegramResponses[keyof SetTelegramResponses];
+
+export type SaveTelegramBotData = {
+    body: TelegramBotIn;
+    path: {
+        /**
+         * Workspace Id
+         */
+        workspace_id: string;
+    };
+    query?: never;
+    url: '/api/v1/workspaces/{workspace_id}/approval-channels/telegram/bot';
+};
+
+export type SaveTelegramBotErrors = {
+    /**
+     * Error envelope
+     */
+    default: ErrorEnvelope;
+};
+
+export type SaveTelegramBotError = SaveTelegramBotErrors[keyof SaveTelegramBotErrors];
+
+export type SaveTelegramBotResponses = {
+    /**
+     * Successful Response
+     */
+    200: ChannelStatus;
+};
+
+export type SaveTelegramBotResponse = SaveTelegramBotResponses[keyof SaveTelegramBotResponses];
 
 export type TestTelegramData = {
     body?: never;

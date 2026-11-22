@@ -25,7 +25,8 @@ export type ScreenId =
   | "mcp"
   | "team"
   | "audit"
-  | "settings";
+  | "settings"
+  | "docs";
 
 export interface Screen {
   id: ScreenId;
@@ -223,6 +224,14 @@ export const SCREENS: Readonly<Record<ScreenId, Screen>> = {
     paletteLabel: "Settings",
     paletteHint: "Workspace and usage",
   },
+  docs: {
+    id: "docs",
+    navLabel: "Help & docs",
+    icon: "hash",
+    title: "Help & docs",
+    paletteLabel: "Help & docs",
+    paletteHint: "Guides for every workspace menu",
+  },
 };
 
 /** Rail groups in mera.js NAV order. */
@@ -230,7 +239,7 @@ export const NAV_GROUPS: readonly { label: string; items: readonly ScreenId[] }[
   { label: "Work", items: ["dashboard", "approvals", "composer", "calendar", "inbox", "analytics"] },
   { label: "Content", items: ["sources", "discovery", "voice", "library"] },
   { label: "Accounts", items: ["accounts", "groups"] },
-  { label: "System", items: ["agents", "automation", "channels", "mcp", "team", "audit", "settings"] },
+  { label: "System", items: ["agents", "automation", "channels", "mcp", "team", "audit", "settings", "docs"] },
 ];
 
 /** Command palette order, from mera.js SCREENS. */
@@ -254,6 +263,7 @@ export const PALETTE_ORDER: readonly ScreenId[] = [
   "team",
   "audit",
   "settings",
+  "docs",
 ];
 
 export type FeatureFlags = Readonly<Record<Feature, boolean>>;

@@ -10048,6 +10048,21 @@
         "title": "TargetsIn",
         "type": "object"
       },
+      "TelegramBotIn": {
+        "properties": {
+          "token": {
+            "maxLength": 256,
+            "minLength": 20,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "TelegramBotIn",
+        "type": "object"
+      },
       "TemplateIn": {
         "properties": {
           "description": {
@@ -16504,6 +16519,64 @@
           }
         ],
         "summary": "Set Telegram",
+        "tags": [
+          "approval-channels"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{workspace_id}/approval-channels/telegram/bot": {
+      "put": {
+        "operationId": "save_telegram_bot_api_v1_workspaces__workspace_id__approval_channels_telegram_bot_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TelegramBotIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error envelope"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Telegram Bot",
         "tags": [
           "approval-channels"
         ]

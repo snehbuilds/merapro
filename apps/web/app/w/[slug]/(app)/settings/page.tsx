@@ -8,6 +8,7 @@ import { LLMSettingsPanel } from "@/components/settings/llm-settings-panel";
 import { MediaSpendPanel } from "@/components/settings/media-spend-panel";
 import { SecondFactorPanel } from "@/components/settings/second-factor-panel";
 import { SocialOAuthPanel } from "@/components/settings/social-oauth-panel";
+import { TelegramBotPanel } from "@/components/settings/telegram-bot-panel";
 import { DangerZonePanel, WorkspaceDefaultsPanel, WorkspaceProfilePanel } from "@/components/settings/workspace-panels";
 import { Topbar } from "@/components/shell/topbar";
 import { Notice } from "@/components/ui/notice";
@@ -64,6 +65,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
         <WorkspaceDefaultsPanel workspace={view} settings={settings} canEdit={isAdmin} />
         <LLMSettingsPanel workspaceId={workspace.id} canEdit={isAdmin} />
         {isAdmin ? <SocialOAuthPanel key={workspace.id} workspaceId={workspace.id} archived={view.archived} /> : null}
+        {isAdmin ? <TelegramBotPanel key={`telegram-${workspace.id}`} workspaceId={workspace.id} slug={workspace.slug} archived={view.archived} /> : null}
         {sfPolicy ? (
           <SecondFactorPanel
             workspaceId={workspace.id}

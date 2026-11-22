@@ -69,7 +69,28 @@ async def sweep_task(timestamp: int) -> None:
     name="dispatch", queue="approvals", retry=procrastinate.RetryStrategy(max_attempts=3, wait=5)
 )
 async def dispatch_task(kind: str, workspace_id: str, subject_id: str) -> None:
-    _, _, bot = worker_bot()
+    sm, deferrer, bot = worker_bot()
+    from mera.application.channels.workspace_telegram import credentials
+    from mera.infrastructure.channels.telegram import TelegramChannel
+    from mera.infrastructure.crypto.envelope import LocalKeyProvider
+
+    own = await credentials(
+        sm,
+        LocalKeyProvider.from_base64(get_settings().mera_master_key.get_secret_value()),
+        uuid.UUID(workspace_id),
+    )
+    if own:
+        bot = build_bot(
+            get_settings(),
+            sm,
+            deferrer,
+            channel=TelegramChannel(own["token"]),
+            posts=bot._posts,
+            media=bot._media,
+            inbox=bot._inbox,
+            registry=bot._registry,
+            workspace_bot_id=uuid.UUID(workspace_id),
+        )
     n = await bot.dispatch(kind, uuid.UUID(workspace_id), uuid.UUID(subject_id))
     wa = worker_whatsapp()
     if wa is not None:
@@ -79,8 +100,32 @@ async def dispatch_task(kind: str, workspace_id: str, subject_id: str) -> None:
 
 
 @blueprint.task(name="telegram_update", queue="approvals")
-async def telegram_update_task(update: dict[str, Any]) -> None:
-    _, _, bot = worker_bot()
+async def telegram_update_task(update: dict[str, Any], workspace_id: str | None = None) -> None:
+    sm, deferrer, bot = worker_bot()
+    if workspace_id:
+        from mera.application.channels.workspace_telegram import credentials
+        from mera.infrastructure.channels.telegram import TelegramChannel
+        from mera.infrastructure.crypto.envelope import LocalKeyProvider
+
+        own = await credentials(
+            sm,
+            LocalKeyProvider.from_base64(get_settings().mera_master_key.get_secret_value()),
+            uuid.UUID(workspace_id),
+        )
+        if own is None:
+            return
+        bot = build_bot(
+            get_settings(),
+            sm,
+            deferrer,
+            channel=TelegramChannel(own["token"]),
+            posts=bot._posts,
+            media=bot._media,
+            inbox=bot._inbox,
+            registry=bot._registry,
+            workspace_bot_id=uuid.UUID(workspace_id),
+        )
+        update = {**update, "update_id": f"{workspace_id}:{update['update_id']}"}
     outcome = await bot.handle_update(update)
     log.info("telegram.update", outcome=outcome)
 

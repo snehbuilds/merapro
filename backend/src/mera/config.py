@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     mera_master_key: SecretStr
     mera_public_url: str = "http://localhost:3000"
     mera_api_url: str = "http://localhost:8000"
+    mera_public_api_url: str | None = None
 
     # ---- database ----
     # The app connects as a non-superuser role so RLS applies (ADR-0006).

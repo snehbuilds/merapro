@@ -17,10 +17,30 @@ const PROVIDERS = {
 };
 
 const PROVIDER_HELP = {
-  linkedin: { url: "https://www.linkedin.com/developers/apps", steps: "Create an app, open Auth, and copy its Client ID and Client Secret. Add the redirect URL shown below under authorized redirect URLs and request the products and permissions your account needs." },
-  meta: { url: "https://developers.facebook.com/apps/", steps: "Create a Meta developer app and add the products needed for Facebook and Instagram. Copy the App ID and App Secret from app settings, then add the redirect URL below to Facebook Login's valid OAuth redirect URIs." },
-  threads: { url: "https://developers.facebook.com/apps/", steps: "Create a Meta developer app with the Threads use case. Copy the Threads App ID and App Secret, and add the redirect URL below in the Threads API settings." },
-  x: { url: "https://developer.x.com/en/portal/dashboard", steps: "Create a project and app in the developer portal. Enable OAuth 2.0 user authentication, add the redirect URL below, and copy the OAuth 2.0 Client ID and Client Secret." },
+  linkedin: { url: "https://www.linkedin.com/developers/apps", steps: [
+    "Create a LinkedIn developer app and associate it with the LinkedIn Page you manage.",
+    "Open the app's Auth section. Copy the Client ID and Client Secret into Mera below.",
+    "Add every Mera redirect URL shown below to the app's authorized redirect URLs.",
+    "Request the LinkedIn products and permissions your publishing use case needs. Save the app, then connect the account in Social Accounts.",
+  ] },
+  meta: { url: "https://developers.facebook.com/apps/", steps: [
+    "Create a Meta developer app for the Facebook Page or Instagram professional account you manage.",
+    "Enable the Facebook Login and relevant Page or Instagram products for your use case.",
+    "Copy the App ID and App Secret from app settings into Mera below.",
+    "Add every Mera redirect URL shown below to Facebook Login's valid OAuth redirect URIs, then connect the account in Social Accounts.",
+  ] },
+  threads: { url: "https://developers.facebook.com/apps/", steps: [
+    "Create a Meta developer app with the Threads use case and configure the Threads API.",
+    "Copy the Threads App ID and Threads App Secret from its app settings into Mera below.",
+    "Add every Mera redirect URL shown below to the Threads redirect or callback URLs.",
+    "Save the app, complete any platform review required for your users, then connect Threads in Social Accounts.",
+  ] },
+  x: { url: "https://developer.x.com/en/portal/dashboard", steps: [
+    "Create an X developer project and app with the access level needed for your use case.",
+    "Enable OAuth 2.0 user authentication and set the app permissions required to publish.",
+    "Add every Mera redirect URL shown below as an app callback URL.",
+    "Copy the OAuth 2.0 Client ID and Client Secret into Mera below, save, then connect the account in Social Accounts.",
+  ] },
 };
 
 export function SocialOAuthPanel({ workspaceId, archived }: { workspaceId: string; archived: boolean }) {
@@ -105,7 +125,7 @@ function OAuthAppForm({ app, workspaceId, archived }: { app: OAuthAppOut; worksp
       </ul>
       <details className="text-sm text-fg-muted">
         <summary className="cursor-pointer font-semibold">How to find these credentials</summary>
-        <p className="mt-2">{PROVIDER_HELP[app.provider].steps}</p>
+        <ol className="mt-2 list-decimal space-y-1 pl-5">{PROVIDER_HELP[app.provider].steps.map((step) => <li key={step}>{step}</li>)}</ol>
         <a className="underline" href={PROVIDER_HELP[app.provider].url} target="_blank" rel="noreferrer">Open {PROVIDERS[app.provider]} developer portal</a>
       </details>
       {archived ? null : (

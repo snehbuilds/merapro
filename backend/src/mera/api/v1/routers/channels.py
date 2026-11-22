@@ -3,18 +3,55 @@ inspector's phone and capture log (M9.17)."""
 
 from __future__ import annotations
 
+import hmac
+import json
 import uuid
 from datetime import datetime
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Query, Response, status
+from fastapi import APIRouter, Query, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from mera.api.deps import Channels, CurrentUser, Meta
 from mera.api.v1.routers.posts import WS
+from mera.application.channels.workspace_telegram import credentials
+from mera.infrastructure.crypto.envelope import LocalKeyProvider
 
 router = APIRouter(tags=["approval-channels"])
 sandbox_router = APIRouter(tags=["sandbox"])
+webhook_router = APIRouter(tags=["approval-channels"])
+
+
+@webhook_router.post("/webhooks/telegram/{workspace_id}", include_in_schema=False)
+async def workspace_telegram_webhook(workspace_id: uuid.UUID, request: Request) -> Response:
+    from mera.bots.main import bounded_body
+
+    settings = request.app.state.settings
+    own = await credentials(
+        request.app.state.sessionmaker,
+        LocalKeyProvider.from_base64(settings.mera_master_key.get_secret_value()),
+        workspace_id,
+    )
+    given = request.headers.get("x-telegram-bot-api-secret-token", "")
+    if own is None or not hmac.compare_digest(given, own["webhook_secret"]):
+        return Response(status_code=401)
+    raw = await bounded_body(request)
+    if raw is None:
+        return Response(status_code=413)
+    try:
+        update = json.loads(raw)
+    except ValueError:
+        return Response(status_code=200)
+    if not isinstance(update, dict) or not isinstance(update.get("update_id"), int):
+        return Response(status_code=200)
+    await request.app.state.deferrer.defer(
+        "approvals:telegram_update",
+        queue="approvals",
+        queueing_lock=f"tg:{workspace_id}:{update['update_id']}",
+        update=update,
+        workspace_id=str(workspace_id),
+    )
+    return Response(status_code=200)
 
 
 class _Out(BaseModel):
@@ -28,6 +65,10 @@ class ChannelStatus(BaseModel):
 
 class ChannelIn(BaseModel):
     enabled: bool
+
+
+class TelegramBotIn(BaseModel):
+    token: str = Field(min_length=20, max_length=256)
 
 
 class PairingCodeIn(BaseModel):
@@ -95,6 +136,13 @@ async def set_telegram(
 ) -> ChannelStatus:
     """Turn Telegram cards on or off for this workspace (Admins)."""
     return ChannelStatus(**await svc.set_enabled(user, workspace_id, meta, enabled=body.enabled))
+
+
+@router.put(f"{WS}/approval-channels/telegram/bot", response_model=ChannelStatus)
+async def save_telegram_bot(
+    workspace_id: uuid.UUID, body: TelegramBotIn, user: CurrentUser, svc: Channels, meta: Meta
+) -> ChannelStatus:
+    return ChannelStatus(**await svc.save_telegram_bot(user, workspace_id, meta, body.token))
 
 
 @router.post(f"{WS}/approval-channels/telegram/test", response_model=TestOut)

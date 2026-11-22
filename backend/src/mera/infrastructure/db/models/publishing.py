@@ -250,6 +250,7 @@ class PairingCode(UUIDPrimaryKey, Base):
 
     user_id: Mapped[uuid.UUID] = _fk("user.id")
     channel_type: Mapped[str] = mapped_column(Text, nullable=False)
+    workspace_id: Mapped[uuid.UUID | None] = _fk("workspace.id", "CASCADE", True)
     code_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[datetime | None] = _ts()

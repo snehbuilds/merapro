@@ -8,15 +8,18 @@ token issued to that person, in every workspace.
 
 from __future__ import annotations
 
+import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+import structlog
 from sqlalchemy import select, update
 
 from mera.application.channels.bot import PAIRING_TTL, BotRuntime, code_hash, new_code
 from mera.application.channels.whatsapp_state import WhatsAppState
+from mera.application.channels.workspace_telegram import KEY, credentials, seal
 from mera.application.context import AuthenticatedUser, RequestMeta
 from mera.application.errors import ConflictError, Forbidden, InvalidInput, NotFoundError
 from mera.application.services.base import WorkspaceScopedService
@@ -27,6 +30,8 @@ from mera.domain.policies import rbac
 from mera.domain.policies.rbac import Permission
 from mera.domain.ports.approval_channel import OutboundMessage
 from mera.domain.value_objects.ids import uuid7
+from mera.infrastructure.channels.telegram import TelegramChannel
+from mera.infrastructure.crypto.envelope import LocalKeyProvider
 from mera.infrastructure.db.models import (
     ApprovalChannel,
     ApprovalToken,
@@ -66,6 +71,7 @@ _SNAPSHOT = {
     "telegram": {"max_body_chars": 4096, "supports_message_edit": True},
     "whatsapp": {"max_body_chars": 1024, "supports_message_edit": False},
 }
+log = structlog.get_logger(__name__)
 
 
 class ChannelService(WorkspaceScopedService):
@@ -103,13 +109,20 @@ class ChannelService(WorkspaceScopedService):
             rows = {r.channel_type: r for r in (await s.execute(select(ApprovalChannel))).scalars()}
         row = rows.get("telegram")
         wa_row = rows.get("whatsapp")
-        configured = self._settings.telegram_bot_token is not None
+        own_bot = await credentials(
+            self._sm,
+            LocalKeyProvider.from_base64(self._settings.mera_master_key.get_secret_value()),
+            workspace_id,
+        )
+        configured = own_bot is not None or self._settings.telegram_bot_token is not None
         wa_usage = await self._wa[1].month_usage() if self._wa else None
         return {
             "telegram": {
                 "configured": configured,
                 "sandbox": not configured,
-                "bot_username": self._settings.telegram_bot_username,
+                "bot_username": own_bot["username"]
+                if own_bot
+                else self._settings.telegram_bot_username,
                 "mode": self._settings.telegram_mode,
                 "enabled": row is None or row.status == "active",
                 "last_test_at": row.last_test_at.isoformat() if row and row.last_test_at else None,
@@ -128,6 +141,72 @@ class ChannelService(WorkspaceScopedService):
                 "usage": wa_usage,
             },
         }
+
+    async def save_telegram_bot(
+        self, user: AuthenticatedUser, workspace_id: uuid.UUID, meta: RequestMeta, token: str
+    ) -> dict[str, Any]:
+        """Validate the token with Telegram before storing it; never return it."""
+        self._require_human(user)
+        async with self._tx(user, workspace_id, meta) as session:
+            principal = await load_user_principal(session, user, workspace_id)
+            rbac.require(principal, Permission.MANAGE_WORKSPACE, workspace_id)
+            workspace = await session.get(Workspace, workspace_id)
+            assert workspace is not None
+            self._ensure_writable(workspace)
+        bot = TelegramChannel(token)
+        try:
+            info = await bot.me()
+        except Exception as exc:
+            raise InvalidInput(
+                "Telegram rejected this bot token.", code="invalid_bot_token"
+            ) from exc
+        username = str(info.get("username") or "")
+        if not info.get("is_bot") or not username:
+            raise InvalidInput(
+                "This token does not identify a Telegram bot.", code="invalid_bot_token"
+            )
+        secret = secrets.token_urlsafe(32)
+        key = LocalKeyProvider.from_base64(self._settings.mera_master_key.get_secret_value())
+        old_bot = await credentials(self._sm, key, workspace_id)
+        async with self._tx(user, workspace_id, meta) as session:
+            principal = await load_user_principal(session, user, workspace_id)
+            rbac.require(principal, Permission.MANAGE_WORKSPACE, workspace_id)
+            workspace = await session.get(Workspace, workspace_id, with_for_update=True)
+            assert workspace is not None
+            self._ensure_writable(workspace)
+            workspace.oauth_apps_ct = {
+                **workspace.oauth_apps_ct,
+                KEY: seal(
+                    key,
+                    workspace_id,
+                    {
+                        "token": token,
+                        "username": username,
+                        "webhook_secret": secret,
+                    },
+                ),
+            }
+            await record(
+                session,
+                self._actor_entry(
+                    user,
+                    meta,
+                    "approval_channel.bot_saved",
+                    workspace_id=workspace_id,
+                    subject_type="workspace",
+                    subject_id=workspace_id,
+                ),
+            )
+        public_api = (self._settings.mera_public_api_url or self._settings.mera_api_url).rstrip("/")
+        if public_api.endswith("/api/v1"):
+            public_api = public_api[:-7]
+        await bot.set_webhook(f"{public_api}/api/v1/webhooks/telegram/{workspace_id}", secret)
+        if old_bot and old_bot["token"] != token:
+            try:
+                await TelegramChannel(old_bot["token"]).delete_webhook()
+            except Exception as exc:
+                log.warning("telegram.old_webhook_cleanup_failed", error_type=type(exc).__name__)
+        return await self.status(user, workspace_id, meta)
 
     async def set_enabled(
         self,
@@ -205,6 +284,25 @@ class ChannelService(WorkspaceScopedService):
         if not bindings:
             raise ConflictError("Pair a chat first, then send a test.", code="not_paired")
         runtime = self._runtime(channel_type)
+        if channel_type == "telegram":
+            own = await credentials(
+                self._sm,
+                LocalKeyProvider.from_base64(self._settings.mera_master_key.get_secret_value()),
+                workspace_id,
+            )
+            if own:
+                from mera.application.channels.factory import build_bot
+
+                runtime = build_bot(
+                    self._settings, self._sm, None, channel=TelegramChannel(own["token"])
+                )
+            bindings = [
+                b
+                for b in bindings
+                if (b.preferences or {}).get("workspace_id") == (str(workspace_id) if own else None)
+            ]
+            if not bindings:
+                raise ConflictError("Pair this workspace's bot first.", code="not_paired")
         if runtime is None:
             raise ConflictError("The approval bot is not available.", code="channel_unavailable")
         sent, error = 0, None
@@ -253,6 +351,11 @@ class ChannelService(WorkspaceScopedService):
                     .order_by(ApproverBinding.verified_at)
                 )
             ).all()
+            own = await credentials(
+                self._sm,
+                LocalKeyProvider.from_base64(self._settings.mera_master_key.get_secret_value()),
+                workspace_id,
+            )
             return [
                 BindingView(
                     b.id,
@@ -265,6 +368,8 @@ class ChannelService(WorkspaceScopedService):
                     b.user_id == user.user_id,
                 )
                 for b, name in rows
+                if b.channel_type != "telegram"
+                or (b.preferences or {}).get("workspace_id") == (str(workspace_id) if own else None)
             ]
 
     async def mint_pairing_code(
@@ -293,11 +398,21 @@ class ChannelService(WorkspaceScopedService):
                 .where(PairingCode.user_id == user.user_id, PairingCode.used_at.is_(None))
                 .values(expires_at=datetime.now(UTC))
             )
+            own_for_pair = (
+                await credentials(
+                    self._sm,
+                    LocalKeyProvider.from_base64(self._settings.mera_master_key.get_secret_value()),
+                    workspace_id,
+                )
+                if channel_type == "telegram"
+                else None
+            )
             s.add(
                 PairingCode(
                     id=uuid7(),
                     user_id=user.user_id,
                     channel_type=channel_type,
+                    workspace_id=workspace_id if own_for_pair else None,
                     code_hash=code_hash(code),
                     expires_at=expires,
                 )
@@ -315,7 +430,12 @@ class ChannelService(WorkspaceScopedService):
             )
             link = f"https://wa.me/{number}?text=%2Fpair%20{code}" if number else None
         else:
-            bot = self._settings.telegram_bot_username
+            own = await credentials(
+                self._sm,
+                LocalKeyProvider.from_base64(self._settings.mera_master_key.get_secret_value()),
+                workspace_id,
+            )
+            bot = own["username"] if own else self._settings.telegram_bot_username
             link = f"https://t.me/{bot}?start={code}" if bot else None
         return PairingCodeView(
             code=code, expires_at=expires, deep_link=link, command=f"/pair {code}"

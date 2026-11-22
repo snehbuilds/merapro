@@ -3,6 +3,8 @@ otherwise the sandbox ``FakeChannel`` (cards land in ``/sandbox`` instead of a p
 
 from __future__ import annotations
 
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from mera.application.channels.bot import BotRuntime
@@ -37,6 +39,7 @@ def build_bot(
     media: object | None = None,
     inbox: object | None = None,
     registry: object | None = None,
+    workspace_bot_id: uuid.UUID | None = None,
 ) -> BotRuntime:
     ch = channel or build_channel(settings)
     return BotRuntime(
@@ -54,6 +57,7 @@ def build_bot(
         inbox=inbox,
         registry=registry,
         mfa_enforced=settings.mfa_enforced,
+        workspace_bot_id=workspace_bot_id,
     )
 
 

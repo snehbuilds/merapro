@@ -3,6 +3,7 @@
 import {
   mintPairingCode,
   revokeBinding,
+  saveTelegramBot,
   setTelegram,
   setWhatsapp,
   testTelegram,
@@ -59,6 +60,7 @@ export function ChannelsScreen({ workspace, status, bindings, canManage }: Chann
   const [code, setCode] = useState<PairingCodeOut | null>(null);
   const [flash, setFlash] = useState<{ tone: "info" | "danger"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [botToken, setBotToken] = useState("");
   const tg = status.telegram as {
     configured: boolean;
     sandbox: boolean;
@@ -124,15 +126,25 @@ export function ChannelsScreen({ workspace, status, bindings, canManage }: Chann
                   .
                 </Notice>
               ) : null}
-              {!tg.configured ? (
+              {canManage ? (
                 <div className="grid gap-2 text-sm text-fg-muted">
-                  <p className="font-semibold text-fg">Set up the Telegram bot</p>
+                  <p className="font-semibold text-fg">{tg.configured ? "Replace Telegram bot" : "Set up the Telegram bot"}</p>
                   <ol className="list-decimal space-y-1 pl-5">
                     <li>Open <a className="underline" href="https://t.me/BotFather" target="_blank" rel="noreferrer">@BotFather</a> in Telegram, send <code>/newbot</code>, and follow the prompts.</li>
-                    <li>Give your deployment administrator the bot token and username privately. They must configure <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_BOT_USERNAME</code>, and a webhook secret on the API, worker, and bot services.</li>
-                    <li>Once the bot is configured, enable Telegram above, pair your chat below, and send a test message.</li>
+                    <li>Copy the HTTP API token BotFather gives you and paste it below. Mera verifies it with Telegram and stores it encrypted for this workspace.</li>
+                    <li>Save, pair your chat below, and send a test message. You can replace the token here if it changes.</li>
                   </ol>
-                  <p>Bot credentials are configured on the server and cannot currently be saved on this screen.</p>
+                  <label htmlFor="telegram-token" className="font-medium text-fg">Bot token</label>
+                  <input id="telegram-token" type="password" autoComplete="off" value={botToken}
+                    onChange={(event) => setBotToken(event.target.value)} disabled={busy || workspace.archived}
+                    placeholder={tg.configured ? "Enter a new token to replace the current bot" : "123456789:AA…"}
+                    className="w-full rounded-md border border-border bg-surface px-3 py-2 text-fg" />
+                  <Button size="sm" disabled={busy || workspace.archived || botToken.trim().length < 20}
+                    onClick={() => void run(() => settle(saveTelegramBot({ client: browserApi, path, body: { token: botToken.trim() } })),
+                      () => { setBotToken(""); return "Telegram bot saved. Pair your chat and send a test message."; })}>
+                    Save bot token
+                  </Button>
+                  <p>The token is never shown again. Only workspace admins can replace it. <Link className="underline" href={`/w/${workspace.slug}/docs#telegram`}>Detailed setup guide</Link></p>
                 </div>
               ) : null}
               <DescriptionList

@@ -167,6 +167,7 @@ class BotRuntime:
         inbox: Any | None = None,
         registry: Any | None = None,
         mfa_enforced: bool = False,
+        workspace_bot_id: uuid.UUID | None = None,
     ) -> None:
         self._sm = sm
         self._mfa_enforced = mfa_enforced
@@ -183,6 +184,12 @@ class BotRuntime:
         self._gov = governance
         self._public = public_url.rstrip("/")
         self._capture = sandbox_capture
+        self._workspace_bot_id = workspace_bot_id
+
+    def _paired_here(self, binding: ApproverBinding) -> bool:
+        return (binding.preferences or {}).get("workspace_id") == (
+            str(self._workspace_bot_id) if self._workspace_bot_id else None
+        )
 
     # ------------------------------------------------------------------ outbound
 
@@ -372,7 +379,7 @@ class BotRuntime:
                 )
             )
         ).all()
-        return [Recipient(u, b) for u, b in rows]
+        return [Recipient(u, b) for u, b in rows if self._paired_here(b)]
 
     def _who(self, user: User) -> AuthenticatedUser:
         return acting_user(user, mfa_enforced=self._mfa_enforced)
@@ -821,6 +828,8 @@ class BotRuntime:
             )
         sent = 0
         for binding in bindings:
+            if not self._paired_here(binding):
+                continue
             async with user_transaction(self._sm, binding.user_id) as s:
                 user = await s.get(User, binding.user_id)
                 workspaces = list(
@@ -1094,9 +1103,18 @@ class BotRuntime:
 
     async def _binding(self, chat_id: str) -> tuple[ApproverBinding, User] | None:
         async with channel_transaction(self._sm, self._ct, chat_id) as s:
-            b = (
-                await s.execute(select(ApproverBinding).where(ApproverBinding.status == "active"))
-            ).scalar_one_or_none()
+            b = next(
+                (
+                    binding
+                    for binding in (
+                        await s.execute(
+                            select(ApproverBinding).where(ApproverBinding.status == "active")
+                        )
+                    ).scalars()
+                    if self._paired_here(binding)
+                ),
+                None,
+            )
             if b is None:
                 return None
             u = await s.get(User, b.user_id)
@@ -1173,6 +1191,7 @@ class BotRuntime:
                 or row.used_at is not None
                 or row.expires_at < now
                 or row.channel_type != self._ct
+                or row.workspace_id != self._workspace_bot_id
             ):
                 if att is None:
                     att = ChannelPairingAttempt(
@@ -1193,7 +1212,8 @@ class BotRuntime:
                         select(ApproverBinding).where(ApproverBinding.status == "active")
                     )
                 ).scalars():
-                    old.status, old.revoked_at = "revoked", now  # this chat moves to its new owner
+                    if self._paired_here(old):
+                        old.status, old.revoked_at = "revoked", now
                 await s.flush()
                 binding = ApproverBinding(
                     id=uuid7(),
@@ -1201,6 +1221,9 @@ class BotRuntime:
                     channel_type=self._ct,
                     external_id=chat_id,
                     external_label=label,
+                    preferences={"workspace_id": str(self._workspace_bot_id)}
+                    if self._workspace_bot_id
+                    else {},
                     status="active",
                     verified_at=now,
                 )
@@ -1288,6 +1311,9 @@ class BotRuntime:
         except (IndexError, ValueError):
             await self._ch.answer(cb_id)
             return "ignored"
+        if self._workspace_bot_id is not None and ws != self._workspace_bot_id:
+            await self._ch.answer(cb_id, "This card belongs to another workspace bot.", alert=True)
+            return "foreign_workspace"
         if kind == "a" and len(parts) == 3:
             return await self._decide(cb_id, chat_id, ws, parts[2], binding, user)
         if kind == "q" and len(parts) == 3:
@@ -1908,7 +1934,11 @@ class BotRuntime:
                     .order_by(Workspace.name)
                 )
             ).all()
-        return [(w, r) for w, r in rows]
+        return [
+            (w, r)
+            for w, r in rows
+            if self._workspace_bot_id is None or w.id == self._workspace_bot_id
+        ]
 
     async def _active(self, binding: ApproverBinding, user: User) -> Workspace | None:
         mine = await self._workspaces(user)
