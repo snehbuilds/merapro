@@ -174,7 +174,12 @@ class McpServer:
             }
         if method == "server/discover":
             return {
-                "protocolVersions": [MODERN, *LEGACY],
+                # MCP 2026-07-28's discovery result uses ``supportedVersions``
+                # (not the earlier draft's ``protocolVersions``) and is a
+                # completed negotiation result. Hosts reject the old shape
+                # before they get as far as tools/list.
+                "resultType": "complete",
+                "supportedVersions": [MODERN, *LEGACY],
                 "capabilities": CAPABILITIES,
                 "serverInfo": SERVER_INFO,
                 "instructions": INSTRUCTIONS,

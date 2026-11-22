@@ -382,7 +382,8 @@ async def test_isolation_and_modern_era(
     assert "error" in r.json()
     # Modern era: discover, and a request with _meta needs no handshake.
     r = await rpc(mcp, key, "server/discover")
-    assert MODERN in r.json()["result"]["protocolVersions"]
+    assert r.json()["result"]["resultType"] == "complete"
+    assert MODERN in r.json()["result"]["supportedVersions"]
     out = await call(
         mcp, key, "list_post_sets", {}, _meta={"protocolVersion": MODERN, "clientCapabilities": {}}
     )
