@@ -70,6 +70,10 @@ class Tool:
     second_factor: str | None = None  # the action a pending confirmation runs
 
     def describe(self) -> dict[str, Any]:
+        # ChatGPT uses tool-level security schemes to determine which OAuth scopes a
+        # connection needs.  Resource metadata alone is not enough for it to finish
+        # linking an authenticated MCP app.
+        security_schemes = [{"type": "oauth2", "scopes": [self.scope] if self.scope else []}]
         return {
             "name": self.name,
             "title": self.title,
@@ -77,6 +81,7 @@ class Tool:
             "inputSchema": self.input_schema,
             "outputSchema": self.output_schema,
             "annotations": {"title": self.title, **self.annotations},
+            "_meta": {"securitySchemes": security_schemes},
         }
 
 
