@@ -106,6 +106,8 @@ def configure_logging(settings: Settings) -> None:
         cache_logger_on_first_use=True,
     )
     logging.basicConfig(level=level, stream=sys.stdout, format="%(message)s")
+    # HTTPX's INFO messages include the full request URL, including OAuth query secrets.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def _signal_endpoint(endpoint: str, signal: str) -> str:

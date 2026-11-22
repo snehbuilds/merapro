@@ -7,6 +7,7 @@ import { DigestPanel, ExportsPanel, MyDataPanel, SecurityAlertsPanel, WebhooksPa
 import { LLMSettingsPanel } from "@/components/settings/llm-settings-panel";
 import { MediaSpendPanel } from "@/components/settings/media-spend-panel";
 import { SecondFactorPanel } from "@/components/settings/second-factor-panel";
+import { SocialOAuthPanel } from "@/components/settings/social-oauth-panel";
 import { DangerZonePanel, WorkspaceDefaultsPanel, WorkspaceProfilePanel } from "@/components/settings/workspace-panels";
 import { Topbar } from "@/components/shell/topbar";
 import { Notice } from "@/components/ui/notice";
@@ -62,6 +63,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
         <WorkspaceProfilePanel workspace={view} canEdit={isAdmin} />
         <WorkspaceDefaultsPanel workspace={view} settings={settings} canEdit={isAdmin} />
         <LLMSettingsPanel workspaceId={workspace.id} canEdit={isAdmin} />
+        {isAdmin ? <SocialOAuthPanel key={workspace.id} workspaceId={workspace.id} archived={view.archived} /> : null}
         {sfPolicy ? (
           <SecondFactorPanel
             workspaceId={workspace.id}

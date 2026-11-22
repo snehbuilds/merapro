@@ -43,6 +43,9 @@ class Workspace(UUIDPrimaryKey, Timestamps, Base):
     settings: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
+    oauth_apps_ct: Mapped[dict[str, str]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
     cloned_from_workspace_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("workspace.id", ondelete="SET NULL")
     )

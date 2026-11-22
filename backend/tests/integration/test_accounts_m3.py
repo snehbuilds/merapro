@@ -17,7 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from mera.application.services.account_service import AccountMaintenance
 from mera.domain.context import WorkspaceContext
 from mera.domain.ports.key_provider import DecryptionError
-from mera.infrastructure.db.models import WorkspaceMember
+from mera.domain.value_objects.platform import Platform
+from mera.infrastructure.db.models import Workspace, WorkspaceMember
 from mera.infrastructure.db.session import set_workspace, workspace_transaction
 from mera.workers.tasks.accounts import sweep
 from tests.integration.conftest import make_api
@@ -144,6 +145,45 @@ def _grp(ws: str, group_id: str = "") -> str:
 
 
 # ------------------------------------------------------------------ connecting
+
+
+async def test_workspace_oauth_app_is_private_and_used_for_new_connections(
+    api: httpx.AsyncClient,
+    owner_engine: AsyncEngine,
+    app_sessionmaker: async_sessionmaker[AsyncSession],
+) -> None:
+    owner, ws = await _setup(api, "ownoauth")
+    editor = await _register_login(api, "editoauth")
+    await _add_member(owner_engine, ws, (await _me(api, editor))["id"], "editor")
+    endpoint = f"/api/v1/workspaces/{ws}/social-oauth-apps"
+    payload = {"client_id": "test-workspace-client", "client_secret": "test-workspace-secret"}
+    assert (await api.put(f"{endpoint}/x", headers=_h(editor), json=payload)).status_code == 403
+    assert (await api.put(f"{endpoint}/x", headers=_h(owner), json=payload)).status_code == 204
+    status = await api.get(endpoint, headers=_h(owner))
+    assert status.status_code == 200
+    x_app = next(app for app in status.json()["data"] if app["provider"] == "x")
+    assert x_app["source"] == "workspace"
+    assert all(value not in status.text for value in payload.values())
+    detail = await api.get(f"/api/v1/workspaces/{ws}", headers=_h(owner))
+    assert "oauth_apps_ct" not in detail.json()
+    async with workspace_transaction(app_sessionmaker, WorkspaceContext(uuid.UUID(ws))) as session:
+        workspace = await session.get(Workspace, uuid.UUID(ws))
+        assert workspace is not None
+        assert workspace.oauth_apps_ct["x"].startswith("mera:enc:")
+        assert all(value not in workspace.oauth_apps_ct["x"] for value in payload.values())
+
+    # Remove the sandbox connector for X to exercise the workspace OAuth path with no
+    # deployment-wide X credentials. Building the consent URL does not call the platform.
+    connectors = _app(api).state.connectors
+    fake = connectors.pop(Platform.X)
+    try:
+        response = await api.post(f"{_acc(ws)}/connect/x", headers=_h(owner), json={})
+        assert response.status_code == 200, response.text
+        query = parse_qs(urlsplit(response.json()["authorize_url"]).query)
+        assert query["client_id"] == [payload["client_id"]]
+        assert "client_secret" not in query
+    finally:
+        connectors[Platform.X] = fake
 
 
 async def test_five_accounts_coexist_with_separately_bound_credentials(

@@ -29,6 +29,7 @@ from urllib.parse import urlencode
 
 import httpx
 import structlog
+from opentelemetry.instrumentation.utils import suppress_instrumentation
 
 log = structlog.get_logger(__name__)
 
@@ -58,8 +59,10 @@ async def _call(
     **kw: Any,
 ) -> dict[str, Any]:
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT, transport=transport) as c:
-            resp = await c.request(method, url, **kw)
+        # Some provider OAuth endpoints require secrets or tokens in the query string.
+        with suppress_instrumentation():
+            async with httpx.AsyncClient(timeout=TIMEOUT, transport=transport) as c:
+                resp = await c.request(method, url, **kw)
     except httpx.HTTPError as exc:
         raise ConnectorError(f"could not reach the platform ({type(exc).__name__})") from exc
     if resp.status_code in (400, 401) and _looks_revoked(resp):

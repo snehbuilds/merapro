@@ -308,7 +308,7 @@ export function connectNotice(
 
 /** Messages for API errors from connect / reauthorize / disconnect / update / health check. */
 export const ACCOUNT_ERROR_TEXT: Readonly<Record<string, string>> = {
-  platform_unavailable: "That platform isn't configured on this server yet.",
+  platform_unavailable: "That platform isn’t configured. Ask a workspace admin to check Settings → Social OAuth apps.",
   instance_required: "Enter the server the account lives on, like mastodon.social.",
   invalid_instance: "That doesn't look like a public Mastodon server. Use its address, like mastodon.social.",
   instance_unavailable: "That server didn't let Mera register. Check the address, or try again later.",

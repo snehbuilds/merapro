@@ -18,7 +18,7 @@ import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlencode
 
 import structlog
@@ -63,9 +63,19 @@ from mera.infrastructure.db.session import (
 from mera.infrastructure.platforms.capabilities import PlatformCapabilities, capabilities_for
 from mera.infrastructure.platforms.connectors import (
     ConnectorError,
+    FakeConnector,
     PlatformConnector,
     ReauthRequired,
     s256,
+)
+from mera.infrastructure.platforms.oauth_connectors import ClientCredentials
+from mera.infrastructure.platforms.workspace_oauth import (
+    APP_SNAPSHOT,
+    PLATFORM_PROVIDER,
+    PROVIDER_PLATFORMS,
+    OAuthProvider,
+    connector_for_app,
+    seal_app,
 )
 
 log = structlog.get_logger(__name__)
@@ -142,6 +152,46 @@ class AccountService(WorkspaceScopedService):
             )
         return c
 
+    async def oauth_app_status(
+        self, user: AuthenticatedUser, workspace_id: uuid.UUID, meta: RequestMeta
+    ) -> dict[OAuthProvider, Literal["workspace", "server", "missing"]]:
+        self._require_human(user)
+        async with self._tx(user, workspace_id, meta) as session:
+            principal = await load_user_principal(session, user, workspace_id)
+            rbac.require(principal, Permission.MANAGE_WORKSPACE, workspace_id)
+            workspace = await session.get(Workspace, workspace_id)
+            assert workspace is not None
+            return {
+                provider: "workspace" if provider in workspace.oauth_apps_ct
+                else "server" if platforms[0] in self._connectors else "missing"
+                for provider, platforms in PROVIDER_PLATFORMS.items()
+            }
+
+    async def save_oauth_app(
+        self,
+        user: AuthenticatedUser,
+        workspace_id: uuid.UUID,
+        provider: OAuthProvider,
+        meta: RequestMeta,
+        client: ClientCredentials,
+    ) -> None:
+        self._require_human(user)
+        async with self._tx(user, workspace_id, meta) as session:
+            principal = await load_user_principal(session, user, workspace_id)
+            rbac.require(principal, Permission.MANAGE_WORKSPACE, workspace_id)
+            workspace = await session.get(Workspace, workspace_id, with_for_update=True)
+            assert workspace is not None
+            self._ensure_writable(workspace)
+            workspace.oauth_apps_ct = {
+                **workspace.oauth_apps_ct,
+                provider: seal_app(self._kp, workspace_id, provider, client),
+            }
+            await record(session, self._actor_entry(
+                user, meta, "workspace.oauth_app_saved", workspace_id=workspace_id,
+                subject_type="workspace", subject_id=workspace_id,
+                after={"provider": provider.value},
+            ))
+
     # ------------------------------------------------------------------ connect
 
     async def start_connect(
@@ -164,12 +214,6 @@ class AccountService(WorkspaceScopedService):
                 code="invalid_return_path",
                 field="return_path",
             )
-        connector = self.connector(platform)
-        if getattr(connector, "connect_method", "oauth") == "app_password":
-            raise InvalidInput(
-                f"{capabilities_for(platform).display_name} connects with an app password.",
-                code="use_app_password",
-            )
         async with self._tx(user, workspace_id, meta) as s:
             principal = await load_user_principal(s, user, workspace_id)
             rbac.require(principal, Permission.CONNECT_ACCOUNTS, workspace_id)
@@ -184,9 +228,22 @@ class AccountService(WorkspaceScopedService):
                     await self._ensure_capacity(s, workspace_id)
             else:
                 await self._ensure_capacity(s, workspace_id)
+            provider = PLATFORM_PROVIDER.get(platform)
+            snapshot = ws.oauth_apps_ct.get(provider) if provider is not None else None
+        if isinstance(self._connectors.get(platform), FakeConnector):
+            snapshot = None
+        connector = (
+            connector_for_app(self._kp, workspace_id, platform, snapshot)
+            if snapshot else self.connector(platform)
+        )
+        if getattr(connector, "connect_method", "oauth") == "app_password":
+            raise InvalidInput(
+                f"{capabilities_for(platform).display_name} connects with an app password.",
+                code="use_app_password",
+            )
         # The server is resolved, and Mera's app registered there, only after the person is
         # known to be allowed to connect: no outbound call for anyone else.
-        context: dict[str, Any] | None = None
+        context: dict[str, Any] | None = {APP_SNAPSHOT: snapshot} if snapshot else None
         if getattr(connector, "per_instance", False):
             if not instance:
                 raise InvalidInput(
@@ -231,7 +288,6 @@ class AccountService(WorkspaceScopedService):
         ``finish_connect``, which only the user who started the flow can do (Sprint 4 review
         M2: a consent link forwarded to someone else must not connect *their* account to
         the sender's workspace)."""
-        connector = self.connector(platform)
         if not state:
             raise InvalidInput("Missing state.", code="invalid_state")
         state_hash = hash_key(state)
@@ -266,6 +322,11 @@ class AccountService(WorkspaceScopedService):
         back = f"{self._public_url}{return_path}"
         if error or not code:
             return _with(back, error="platform_denied")
+        snapshot = context.get(APP_SNAPSHOT)
+        connector = (
+            connector_for_app(self._kp, flow_ws, platform, snapshot)
+            if snapshot else self.connector(platform)
+        )
         if getattr(connector, "per_instance", False):
             host = str(context.get("instance") or "")
             try:
@@ -278,7 +339,10 @@ class AccountService(WorkspaceScopedService):
                 code=code, code_verifier=verifier, redirect_uri=self.callback_uri(platform)
             )
         except ConnectorError as exc:
-            log.warning("account.connect_exchange_failed", platform=platform.value, error=str(exc))
+            log.warning(
+                "account.connect_exchange_failed", platform=platform.value,
+                error_type=type(exc).__name__,
+            )
             return _with(back, error="platform_error")
         connect_code = secrets.token_urlsafe(32)
         async with workspace_transaction(self._sm, WorkspaceContext(flow_ws)) as s:
@@ -608,7 +672,12 @@ class AccountService(WorkspaceScopedService):
             )[:200]
             account.avatar_url = _safe_url(identity["avatar_url"])
             account.account_type = identity["account_type"]
-            account.credentials_ct = self._seal(ws_id, account.id, identity["credentials"])
+            credentials = identity["credentials"]
+            snapshot = (flow.context or {}).get(APP_SNAPSHOT)
+            if snapshot:
+                credentials = {**credentials, APP_SNAPSHOT: snapshot}
+                flow.context = None
+            account.credentials_ct = self._seal(ws_id, account.id, credentials)
             account.granted_scopes = list(identity["granted_scopes"])
             account.token_issued_at = now
             account.token_expires_at = (
@@ -665,7 +734,12 @@ class AccountService(WorkspaceScopedService):
         revoke_error: str | None = None
         if creds is not None:
             try:
-                await self.connector(platform).revoke(creds)
+                snapshot = creds.pop(APP_SNAPSHOT, None)
+                connector = (
+                    connector_for_app(self._kp, workspace_id, platform, snapshot)
+                    if snapshot else self.connector(platform)
+                )
+                await connector.revoke(creds)
             except (ConnectorError, NotFoundError) as exc:
                 revoke_error = type(exc).__name__
         async with self._tx(user, workspace_id, meta) as s:
@@ -948,11 +1022,17 @@ class AccountMaintenance:
             creds = open_credentials(self._kp, account)
             platform = Platform(account.platform)
             issued_before = account.token_issued_at
-        connector = self._connectors.get(platform)
+        snapshot = creds.pop(APP_SNAPSHOT, None)
+        connector = (
+            connector_for_app(self._kp, workspace_id, platform, snapshot)
+            if snapshot else self._connectors.get(platform)
+        )
         if connector is None:
             return "skipped"
         try:
             new_creds, expires_at = await connector.refresh(creds)
+            if snapshot:
+                new_creds = {**new_creds, APP_SNAPSHOT: snapshot}
         except ReauthRequired as exc:
             await self._needs_reauth(workspace_id, account_id, _safe_reason(exc))
             return "needs_reauth"
@@ -981,7 +1061,11 @@ class AccountMaintenance:
                 return "skipped"
             creds = open_credentials(self._kp, account)
             platform = Platform(account.platform)
-        connector = self._connectors.get(platform)
+        snapshot = creds.pop(APP_SNAPSHOT, None)
+        connector = (
+            connector_for_app(self._kp, workspace_id, platform, snapshot)
+            if snapshot else self._connectors.get(platform)
+        )
         if connector is None:
             return "skipped"
         try:

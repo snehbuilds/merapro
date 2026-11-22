@@ -4765,6 +4765,227 @@
         "title": "LimitsIn",
         "type": "object"
       },
+      "LlmSettingsOut": {
+        "properties": {
+          "anthropic_key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anthropic Key Preview"
+          },
+          "custom_api_base": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Api Base"
+          },
+          "custom_key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Key Preview"
+          },
+          "gemini_key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gemini Key Preview"
+          },
+          "groq_key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groq Key Preview"
+          },
+          "has_anthropic_key": {
+            "title": "Has Anthropic Key",
+            "type": "boolean"
+          },
+          "has_custom_key": {
+            "title": "Has Custom Key",
+            "type": "boolean"
+          },
+          "has_gemini_key": {
+            "title": "Has Gemini Key",
+            "type": "boolean"
+          },
+          "has_groq_key": {
+            "title": "Has Groq Key",
+            "type": "boolean"
+          },
+          "has_openai_key": {
+            "title": "Has Openai Key",
+            "type": "boolean"
+          },
+          "has_openrouter_key": {
+            "title": "Has Openrouter Key",
+            "type": "boolean"
+          },
+          "openai_key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openai Key Preview"
+          },
+          "openrouter_key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openrouter Key Preview"
+          },
+          "sandbox_llm": {
+            "title": "Sandbox Llm",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sandbox_llm",
+          "has_openai_key",
+          "openai_key_preview",
+          "has_anthropic_key",
+          "anthropic_key_preview",
+          "has_gemini_key",
+          "gemini_key_preview",
+          "has_openrouter_key",
+          "openrouter_key_preview",
+          "has_groq_key",
+          "groq_key_preview",
+          "custom_api_base",
+          "has_custom_key",
+          "custom_key_preview"
+        ],
+        "title": "LlmSettingsOut",
+        "type": "object"
+      },
+      "LlmSettingsPatch": {
+        "properties": {
+          "anthropic_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anthropic Api Key"
+          },
+          "custom_api_base": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Api Base"
+          },
+          "custom_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Api Key"
+          },
+          "gemini_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gemini Api Key"
+          },
+          "groq_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groq Api Key"
+          },
+          "openai_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openai Api Key"
+          },
+          "openrouter_api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openrouter Api Key"
+          },
+          "sandbox_llm": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sandbox Llm"
+          }
+        },
+        "title": "LlmSettingsPatch",
+        "type": "object"
+      },
       "LoginIn": {
         "properties": {
           "device_label": {
@@ -5319,6 +5540,61 @@
         "title": "NotificationOut",
         "type": "object"
       },
+      "OAuthAppIn": {
+        "additionalProperties": false,
+        "properties": {
+          "client_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Client Id",
+            "type": "string"
+          },
+          "client_secret": {
+            "format": "password",
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Client Secret",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret"
+        ],
+        "title": "OAuthAppIn",
+        "type": "object"
+      },
+      "OAuthAppOut": {
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/OAuthProvider"
+          },
+          "redirect_uris": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Redirect Uris",
+            "type": "array"
+          },
+          "source": {
+            "enum": [
+              "workspace",
+              "server",
+              "missing"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "source",
+          "redirect_uris"
+        ],
+        "title": "OAuthAppOut",
+        "type": "object"
+      },
       "OAuthExchangeIn": {
         "properties": {
           "code": {
@@ -5340,6 +5616,16 @@
         ],
         "title": "OAuthExchangeIn",
         "type": "object"
+      },
+      "OAuthProvider": {
+        "enum": [
+          "linkedin",
+          "meta",
+          "threads",
+          "x"
+        ],
+        "title": "OAuthProvider",
+        "type": "string"
       },
       "OAuthStartOut": {
         "properties": {
@@ -5464,6 +5750,22 @@
           "data"
         ],
         "title": "Page[NotificationOut]",
+        "type": "object"
+      },
+      "Page_OAuthAppOut_": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OAuthAppOut"
+            },
+            "title": "Data",
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "Page[OAuthAppOut]",
         "type": "object"
       },
       "Page_ResolvedOut_": {
@@ -20526,6 +20828,110 @@
         ]
       }
     },
+    "/api/v1/workspaces/{workspace_id}/llm-settings": {
+      "get": {
+        "operationId": "get_llm_settings_api_v1_workspaces__workspace_id__llm_settings_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error envelope"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Llm Settings",
+        "tags": [
+          "workspaces"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_llm_settings_api_v1_workspaces__workspace_id__llm_settings_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LlmSettingsPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error envelope"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patch Llm Settings",
+        "tags": [
+          "workspaces"
+        ]
+      }
+    },
     "/api/v1/workspaces/{workspace_id}/mcp-catalog": {
       "get": {
         "description": "Curated servers, plus the public MCP Registry when it is configured (Admins).",
@@ -27350,6 +27756,113 @@
         "summary": "Slot Proposals",
         "tags": [
           "agents"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{workspace_id}/social-oauth-apps": {
+      "get": {
+        "operationId": "list_oauth_apps_api_v1_workspaces__workspace_id__social_oauth_apps_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_OAuthAppOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error envelope"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Oauth Apps",
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{workspace_id}/social-oauth-apps/{provider}": {
+      "put": {
+        "operationId": "save_oauth_app_api_v1_workspaces__workspace_id__social_oauth_apps__provider__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OAuthProvider"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthAppIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error envelope"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Oauth App",
+        "tags": [
+          "accounts"
         ]
       }
     },

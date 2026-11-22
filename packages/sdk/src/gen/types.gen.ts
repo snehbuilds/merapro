@@ -2641,6 +2641,106 @@ export type LimitsIn = {
 };
 
 /**
+ * LlmSettingsOut
+ */
+export type LlmSettingsOut = {
+    /**
+     * Anthropic Key Preview
+     */
+    anthropic_key_preview: string | null;
+    /**
+     * Custom Api Base
+     */
+    custom_api_base: string | null;
+    /**
+     * Custom Key Preview
+     */
+    custom_key_preview: string | null;
+    /**
+     * Gemini Key Preview
+     */
+    gemini_key_preview: string | null;
+    /**
+     * Groq Key Preview
+     */
+    groq_key_preview: string | null;
+    /**
+     * Has Anthropic Key
+     */
+    has_anthropic_key: boolean;
+    /**
+     * Has Custom Key
+     */
+    has_custom_key: boolean;
+    /**
+     * Has Gemini Key
+     */
+    has_gemini_key: boolean;
+    /**
+     * Has Groq Key
+     */
+    has_groq_key: boolean;
+    /**
+     * Has Openai Key
+     */
+    has_openai_key: boolean;
+    /**
+     * Has Openrouter Key
+     */
+    has_openrouter_key: boolean;
+    /**
+     * Openai Key Preview
+     */
+    openai_key_preview: string | null;
+    /**
+     * Openrouter Key Preview
+     */
+    openrouter_key_preview: string | null;
+    /**
+     * Sandbox Llm
+     */
+    sandbox_llm: boolean;
+};
+
+/**
+ * LlmSettingsPatch
+ */
+export type LlmSettingsPatch = {
+    /**
+     * Anthropic Api Key
+     */
+    anthropic_api_key?: string | null;
+    /**
+     * Custom Api Base
+     */
+    custom_api_base?: string | null;
+    /**
+     * Custom Api Key
+     */
+    custom_api_key?: string | null;
+    /**
+     * Gemini Api Key
+     */
+    gemini_api_key?: string | null;
+    /**
+     * Groq Api Key
+     */
+    groq_api_key?: string | null;
+    /**
+     * Openai Api Key
+     */
+    openai_api_key?: string | null;
+    /**
+     * Openrouter Api Key
+     */
+    openrouter_api_key?: string | null;
+    /**
+     * Sandbox Llm
+     */
+    sandbox_llm?: boolean | null;
+};
+
+/**
  * LoginIn
  */
 export type LoginIn = {
@@ -2980,6 +3080,31 @@ export type NotificationOut = {
 };
 
 /**
+ * OAuthAppIn
+ */
+export type OAuthAppIn = {
+    /**
+     * Client Id
+     */
+    client_id: string;
+};
+
+/**
+ * OAuthAppOut
+ */
+export type OAuthAppOut = {
+    provider: OAuthProvider;
+    /**
+     * Redirect Uris
+     */
+    redirect_uris: Array<string>;
+    /**
+     * Source
+     */
+    source: 'workspace' | 'server' | 'missing';
+};
+
+/**
  * OAuthExchangeIn
  */
 export type OAuthExchangeIn = {
@@ -2992,6 +3117,11 @@ export type OAuthExchangeIn = {
      */
     code_verifier: string;
 };
+
+/**
+ * OAuthProvider
+ */
+export type OAuthProvider = 'linkedin' | 'meta' | 'threads' | 'x';
 
 /**
  * OAuthStartOut
@@ -3071,6 +3201,16 @@ export type PageNotificationOut = {
      * Data
      */
     data: Array<NotificationOut>;
+};
+
+/**
+ * Page[OAuthAppOut]
+ */
+export type PageOAuthAppOut = {
+    /**
+     * Data
+     */
+    data: Array<OAuthAppOut>;
 };
 
 /**
@@ -6601,6 +6741,20 @@ export type MeraApiV1RoutersPrivacyProofIn = {
      * Your authenticator code if two-step sign-in is on, else your password; an account that signs in only with a provider gives a step-up proof
      */
     proof: string;
+};
+
+/**
+ * OAuthAppIn
+ */
+export type OAuthAppInWritable = {
+    /**
+     * Client Id
+     */
+    client_id: string;
+    /**
+     * Client Secret
+     */
+    client_secret: string;
 };
 
 export type RequestEmailVerificationData = {
@@ -11263,6 +11417,66 @@ export type InboxSummaryResponses = {
 
 export type InboxSummaryResponse = InboxSummaryResponses[keyof InboxSummaryResponses];
 
+export type GetLlmSettingsData = {
+    body?: never;
+    path: {
+        /**
+         * Workspace Id
+         */
+        workspace_id: string;
+    };
+    query?: never;
+    url: '/api/v1/workspaces/{workspace_id}/llm-settings';
+};
+
+export type GetLlmSettingsErrors = {
+    /**
+     * Error envelope
+     */
+    default: ErrorEnvelope;
+};
+
+export type GetLlmSettingsError = GetLlmSettingsErrors[keyof GetLlmSettingsErrors];
+
+export type GetLlmSettingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: LlmSettingsOut;
+};
+
+export type GetLlmSettingsResponse = GetLlmSettingsResponses[keyof GetLlmSettingsResponses];
+
+export type PatchLlmSettingsData = {
+    body: LlmSettingsPatch;
+    path: {
+        /**
+         * Workspace Id
+         */
+        workspace_id: string;
+    };
+    query?: never;
+    url: '/api/v1/workspaces/{workspace_id}/llm-settings';
+};
+
+export type PatchLlmSettingsErrors = {
+    /**
+     * Error envelope
+     */
+    default: ErrorEnvelope;
+};
+
+export type PatchLlmSettingsError = PatchLlmSettingsErrors[keyof PatchLlmSettingsErrors];
+
+export type PatchLlmSettingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: LlmSettingsOut;
+};
+
+export type PatchLlmSettingsResponse = PatchLlmSettingsResponses[keyof PatchLlmSettingsResponses];
+
 export type McpCatalogData = {
     body?: never;
     path: {
@@ -14954,6 +15168,67 @@ export type SlotProposalsResponses = {
 };
 
 export type SlotProposalsResponse = SlotProposalsResponses[keyof SlotProposalsResponses];
+
+export type ListOauthAppsData = {
+    body?: never;
+    path: {
+        /**
+         * Workspace Id
+         */
+        workspace_id: string;
+    };
+    query?: never;
+    url: '/api/v1/workspaces/{workspace_id}/social-oauth-apps';
+};
+
+export type ListOauthAppsErrors = {
+    /**
+     * Error envelope
+     */
+    default: ErrorEnvelope;
+};
+
+export type ListOauthAppsError = ListOauthAppsErrors[keyof ListOauthAppsErrors];
+
+export type ListOauthAppsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PageOAuthAppOut;
+};
+
+export type ListOauthAppsResponse = ListOauthAppsResponses[keyof ListOauthAppsResponses];
+
+export type SaveOauthAppData = {
+    body: OAuthAppInWritable;
+    path: {
+        /**
+         * Workspace Id
+         */
+        workspace_id: string;
+        provider: OAuthProvider;
+    };
+    query?: never;
+    url: '/api/v1/workspaces/{workspace_id}/social-oauth-apps/{provider}';
+};
+
+export type SaveOauthAppErrors = {
+    /**
+     * Error envelope
+     */
+    default: ErrorEnvelope;
+};
+
+export type SaveOauthAppError = SaveOauthAppErrors[keyof SaveOauthAppErrors];
+
+export type SaveOauthAppResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type SaveOauthAppResponse = SaveOauthAppResponses[keyof SaveOauthAppResponses];
 
 export type ListSourcesData = {
     body?: never;

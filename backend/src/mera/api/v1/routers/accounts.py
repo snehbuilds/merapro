@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Annotated, Any, Generic, TypeVar
+from typing import Annotated, Any, Generic, Literal, TypeVar
 
 from fastapi import APIRouter, Query, status
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, StringConstraints, field_validator
 
 from mera.api.deps import Accounts, CurrentUser, Groups, HumanUser, Meta
 from mera.application.services.account_service import AccountView
@@ -17,6 +17,8 @@ from mera.application.settings_model import LevelSettings, PostingTime
 from mera.domain.policies.settings_resolution import Resolved
 from mera.domain.value_objects.platform import AccountStatus, Platform, StaggerMode
 from mera.infrastructure.platforms.capabilities import PlatformCapabilities
+from mera.infrastructure.platforms.oauth_connectors import ClientCredentials
+from mera.infrastructure.platforms.workspace_oauth import PROVIDER_PLATFORMS, OAuthProvider
 
 router = APIRouter(tags=["accounts"])
 callbacks = APIRouter(tags=["accounts"])
@@ -193,6 +195,53 @@ def _resolved(rows: list[Resolved]) -> Page[ResolvedOut]:
 
 
 WS = "/workspaces/{workspace_id}"
+
+
+class OAuthAppIn(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    client_id: Annotated[str, StringConstraints(min_length=1, max_length=512)]
+    client_secret: SecretStr = Field(min_length=1, max_length=4096)
+
+    @field_validator("client_secret")
+    @classmethod
+    def strip_secret(cls, secret: SecretStr) -> SecretStr:
+        value = secret.get_secret_value().strip()
+        if not value:
+            raise ValueError("Enter the app secret.")
+        return SecretStr(value)
+
+
+class OAuthAppOut(BaseModel):
+    provider: OAuthProvider
+    source: Literal["workspace", "server", "missing"]
+    redirect_uris: list[str]
+
+
+@router.get(f"{WS}/social-oauth-apps", response_model=Page[OAuthAppOut])
+async def list_oauth_apps(
+    workspace_id: uuid.UUID, user: HumanUser, svc: Accounts, meta: Meta
+) -> Page[OAuthAppOut]:
+    states = await svc.oauth_app_status(user, workspace_id, meta)
+    return Page(data=[
+            OAuthAppOut(
+                provider=provider,
+                source=states[provider],
+                redirect_uris=[svc.callback_uri(platform) for platform in platforms],
+            )
+            for provider, platforms in PROVIDER_PLATFORMS.items()
+    ])
+
+
+@router.put(f"{WS}/social-oauth-apps/{{provider}}", status_code=204)
+async def save_oauth_app(
+    workspace_id: uuid.UUID, provider: OAuthProvider, body: OAuthAppIn,
+    user: HumanUser, svc: Accounts, meta: Meta,
+) -> None:
+    await svc.save_oauth_app(
+        user, workspace_id, provider, meta,
+        ClientCredentials(body.client_id, body.client_secret.get_secret_value()),
+    )
 
 # ---------------------------------------------------------------- accounts
 
