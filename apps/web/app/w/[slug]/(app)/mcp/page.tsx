@@ -37,7 +37,7 @@ function resolveMcpEndpoint(): string {
       // ignore
     }
   }
-  return process.env.MERA_PUBLIC_MCP_URL || "https://api.drtea.cloud/mcp";
+  return process.env.MERA_PUBLIC_MCP_URL || "https://mcp.drtea.cloud/mcp";
 }
 
 /* MCP: Mera as a server (P2-M8: clients, how to connect, recent calls) and the external
