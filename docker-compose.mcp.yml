@@ -1,5 +1,4 @@
-# MCP Server, Sandbox Execution & LiteLLM Proxy Stack
-# Deploys only when MCP tools, sandbox configuration, or LLM proxy settings change.
+# MCP Server and sandbox execution stack.
 
 x-backend-env: &backend-env
   env_file:
@@ -7,7 +6,7 @@ x-backend-env: &backend-env
     - path: .env
       required: false
   environment: &backend-environment
-    MERA_ENV: ${MERA_ENV:-development}
+    MERA_ENV: ${MERA_ENV:?set MERA_ENV to staging or production}
     MERA_MASTER_KEY: ${MERA_MASTER_KEY}
     MERA_SECRET_KEY: ${MERA_SECRET_KEY}
     MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-https://drtea.cloud}
@@ -18,7 +17,7 @@ x-backend-env: &backend-env
     DATABASE_URL: postgresql+asyncpg://mera_app:${MERA_APP_DB_PASSWORD}@mera-db:5432/mera
     DATABASE_MIGRATION_URL: postgresql+asyncpg://mera:${POSTGRES_PASSWORD}@mera-db:5432/mera
     WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
-    SANDBOX_LLM: ${SANDBOX_LLM:-true}
+    SANDBOX_LLM: ${SANDBOX_LLM:-false}
     MEDIA_ROOT: /var/lib/mera/media
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
 
@@ -37,34 +36,17 @@ services:
       timeout: 3s
       retries: 10
 
-  litellm:
-    build:
-      context: ./infra/litellm
-    restart: unless-stopped
-    expose:
-      - "4000"
-    environment:
-      - PORT=4000
-      - DATABASE_URL=postgresql://mera:${POSTGRES_PASSWORD}@mera-db:5432/litellm
-      - STORE_MODEL_IN_DB=True
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-mera-litellm-admin-key}
-      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-mera-litellm-salt-key-secure-2026}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-    networks:
-      coolify:
-        aliases:
-          - litellm
-
   mcp-sandbox:
     build: { context: ./backend, target: mcp-sandbox, secrets: [corp_ca] }
     runtime: ${MCP_SANDBOX_RUNTIME:-runc}
     expose: ["8010"]
     environment:
-      MERA_ENV: ${MERA_ENV:-development}
-      MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+      MERA_ENV: ${MERA_ENV:?set MERA_ENV to staging or production}
+      MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:?set MCP_SANDBOX_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     networks:
       coolify:
         aliases:
@@ -77,8 +59,12 @@ services:
     security_opt: ["no-new-privileges:true"]
     expose: ["3128", "3129"]
     environment:
-      MERA_ENV: ${MERA_ENV:-development}
-      MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+      MERA_ENV: ${MERA_ENV:?set MERA_ENV to staging or production}
+      MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:?set MCP_EGRESS_ADMIN_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     networks:
       coolify:
         aliases:

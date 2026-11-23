@@ -6,8 +6,6 @@ implicit current workspace (docs/04 §1).
 
 from __future__ import annotations
 
-import os
-import re
 import uuid
 from datetime import datetime
 from typing import Annotated, Any, Generic, Literal, TypeVar
@@ -16,10 +14,14 @@ from fastapi import APIRouter, Query, status
 from pydantic import BaseModel, EmailStr, Field
 
 from mera.api.deps import Access, CurrentUser, Meta, Security, Workspaces
+from mera.application.services.principals import load_user_principal
 from mera.application.services.workspace_service import MemberView, WorkspaceView
 from mera.application.settings_model import LevelSettings
+from mera.domain.policies import rbac
+from mera.domain.policies.rbac import Permission
 from mera.domain.value_objects.role import Role
 from mera.domain.value_objects.workspace import WorkspaceType
+from mera.infrastructure.db.models import Workspace
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 
@@ -555,24 +557,42 @@ class LlmSettingsPatch(BaseModel):
     custom_api_key: str | None = None
 
 
+async def _llm_config(
+    workspace_id: uuid.UUID,
+    user: CurrentUser,
+    svc: Workspaces,
+    meta: Meta,
+    *,
+    permission: Permission,
+) -> dict[str, Any]:
+    """Read provider configuration without ever exposing it through WorkspaceOut.
+
+    Provider keys are workspace-scoped.  UI visibility is allowed to members, but modifying
+    them is reserved for workspace managers; hiding the control in the browser is not an
+    authorization boundary.
+    """
+    async with svc._tx(user, workspace_id, meta) as s:
+        principal = await load_user_principal(s, user, workspace_id)
+        rbac.require(principal, permission, workspace_id)
+        ws = await s.get(Workspace, workspace_id)
+        return dict((ws.settings or {}).get("llm_config") or {}) if ws else {}
+
+
 @router.get("/{workspace_id}/llm-settings", response_model=LlmSettingsOut)
 async def get_llm_settings(
     workspace_id: uuid.UUID, user: CurrentUser, svc: Workspaces, meta: Meta
 ) -> LlmSettingsOut:
-    detail = await svc.get(user, workspace_id, meta)
-    ws_llm = (detail.settings or {}).get("llm_config") or {}
+    ws_llm = await _llm_config(workspace_id, user, svc, meta, permission=Permission.READ)
 
-    openai = ws_llm.get("openai_api_key") or os.getenv("OPENAI_API_KEY")
-    anthropic = ws_llm.get("anthropic_api_key") or os.getenv("ANTHROPIC_API_KEY")
-    gemini = ws_llm.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
-    openrouter = ws_llm.get("openrouter_api_key") or os.getenv("OPENROUTER_API_KEY")
-    groq = ws_llm.get("groq_api_key") or os.getenv("GROQ_API_KEY")
-    custom_base = ws_llm.get("custom_api_base") or os.getenv("OPENAI_API_BASE") or os.getenv("OPENAI_BASE_URL")
+    openai = ws_llm.get("openai_api_key")
+    anthropic = ws_llm.get("anthropic_api_key")
+    gemini = ws_llm.get("gemini_api_key")
+    openrouter = ws_llm.get("openrouter_api_key")
+    groq = ws_llm.get("groq_api_key")
+    custom_base = ws_llm.get("custom_api_base")
     custom_key = ws_llm.get("custom_api_key")
 
-    sandbox_val = ws_llm.get("sandbox_llm")
-    if sandbox_val is None:
-        sandbox_val = os.getenv("SANDBOX_LLM", "true").lower() in ("true", "1", "yes")
+    sandbox_val = ws_llm.get("sandbox_llm", False)
 
     return LlmSettingsOut(
         sandbox_llm=bool(sandbox_val),
@@ -596,54 +616,42 @@ async def get_llm_settings(
 async def patch_llm_settings(
     workspace_id: uuid.UUID, body: LlmSettingsPatch, user: CurrentUser, svc: Workspaces, meta: Meta
 ) -> LlmSettingsOut:
-    detail = await svc.get(user, workspace_id, meta)
-    settings = dict(detail.settings or {})
-    llm_cfg = dict(settings.get("llm_config") or {})
-
-    env_updates: dict[str, str | None] = {}
+    # Verify server-side permission before changing credentials.  This also prevents a
+    # viewer from bypassing the disabled form with a direct HTTP request.
+    llm_cfg = await _llm_config(
+        workspace_id, user, svc, meta, permission=Permission.MANAGE_WORKSPACE
+    )
 
     if body.sandbox_llm is not None:
         llm_cfg["sandbox_llm"] = body.sandbox_llm
-        os.environ["SANDBOX_LLM"] = "true" if body.sandbox_llm else "false"
-        env_updates["SANDBOX_LLM"] = "true" if body.sandbox_llm else "false"
 
     if body.openai_api_key is not None:
         if body.openai_api_key.strip():
             llm_cfg["openai_api_key"] = body.openai_api_key.strip()
-            os.environ["OPENAI_API_KEY"] = body.openai_api_key.strip()
-            env_updates["OPENAI_API_KEY"] = body.openai_api_key.strip()
         else:
             llm_cfg.pop("openai_api_key", None)
 
     if body.anthropic_api_key is not None:
         if body.anthropic_api_key.strip():
             llm_cfg["anthropic_api_key"] = body.anthropic_api_key.strip()
-            os.environ["ANTHROPIC_API_KEY"] = body.anthropic_api_key.strip()
-            env_updates["ANTHROPIC_API_KEY"] = body.anthropic_api_key.strip()
         else:
             llm_cfg.pop("anthropic_api_key", None)
 
     if body.gemini_api_key is not None:
         if body.gemini_api_key.strip():
             llm_cfg["gemini_api_key"] = body.gemini_api_key.strip()
-            os.environ["GEMINI_API_KEY"] = body.gemini_api_key.strip()
-            env_updates["GEMINI_API_KEY"] = body.gemini_api_key.strip()
         else:
             llm_cfg.pop("gemini_api_key", None)
 
     if body.openrouter_api_key is not None:
         if body.openrouter_api_key.strip():
             llm_cfg["openrouter_api_key"] = body.openrouter_api_key.strip()
-            os.environ["OPENROUTER_API_KEY"] = body.openrouter_api_key.strip()
-            env_updates["OPENROUTER_API_KEY"] = body.openrouter_api_key.strip()
         else:
             llm_cfg.pop("openrouter_api_key", None)
 
     if body.groq_api_key is not None:
         if body.groq_api_key.strip():
             llm_cfg["groq_api_key"] = body.groq_api_key.strip()
-            os.environ["GROQ_API_KEY"] = body.groq_api_key.strip()
-            env_updates["GROQ_API_KEY"] = body.groq_api_key.strip()
         else:
             llm_cfg.pop("groq_api_key", None)
 
@@ -651,11 +659,8 @@ async def patch_llm_settings(
         base_val = body.custom_api_base.strip()
         if base_val:
             llm_cfg["custom_api_base"] = base_val
-            os.environ["OPENAI_API_BASE"] = base_val
-            env_updates["OPENAI_API_BASE"] = base_val
         else:
             llm_cfg.pop("custom_api_base", None)
-            os.environ.pop("OPENAI_API_BASE", None)
 
     if body.custom_api_key is not None:
         key_val = body.custom_api_key.strip()
@@ -664,35 +669,18 @@ async def patch_llm_settings(
         else:
             llm_cfg.pop("custom_api_key", None)
 
-    settings["llm_config"] = llm_cfg
-
-    # Save to workspace settings
+    # Save only in the workspace.  Do not mutate process-wide environment variables or
+    # rewrite a deployment's .env: either would leak one workspace's credentials to another.
     from sqlalchemy.orm.attributes import flag_modified
-    from mera.infrastructure.db.models import Workspace
     async with svc._tx(user, workspace_id, meta) as s:
+        principal = await load_user_principal(s, user, workspace_id)
+        rbac.require(principal, Permission.MANAGE_WORKSPACE, workspace_id)
         ws = await s.get(Workspace, workspace_id, with_for_update=True)
         if ws:
+            settings = dict(ws.settings or {})
+            settings["llm_config"] = llm_cfg
             ws.settings = dict(settings)
             flag_modified(ws, "settings")
             await s.flush()
-
-    # Sync to .env file if available
-    try:
-        for p in ("/app/.env", ".env", "../.env"):
-            if os.path.exists(p):
-                with open(p, "r", encoding="utf-8") as f:
-                    content = f.read()
-                for k, v in env_updates.items():
-                    if v is not None:
-                        pattern = re.compile(rf"^#?\s*{k}=.*$", re.MULTILINE)
-                        if pattern.search(content):
-                            content = pattern.sub(f"{k}={v}", content)
-                        else:
-                            content += f"\n{k}={v}\n"
-                with open(p, "w", encoding="utf-8") as f:
-                    f.write(content)
-                break
-    except Exception:
-        pass
 
     return await get_llm_settings(workspace_id, user, svc, meta)

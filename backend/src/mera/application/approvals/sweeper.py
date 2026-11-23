@@ -171,8 +171,13 @@ async def sweep(
                 if ws is not None:
                     steps.extend(await sweep_workspace(s, ws, now))
         except Exception as exc:  # one workspace must not stop the sweep for the rest
-            log.error(
-                "approvals.sweep_failed", workspace_id=str(ws_id), error_type=type(exc).__name__
+            log.exception(
+                "approvals.sweep_failed",
+                message=(
+                    "Approval maintenance failed for a workspace; continuing the scheduled sweep."
+                ),
+                workspace_id=str(ws_id),
+                error_type=type(exc).__name__,
             )
     async with global_transaction(sm) as s:
         await s.execute(
@@ -192,7 +197,12 @@ async def sweep(
                     subject_id=str(st.request_id),
                 )
             except Exception as exc:  # pragma: no cover
-                log.warning("approvals.sweep_dispatch_failed", error_type=type(exc).__name__)
+                log.warning(
+                    "approvals.sweep_dispatch_failed",
+                    message="Approval follow-up could not be queued; the next sweep will retry.",
+                    error_type=type(exc).__name__,
+                    exc_info=True,
+                )
     if counts:
         log.info("approvals.sweep", **counts)
     return dict(counts)

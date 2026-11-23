@@ -96,8 +96,9 @@ async def sweep(
             if item.health:
                 outcomes[f"health:{await maintenance.check_health(ws, account)}"] += 1
         except Exception as exc:  # one bad account must not stop the sweep for the rest
-            log.error(
+            log.exception(
                 "accounts.sweep_failed",
+                message="Account maintenance failed; continuing with the remaining accounts.",
                 account_id=str(item.account_id),
                 error_type=type(exc).__name__,
             )

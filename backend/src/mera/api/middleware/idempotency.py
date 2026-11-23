@@ -226,7 +226,12 @@ async def _finish(sm: Any, kp: Any, who: str, row_id: int, captured: dict[str, A
                 captured["body"], workspace_id=None, purpose=_purpose(who)
             ).encode()
     except Exception as exc:
-        log.error("idempotency.store_failed", error_type=type(exc).__name__)
+        log.exception(
+            "idempotency.store_failed",
+            message="Unable to persist the idempotency response; the client may safely retry.",
+            error_type=type(exc).__name__,
+            row_id=row_id,
+        )
 
 
 def _purpose(who: str) -> str:

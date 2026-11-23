@@ -44,6 +44,16 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
+from mera.api.errors import install_error_handlers
+from mera.api.middleware.request_id import RequestIdMiddleware
+from mera.observability import (
+    EnvironmentObservabilitySettings,
+    configure_logging,
+    configure_tracing,
+    install_asyncio_exception_handler,
+    instrument_fastapi,
+)
+
 log = structlog.get_logger(__name__)
 
 IDLE_SECONDS: Final = 600
@@ -227,6 +237,9 @@ class Sandbox:
 def create_sandbox_app(
     sandbox: Sandbox | None = None, *, relay_token: str | None = None, reap: bool = True
 ) -> FastAPI:
+    observability = EnvironmentObservabilitySettings()
+    configure_logging(observability)
+    configure_tracing(observability, "mera-mcp-sandbox")
     token = relay_token or os.environ.get("MCP_SANDBOX_TOKEN") or ""
     if len(token) < 16:
         raise RuntimeError("MCP_SANDBOX_TOKEN (16+ characters) is required")
@@ -234,6 +247,7 @@ def create_sandbox_app(
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        install_asyncio_exception_handler(asyncio.get_running_loop())
         async def reaper() -> None:
             while True:
                 await asyncio.sleep(60)
@@ -252,6 +266,9 @@ def create_sandbox_app(
     app = FastAPI(
         title="mcp-sandbox", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan
     )
+    app.add_middleware(RequestIdMiddleware)
+    install_error_handlers(app)
+    instrument_fastapi(app)
     app.state.sandbox = sb
 
     @app.middleware("http")

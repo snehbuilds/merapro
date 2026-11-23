@@ -34,7 +34,16 @@ from mera.domain.ports.platform_adapter import (
     PublishError,
     RateLimited,
 )
-from mera.infrastructure.db.models import MetricSnapshot, PublishedPost, SocialAccount, Workspace
+from mera.domain.value_objects.ids import uuid7
+from mera.domain.value_objects.platform import AccountStatus
+from mera.infrastructure.db.models import (
+    MetricSnapshot,
+    Notification,
+    PublishedPost,
+    SocialAccount,
+    Workspace,
+)
+from mera.infrastructure.db.repositories.audit import AuditEntry, record
 from mera.infrastructure.db.session import system_scan_transaction, workspace_transaction
 
 log = structlog.get_logger(__name__)
@@ -138,8 +147,14 @@ class MetricsSync:
             try:
                 counts.update(await self.sync_workspace(ws, now))
             except Exception as exc:  # one workspace must not stop the others
-                log.error(
-                    "metrics.workspace_failed", workspace_id=str(ws), error_type=type(exc).__name__
+                log.exception(
+                    "metrics.workspace_sync_failed",
+                    message=(
+                        "Metrics synchronization crashed for this workspace; other workspaces "
+                        "continue."
+                    ),
+                    workspace_id=str(ws),
+                    error_type=type(exc).__name__,
                 )
                 counts["error"] += 1
         if counts:
@@ -226,17 +241,56 @@ class MetricsSync:
                 )
             except RateLimited as exc:
                 blocked.add(account.id)
+                log.warning(
+                    "metrics.post_rate_limited",
+                    message=(
+                        "Platform rate-limited post metrics; the post will be retried after the "
+                        "platform delay."
+                    ),
+                    workspace_id=str(workspace_id),
+                    social_account_id=str(account.id),
+                    platform=p.platform,
+                    published_post_id=str(p.id),
+                    retry_after=exc.retry_after,
+                )
                 await self._reschedule(
                     workspace_id, p.id, now + timedelta(seconds=max(60, exc.retry_after or 900))
                 )
                 counts["rate_limited"] += 1
                 continue
-            except AuthExpired:
+            except AuthExpired as exc:
                 blocked.add(account.id)
+                log.warning(
+                    "metrics.post_auth_expired",
+                    message=(
+                        "Platform authorization expired while reading post metrics; reconnect is "
+                        "required."
+                    ),
+                    workspace_id=str(workspace_id),
+                    social_account_id=str(account.id),
+                    platform=p.platform,
+                    published_post_id=str(p.id),
+                    error_type=type(exc).__name__,
+                )
+                await self._mark_needs_reauth(workspace_id, account.id, exc)
                 await self._reschedule(workspace_id, p.id, now + timedelta(hours=6))
                 counts["auth"] += 1
                 continue
-            except PublishError:
+            except PublishError as exc:
+                log.exception(
+                    "metrics.post_sync_failed",
+                    message=(
+                        "Platform request for post metrics failed; the post will be retried in one "
+                        "hour."
+                    ),
+                    workspace_id=str(workspace_id),
+                    social_account_id=str(account.id),
+                    platform=p.platform,
+                    published_post_id=str(p.id),
+                    error_type=type(exc).__name__,
+                    status=exc.status,
+                    retryable=exc.retryable,
+                )
                 await self._reschedule(workspace_id, p.id, now + timedelta(hours=1))
                 counts["failed"] += 1
                 continue
@@ -277,7 +331,34 @@ class MetricsSync:
                 readings = await adapter.account_metrics(
                     self._creds(account), account.platform_account_id
                 )
-            except PublishError:
+            except AuthExpired as exc:
+                log.warning(
+                    "metrics.account_auth_expired",
+                    message=(
+                        "Platform authorization expired while reading account metrics; "
+                        "reconnect is required."
+                    ),
+                    workspace_id=str(workspace_id),
+                    social_account_id=str(account.id),
+                    platform=account.platform,
+                    error_type=type(exc).__name__,
+                )
+                await self._mark_needs_reauth(workspace_id, account.id, exc)
+                continue
+            except PublishError as exc:
+                log.exception(
+                    "metrics.account_sync_failed",
+                    message=(
+                        "Platform request for account metrics failed; it will be retried on the "
+                        "next sync."
+                    ),
+                    workspace_id=str(workspace_id),
+                    social_account_id=str(account.id),
+                    platform=account.platform,
+                    error_type=type(exc).__name__,
+                    status=exc.status,
+                    retryable=exc.retryable,
+                )
                 continue
             async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
                 counts["account_snapshots"] += await write_snapshots(
@@ -298,3 +379,53 @@ class MetricsSync:
             pp = await s.get(PublishedPost, post_id, with_for_update=True)
             if pp is not None:
                 pp.next_metrics_at = at
+
+    async def _mark_needs_reauth(
+        self, workspace_id: uuid.UUID, account_id: uuid.UUID, exc: AuthExpired
+    ) -> None:
+        """Surface an expired analytics grant once instead of retrying it invisibly forever."""
+        async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
+            account = await s.get(SocialAccount, account_id, with_for_update=True)
+            if account is None or account.status != AccountStatus.ACTIVE.value:
+                return
+            reason = " ".join(exc.message.split())[:200]
+            account.status = AccountStatus.NEEDS_REAUTH.value
+            account.status_reason = reason
+            account.health = {**account.health, "token_valid": False, "last_error": reason}
+            s.add(
+                Notification(
+                    id=uuid7(),
+                    workspace_id=workspace_id,
+                    kind="account.needs_reauth",
+                    severity="critical",
+                    title=f"{account.nickname} needs reconnecting",
+                    body=(
+                        "Analytics access expired; publishing for this account is paused until it "
+                        "reconnects."
+                    ),
+                    subject_type="social_account",
+                    subject_id=account.id,
+                    social_account_id=account.id,
+                )
+            )
+            await record(
+                s,
+                AuditEntry(
+                    action="account.needs_reauth",
+                    actor_type="system",
+                    surface="worker",
+                    workspace_id=workspace_id,
+                    subject_type="social_account",
+                    subject_id=account.id,
+                    social_account_id=account.id,
+                    after={"reason": reason, "during": "metrics_sync"},
+                ),
+            )
+            await emit(
+                s,
+                workspace_id,
+                "account.needs_reauth",
+                subject_type="social_account",
+                subject_id=account.id,
+                social_account_id=account.id,
+            )

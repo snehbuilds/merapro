@@ -52,7 +52,7 @@ class SmartLLMProvider:
         )
 
         has_custom_url = bool(
-            cfg.get("custom_base_url")
+            cfg.get("custom_api_base")
             or os.getenv("OPENAI_BASE_URL")
             or os.getenv("LITELLM_PROXY_URL")
         )
@@ -68,7 +68,7 @@ class SmartLLMProvider:
             if os.getenv("OPENAI_API_KEY"):
                 return await self._real.embed(model, texts)
         except Exception:
-            pass
+            return await self._fake.embed(model, texts)
         return await self._fake.embed(model, texts)
 
 

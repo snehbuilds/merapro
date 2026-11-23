@@ -79,5 +79,10 @@ class SmtpNotifier:
             )
         except (smtplib.SMTPException, OSError, TimeoutError) as exc:
             # Never log the body: it carries a single-use link.
-            log.warning("email_delivery_failed", error=type(exc).__name__, subject=message.subject)
+            log.warning(
+                "email_delivery_failed",
+                message="Email delivery failed; message content was not logged.",
+                error_type=type(exc).__name__,
+                exc_info=True,
+            )
             raise NotifierError("email delivery failed") from exc

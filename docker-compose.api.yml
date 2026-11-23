@@ -7,7 +7,7 @@ x-backend-env: &backend-env
     - path: .env
       required: false
   environment: &backend-environment
-    MERA_ENV: ${MERA_ENV:-development}
+    MERA_ENV: ${MERA_ENV:?set MERA_ENV to staging or production}
     MERA_MASTER_KEY: ${MERA_MASTER_KEY}
     MERA_SECRET_KEY: ${MERA_SECRET_KEY}
     MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-https://drtea.cloud}
@@ -18,15 +18,15 @@ x-backend-env: &backend-env
     DATABASE_URL: postgresql+asyncpg://mera_app:${MERA_APP_DB_PASSWORD}@mera-db:5432/mera
     DATABASE_MIGRATION_URL: postgresql+asyncpg://mera:${POSTGRES_PASSWORD}@mera-db:5432/mera
     WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
-    SANDBOX_LLM: ${SANDBOX_LLM:-true}
+    SANDBOX_LLM: ${SANDBOX_LLM:-false}
     MEDIA_ROOT: /var/lib/mera/media
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
 
 x-sandbox-client-env: &sandbox-client-env
   MCP_SANDBOX_URL: http://mcp-sandbox:8010
-  MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+  MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:?set MCP_SANDBOX_TOKEN}
   MCP_EGRESS_ADMIN_URL: http://mcp-egress:3129
-  MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+  MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:?set MCP_EGRESS_ADMIN_TOKEN}
   MCP_EGRESS_PROXY: mcp-egress:3128
 
 services:

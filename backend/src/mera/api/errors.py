@@ -230,7 +230,14 @@ def install_error_handlers(app: FastAPI) -> None:
         # Runs outside RequestIdMiddleware, so the id comes from the shared scope and the
         # header is set here rather than by the middleware.
         request_id = request_id_from_scope(request.scope)
-        log.exception("unhandled_error", error_type=type(exc).__name__, request_id=request_id)
+        log.exception(
+            "api.unhandled_exception",
+            message="An unexpected API error reached the exception handler.",
+            error_type=type(exc).__name__,
+            request_id=request_id,
+            method=request.method,
+            path=request.url.path,
+        )
         headers = {"X-Request-ID": request_id} if request_id else None
         return _envelope(
             500,

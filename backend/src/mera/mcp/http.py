@@ -15,17 +15,27 @@ import hashlib
 import json
 import secrets
 import time
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any
 
 import httpx
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
+from mera.api.errors import install_error_handlers
+from mera.api.middleware.request_id import RequestIdMiddleware
 from mera.config import Settings
 from mera.domain.policies.rbac import KNOWN_SCOPES
 from mera.mcp.api import ApiError, Caller, MeraApi, Sealer
 from mera.mcp.server import Context, InsufficientScope, McpServer
 from mera.mcp.settings import McpServiceSettings
+from mera.observability import (
+    configure_logging,
+    configure_tracing,
+    install_asyncio_exception_handler,
+    instrument_fastapi,
+)
 
 CACHE_SECONDS = 60
 
@@ -36,7 +46,22 @@ def create_mcp_app(
     api_transport: httpx.AsyncBaseTransport | None = None,
 ) -> FastAPI:
     settings = settings or McpServiceSettings()
-    app = FastAPI(title="Mera MCP", docs_url=None, redoc_url=None, openapi_url=None)
+    configure_logging(settings)
+    configure_tracing(settings, "mera-mcp")
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        import asyncio
+
+        install_asyncio_exception_handler(asyncio.get_running_loop())
+        yield
+
+    app = FastAPI(
+        title="Mera MCP", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan
+    )
+    app.add_middleware(RequestIdMiddleware)
+    install_error_handlers(app)
+    instrument_fastapi(app)
     server = McpServer()
     secret = settings.mcp_service_secret.get_secret_value() if settings.mcp_service_secret else None
     # The sealed requestState is keyed by the service secret, which every replica holds;

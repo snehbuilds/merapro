@@ -425,7 +425,12 @@ class Drafting:
                 never = {b.lower() for b in t.banned_tags}
                 tags = [x.tag for x in ranked if x.tag.lstrip("#").lower() not in never][:ceiling]
             except Exception as exc:
-                log.warning("drafting.hashtag_failed", error=str(exc))
+                log.warning(
+                    "drafting.hashtag_failed",
+                    message="Hashtag generation failed; continuing without suggestions.",
+                    error_type=type(exc).__name__,
+                    exc_info=True,
+                )
                 tags = []
                 suggestions = []
         review: EditorOutput = await self.editor.run(

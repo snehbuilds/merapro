@@ -78,8 +78,11 @@ class HashtagStats:
             try:
                 counts.update(await self.refresh_workspace(ws, now))
             except Exception as exc:  # one workspace must not stop the others
-                log.error(
+                log.exception(
                     "hashtag_stats.workspace_failed",
+                    message=(
+                        "Hashtag statistics refresh failed; continuing the scheduled run."
+                    ),
                     workspace_id=str(ws),
                     error_type=type(exc).__name__,
                 )

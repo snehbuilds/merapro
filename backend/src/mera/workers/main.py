@@ -15,7 +15,11 @@ import structlog
 from mera.config import get_settings
 from mera.infrastructure.db.session import assert_rls_bound, create_engine, ensure_app_role
 from mera.infrastructure.queue.app import QUEUES, build_app
-from mera.observability import configure_logging, configure_tracing
+from mera.observability import (
+    configure_logging,
+    configure_tracing,
+    install_asyncio_exception_handler,
+)
 from mera.workers.health import HEARTBEAT_PATH, heartbeat
 
 log = structlog.get_logger(__name__)
@@ -40,6 +44,7 @@ def _parse(argv: list[str] | None) -> argparse.Namespace:
 
 async def _run(queues: list[str], concurrency: int) -> None:
     settings = get_settings()
+    install_asyncio_exception_handler(asyncio.get_running_loop())
     await ensure_app_role(settings)
     engine = create_engine(settings)
     try:

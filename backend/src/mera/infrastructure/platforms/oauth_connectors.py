@@ -31,8 +31,6 @@ import httpx
 import structlog
 from opentelemetry.instrumentation.utils import suppress_instrumentation
 
-log = structlog.get_logger(__name__)
-
 from mera.domain.value_objects.platform import AccountType, Platform
 from mera.infrastructure.platforms.adapters.http import TIMEOUT
 from mera.infrastructure.platforms.adapters.linkedin import LINKEDIN_VERSION
@@ -43,6 +41,8 @@ from mera.infrastructure.platforms.connectors import (
     HealthReport,
     ReauthRequired,
 )
+
+log = structlog.get_logger(__name__)
 
 
 @dataclass(frozen=True, slots=True)
@@ -344,7 +344,7 @@ class MetaConnector:
         )
         data = pages.get("data") or []
         if not data:
-            # Fallback for Meta Granular Scopes: check debug_token for explicitly selected target_ids
+            # With Meta Granular Scopes, inspect debug_token for selected target IDs.
             try:
                 debug_info = await _call(
                     "GET",
@@ -377,9 +377,20 @@ class MetaConnector:
                         if p.get("id"):
                             data.append(p)
                     except Exception as p_err:
-                        log.warning("failed to fetch target page", page_id=tid, error=str(p_err))
+                        log.warning(
+                            "meta.target_page_fetch_failed",
+                            message="Could not fetch a Meta target page during account discovery.",
+                            page_id=tid,
+                            error_type=type(p_err).__name__,
+                            exc_info=True,
+                        )
             except Exception as d_err:
-                log.warning("failed to inspect debug_token", error=str(d_err))
+                log.warning(
+                    "meta.debug_token_inspection_failed",
+                    message="Could not inspect the Meta token during account discovery.",
+                    error_type=type(d_err).__name__,
+                    exc_info=True,
+                )
 
         if not data:
             raise ConnectorError("this Facebook login manages no Page")
@@ -413,7 +424,11 @@ class MetaConnector:
         )
 
     def _page(self, page: dict[str, Any], user_token: str) -> ConnectedIdentity:
-        pic = page.get("picture", {}).get("data", {}).get("url") if isinstance(page.get("picture"), dict) else None
+        pic = (
+            page.get("picture", {}).get("data", {}).get("url")
+            if isinstance(page.get("picture"), dict)
+            else None
+        )
         return ConnectedIdentity(
             platform_account_id=str(page["id"]),
             handle=str(page.get("username") or page["name"]),

@@ -108,8 +108,13 @@ class InsightRun:
             try:
                 counts.update(await self.refresh_workspace(ws, now))
             except Exception as exc:  # one workspace must not stop the others
-                log.error(
-                    "insights.workspace_failed", workspace_id=str(ws), error=type(exc).__name__
+                log.exception(
+                    "insights.workspace_failed",
+                    message=(
+                        "Insight generation failed for a workspace; continuing the scheduled run."
+                    ),
+                    workspace_id=str(ws),
+                    error_type=type(exc).__name__,
                 )
                 counts["error"] += 1
         log.info("insights.run", **counts)

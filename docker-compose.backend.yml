@@ -1,4 +1,4 @@
-# Backend services for Coolify deployment: postgres, migrate, api, worker, bots, litellm, mcp.
+# Backend services for Coolify deployment: postgres, migrate, api, worker, bots, and mcp.
 # Web frontend runs as a separate Coolify Dockerfile application for fast, isolated deployments.
 
 x-backend-env: &backend-env
@@ -7,19 +7,21 @@ x-backend-env: &backend-env
     - path: .env
       required: false
   environment: &backend-environment
-    MERA_ENV: ${MERA_ENV:-development}
+    # A deploy must explicitly choose its environment.  Falling back to development here
+    # would disable production-only safeguards on a public host.
+    MERA_ENV: ${MERA_ENV:?set MERA_ENV to staging or production}
     MERA_MASTER_KEY: ${MERA_MASTER_KEY}
     MERA_SECRET_KEY: ${MERA_SECRET_KEY}
     MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-https://drtea.cloud}
     MERA_API_URL: ${MERA_API_URL:-http://api:8000}
     MERA_PUBLIC_API_URL: ${MERA_PUBLIC_API_URL:-https://api.drtea.cloud}
-    SANDBOX_MODE: ${SANDBOX_MODE:-true}
+    SANDBOX_MODE: ${SANDBOX_MODE:-false}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD}
     DATABASE_URL: ${DATABASE_URL}
     DATABASE_MIGRATION_URL: ${DATABASE_MIGRATION_URL}
     WEB_PROXY_SECRET: ${MERA_WEB_PROXY_SECRET:-}
-    SANDBOX_LLM: ${SANDBOX_LLM:-true}
+    SANDBOX_LLM: ${SANDBOX_LLM:-false}
     MEDIA_ROOT: /var/lib/mera/media
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
     LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
@@ -31,9 +33,9 @@ x-backend-env: &backend-env
 
 x-sandbox-client-env: &sandbox-client-env
   MCP_SANDBOX_URL: http://mcp-sandbox:8010
-  MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+  MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:?set MCP_SANDBOX_TOKEN}
   MCP_EGRESS_ADMIN_URL: http://mcp-egress:3129
-  MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+  MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:?set MCP_EGRESS_ADMIN_TOKEN}
   MCP_EGRESS_PROXY: mcp-egress:3128
 
 services:
@@ -45,7 +47,6 @@ services:
       POSTGRES_USER: mera
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       MERA_APP_DB_PASSWORD: ${MERA_APP_DB_PASSWORD}
-      POSTGRES_HOST_AUTH_METHOD: "trust"
     command: >
       postgres -c max_connections=200
                -c shared_preload_libraries=pg_stat_statements
@@ -176,22 +177,6 @@ services:
       timeout: 3s
       retries: 10
 
-  litellm:
-    build:
-      context: ./infra/litellm
-    restart: unless-stopped
-    expose:
-      - "4000"
-    environment:
-      - PORT=4000
-      - STORE_MODEL_IN_DB=False
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-mera-litellm-admin-key}
-      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-mera-litellm-salt-key-secure-2026}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-
   mcp-sandbox:
     build: { context: ./backend, target: mcp-sandbox, secrets: [corp_ca] }
     runtime: ${MCP_SANDBOX_RUNTIME:-runc}
@@ -206,7 +191,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     environment:
       MERA_ENV: ${MERA_ENV:-development}
-      MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+      MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:?set MCP_SANDBOX_TOKEN}
     networks: [sandbox, sandbox_rpc]
 
   mcp-egress:
@@ -216,7 +201,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     environment:
       MERA_ENV: ${MERA_ENV:-development}
-      MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+      MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:?set MCP_EGRESS_ADMIN_TOKEN}
     networks: [sandbox, sandbox_rpc, default]
 
 secrets:

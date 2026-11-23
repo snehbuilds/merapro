@@ -31,7 +31,16 @@ import structlog
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from mera.api.errors import install_error_handlers
+from mera.api.middleware.request_id import RequestIdMiddleware
 from mera.infrastructure.http.safe_fetch import is_public as _safe_is_public
+from mera.observability import (
+    EnvironmentObservabilitySettings,
+    configure_logging,
+    configure_tracing,
+    install_asyncio_exception_handler,
+    instrument_fastapi,
+)
 
 log = structlog.get_logger(__name__)
 METADATA: Final = frozenset({"169.254.169.254", "fd00:ec2::254", "100.100.100.200"})
@@ -206,9 +215,13 @@ class GrantIn(BaseModel):
 
 def create_egress_app(proxy: EgressProxy, admin_token: str, *, port: int | None = 3128) -> FastAPI:
     """The grant admin API; with ``port``, the proxy itself starts with the app."""
+    observability = EnvironmentObservabilitySettings()
+    configure_logging(observability)
+    configure_tracing(observability, "mera-mcp-egress")
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        install_asyncio_exception_handler(asyncio.get_running_loop())
         server = await serve(proxy, port=port) if port is not None else None
         try:
             yield
@@ -217,6 +230,9 @@ def create_egress_app(proxy: EgressProxy, admin_token: str, *, port: int | None 
                 server.close()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+    app.add_middleware(RequestIdMiddleware)
+    install_error_handlers(app)
+    instrument_fastapi(app)
 
     def _check(given: str | None) -> None:
         if not hmac.compare_digest((given or "").encode(), admin_token.encode()):

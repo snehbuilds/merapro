@@ -745,7 +745,14 @@ class BotRuntime:
             else:
                 mid = await self._ch.send(chat_id, msg)
         except ChannelError as exc:
-            log.warning("bot.deliver_failed", error=str(exc)[:120])
+            log.warning(
+                "bot.deliver_failed",
+                message=(
+                    "Approval-channel delivery failed; the message is marked failed for recovery."
+                ),
+                error_type=type(exc).__name__,
+                exc_info=True,
+            )
             state = "failed"
         async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
             cm = await s.get(ChannelMessage, cm_id)

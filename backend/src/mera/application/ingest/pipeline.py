@@ -450,6 +450,13 @@ class Ingestion:
                 decode(page.body, page.headers.get("content-type")), url=page.url
             )
         except Exception as exc:  # a parser crash on one page must not lose the feed
+            log.warning(
+                "ingest.article_extract_failed",
+                message="Article extraction failed; retaining the source feed item.",
+                item_url=item.url,
+                error_type=type(exc).__name__,
+                exc_info=True,
+            )
             item.provenance["article_error"] = f"extract:{type(exc).__name__}"
             return
         if len(extracted.text) > len(item.text):

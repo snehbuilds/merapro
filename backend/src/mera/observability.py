@@ -9,18 +9,51 @@ is deliberately optional: development remains useful with JSON logs alone, while
 from __future__ import annotations
 
 import logging
+import os
 import sys
+import threading
 from collections.abc import MutableMapping
+from types import TracebackType
+from typing import Protocol
 from urllib.parse import unquote, urlsplit, urlunsplit
 
 import structlog
 from fastapi import FastAPI
+from pydantic import SecretStr
 from sqlalchemy.engine import Engine
 
-from mera.config import Settings
+from mera.config import Env
 
 _tracing_configured = False
 _httpx_instrumented = False
+_exception_hooks_installed = False
+
+
+class LoggingSettings(Protocol):
+    """The small configuration surface every runnable service needs for JSON logging."""
+
+    log_level: str
+    log_format: str
+
+
+class TracingSettings(LoggingSettings, Protocol):
+    """Configuration needed by a process that exports OTLP traces and logs."""
+
+    mera_env: Env
+    otel_exporter_otlp_endpoint: str | None
+    @property
+    def otel_exporter_otlp_headers(self) -> SecretStr | str | None: ...
+
+
+class EnvironmentObservabilitySettings:
+    """Minimal settings for small services that must not load API/database secrets."""
+
+    def __init__(self) -> None:
+        self.log_level = os.environ.get("LOG_LEVEL", "INFO")
+        self.log_format = os.environ.get("LOG_FORMAT", "json")
+        self.mera_env = Env(os.environ.get("MERA_ENV", "development"))
+        self.otel_exporter_otlp_endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or None
+        self.otel_exporter_otlp_headers = os.environ.get("OTEL_EXPORTER_OTLP_HEADERS") or None
 
 
 def _otel_attributes(
@@ -83,7 +116,7 @@ def add_trace_context(
     return event_dict
 
 
-def configure_logging(settings: Settings) -> None:
+def configure_logging(settings: LoggingSettings) -> None:
     level = logging.getLevelName(settings.log_level.upper())
     renderer: structlog.typing.Processor = (
         structlog.processors.JSONRenderer()
@@ -108,6 +141,72 @@ def configure_logging(settings: Settings) -> None:
     logging.basicConfig(level=level, stream=sys.stdout, format="%(message)s")
     # HTTPX's INFO messages include the full request URL, including OAuth query secrets.
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    install_exception_hooks()
+
+
+def install_exception_hooks() -> None:
+    """Log uncaught main-thread and background-thread exceptions with their traceback.
+
+    Expected operational failures should be logged at the call site. These hooks are the
+    last line of defence so a crashed worker task or service thread never disappears into
+    a container log without its exception and stack trace.
+    """
+    global _exception_hooks_installed
+    if _exception_hooks_installed:
+        return
+    _exception_hooks_installed = True
+
+    def report(
+        exc_type: type[BaseException], exc: BaseException, tb: TracebackType | None, *, source: str
+    ) -> None:
+        if issubclass(exc_type, (KeyboardInterrupt, SystemExit)):
+            return
+        structlog.get_logger("mera.runtime").error(
+            "runtime.unhandled_exception",
+            message="An unhandled exception reached the process boundary.",
+            source=source,
+            error_type=exc_type.__name__,
+            exc_info=(exc_type, exc, tb),
+        )
+
+    def excepthook(
+        exc_type: type[BaseException], exc: BaseException, tb: TracebackType | None
+    ) -> None:
+        report(exc_type, exc, tb, source="main_thread")
+
+    def thread_excepthook(args: threading.ExceptHookArgs) -> None:
+        if args.exc_value is not None:
+            report(args.exc_type, args.exc_value, args.exc_traceback, source="thread")
+
+    sys.excepthook = excepthook
+    threading.excepthook = thread_excepthook
+
+
+def install_asyncio_exception_handler(loop: object) -> None:
+    """Record unobserved task failures with a traceback when an event loop reports them."""
+    import asyncio
+
+    if not isinstance(loop, asyncio.AbstractEventLoop):
+        raise TypeError("loop must be an asyncio event loop")
+
+    def handler(active_loop: asyncio.AbstractEventLoop, context: dict[str, object]) -> None:
+        exc = context.get("exception")
+        if isinstance(exc, BaseException):
+            structlog.get_logger("mera.runtime").error(
+                "runtime.unobserved_async_exception",
+                message="An asynchronous task failed without being awaited.",
+                error_type=type(exc).__name__,
+                task=str(context.get("task") or context.get("future") or "unknown"),
+                exc_info=(type(exc), exc, exc.__traceback__),
+            )
+            return
+        structlog.get_logger("mera.runtime").error(
+            "runtime.unobserved_async_error",
+            message=str(context.get("message") or "The event loop reported an unknown error."),
+        )
+        active_loop.default_exception_handler(context)
+
+    loop.set_exception_handler(handler)
 
 
 def _signal_endpoint(endpoint: str, signal: str) -> str:
@@ -118,16 +217,22 @@ def _signal_endpoint(endpoint: str, signal: str) -> str:
     return urlunsplit((parsed.scheme, parsed.netloc, f"{parsed.path}/v1/{signal}", "", ""))
 
 
-def _otlp_headers(settings: Settings) -> dict[str, str] | None:
+def _otlp_headers(settings: TracingSettings) -> dict[str, str] | None:
     """Parse the standard OTLP comma-separated header environment variable.
 
     Grafana Cloud generates ``Authorization=Basic%20…`` for Python, hence URL-decoding
     values after splitting on the first equals sign (the base64 value can contain ``=``).
     """
-    if settings.otel_exporter_otlp_headers is None:
+    raw_headers = settings.otel_exporter_otlp_headers
+    if raw_headers is None:
         return None
+    value = (
+        raw_headers.get_secret_value()
+        if hasattr(raw_headers, "get_secret_value")
+        else str(raw_headers)
+    )
     headers: dict[str, str] = {}
-    for item in settings.otel_exporter_otlp_headers.get_secret_value().split(","):
+    for item in value.split(","):
         key, separator, value = item.partition("=")
         if not separator or not key.strip():
             raise ValueError("OTEL_EXPORTER_OTLP_HEADERS entries must use name=value format")
@@ -135,7 +240,7 @@ def _otlp_headers(settings: Settings) -> dict[str, str] | None:
     return headers
 
 
-def configure_tracing(settings: Settings, service_name: str) -> None:
+def configure_tracing(settings: TracingSettings, service_name: str) -> None:
     """Configure OTLP tracing once per process and instrument outbound HTTP clients."""
     global _httpx_instrumented, _tracing_configured
 

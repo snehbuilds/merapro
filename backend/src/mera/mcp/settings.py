@@ -12,6 +12,8 @@ from __future__ import annotations
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from mera.config import Env
+
 
 class McpServiceSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=None, extra="ignore", case_sensitive=False)
@@ -29,6 +31,9 @@ class McpServiceSettings(BaseSettings):
     mcp_api_url: str | None = None
     log_level: str = "INFO"
     log_format: str = Field(default="json", pattern="^(json|console)$")
+    mera_env: Env = Env.DEVELOPMENT
+    otel_exporter_otlp_endpoint: str | None = None
+    otel_exporter_otlp_headers: SecretStr | None = None
 
     @field_validator("mcp_service_secret", mode="before")
     @classmethod

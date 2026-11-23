@@ -69,8 +69,13 @@ class Digests:
             try:
                 counts.update(await self.run_workspace(ws, now))
             except Exception as exc:
-                log.error(
-                    "digests.workspace_failed", workspace_id=str(ws), error=type(exc).__name__
+                log.exception(
+                    "digests.workspace_failed",
+                    message=(
+                        "Digest generation failed for a workspace; continuing the scheduled run."
+                    ),
+                    workspace_id=str(ws),
+                    error_type=type(exc).__name__,
                 )
         return dict(counts)
 
@@ -113,8 +118,16 @@ class Digests:
                         )
                     )
                     counts["emails"] += 1
-                except Exception:
-                    log.warning("digests.email_failed", workspace_id=str(workspace_id))
+                except Exception as exc:
+                    log.warning(
+                        "digests.email_failed",
+                        message=(
+                            "Digest email delivery failed; the next scheduled digest will retry."
+                        ),
+                        workspace_id=str(workspace_id),
+                        error_type=type(exc).__name__,
+                        exc_info=True,
+                    )
             async with workspace_transaction(self._sm, ctx) as s:
                 m = await s.get(WorkspaceMember, member_id, with_for_update=True)
                 if m is not None:

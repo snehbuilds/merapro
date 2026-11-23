@@ -69,7 +69,13 @@ class RateLimitMiddleware:
                 if not by_ip.allowed:
                     decision, limit = by_ip, ceiling
         except Exception as exc:  # fail open, loudly
-            log.warning("rate_limit.unavailable", error_type=type(exc).__name__)
+            log.exception(
+                "rate_limit.unavailable",
+                message=(
+                    "Rate-limit storage failed; allowing the request so the API remains available."
+                ),
+                error_type=type(exc).__name__,
+            )
 
         if decision is not None and not decision.allowed:
             headers = [

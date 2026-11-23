@@ -14,8 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from mera.application.analytics.sync import MetricsSync, next_sync
 from mera.domain.context import WorkspaceContext
-from mera.domain.ports.platform_adapter import MetricReading, RateLimited
-from mera.infrastructure.db.models import MetricSnapshot, PublishedPost
+from mera.domain.ports.platform_adapter import AuthExpired, MetricReading, RateLimited
+from mera.infrastructure.db.models import MetricSnapshot, Notification, PublishedPost, SocialAccount
 from mera.infrastructure.db.session import workspace_transaction
 from mera.infrastructure.platforms.adapters.fake import FakePlatformAdapter
 from tests.integration.test_accounts_m3 import _app, _setup
@@ -33,6 +33,13 @@ class _Limited(FakePlatformAdapter):
         self, credentials: dict[str, Any], platform_account_id: str, platform_post_id: str
     ) -> list[MetricReading]:
         raise RateLimited("slow down", retry_after=900)
+
+
+class _Expired(FakePlatformAdapter):
+    async def post_metrics(
+        self, credentials: dict[str, Any], platform_account_id: str, platform_post_id: str
+    ) -> list[MetricReading]:
+        raise AuthExpired("the platform token has expired", status=401)
 
 
 def _sync(api: httpx.AsyncClient, adapters: dict[str, Any] | None = None) -> MetricsSync:
@@ -174,6 +181,36 @@ async def test_rate_limited_sync_reschedules_without_starving_others(
     assert x.next_metrics_at is not None
     assert x.next_metrics_at > datetime.now(UTC) + timedelta(minutes=10)
     assert x.metrics_synced_at is None  # the window is kept, not lost
+
+
+async def test_expired_metrics_grant_marks_only_that_account_for_reauth(
+    api: httpx.AsyncClient,
+    deferrer: CapturingDeferrer,
+    quiet: CapturingDeferrer,
+    owner_engine: AsyncEngine,
+) -> None:
+    s, ws = await _setup(api, "metricsexpired")
+    _ps, acc = await _published_set(api, s, ws, deferrer)
+    await _due_now(owner_engine, ws)
+    adapters: dict[str, Any] = {
+        p: FakePlatformAdapter(p) for p in ("linkedin_member", "facebook", "threads")
+    }
+    adapters["x"] = _Expired("x")
+
+    out = await _sync(api, adapters).sync_workspace(uuid.UUID(ws), datetime.now(UTC))
+    assert out["auth"] == 1
+    assert out["posts"] == 3
+    async with workspace_transaction(_sm(api), WorkspaceContext(uuid.UUID(ws))) as tx:
+        account = await tx.get(SocialAccount, uuid.UUID(acc["xx"]))
+        assert account is not None
+        assert account.status == "needs_reauth"
+        notice = await tx.scalar(
+            select(Notification).where(
+                Notification.social_account_id == account.id,
+                Notification.kind == "account.needs_reauth",
+            )
+        )
+        assert notice is not None
 
 
 async def test_account_comparison_uses_each_accounts_baseline(

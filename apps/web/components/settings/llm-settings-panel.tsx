@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getLlmSettings, patchLlmSettings } from "@mera/sdk";
+import { browserApi, settle } from "@/lib/api/browser";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
@@ -64,19 +66,14 @@ export function LLMSettingsPanel({
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/mera/workspaces/${workspaceId}/llm-settings`, {
-          credentials: "include",
-          headers: {
-            "X-Mera-Client": "web",
-          },
-        });
-        if (res.ok) {
-          const data: LlmSettingsState = await res.json();
+        const result = await settle(getLlmSettings({ client: browserApi, path: { workspace_id: workspaceId } }));
+        if (result.ok) {
+          const data = result.data as LlmSettingsState;
           setSettings(data);
           setSandboxLlm(data.sandbox_llm);
           setCustomBase(data.custom_api_base ?? "");
         }
-      } catch (e) {
+      } catch {
         // Fallback silently if fetch fails
       } finally {
         setLoading(false);
@@ -106,22 +103,11 @@ export function LLMSettingsPanel({
       }
       if (customKey.trim()) payload.custom_api_key = customKey.trim();
 
-      const res = await fetch(`/api/mera/workspaces/${workspaceId}/llm-settings`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Mera-Client": "web",
-        },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => null);
-        throw new Error(errJson?.detail || "Failed to update LLM settings");
-      }
-
-      const updated: LlmSettingsState = await res.json();
+      const result = await settle(
+        patchLlmSettings({ client: browserApi, path: { workspace_id: workspaceId }, body: payload }),
+      );
+      if (!result.ok) throw new Error(result.error.message || "Failed to update LLM settings");
+      const updated = result.data as LlmSettingsState;
       setSettings(updated);
       setSandboxLlm(updated.sandbox_llm);
       setOpenaiKey("");
@@ -151,8 +137,8 @@ export function LLMSettingsPanel({
       />
       <PanelBody className="grid gap-5">
         <p className="text-sm text-fg-muted">
-          Configure API keys for real AI providers (OpenAI, Anthropic Claude, Google Gemini, OpenRouter, or local/custom
-          OpenAI-compatible models like Ollama). Individual models for each agent (Writer, Editor, Research, etc.) can be
+          Configure direct provider access for OpenAI, Anthropic Claude, Google Gemini, OpenRouter, or an OpenAI-compatible
+          endpoint such as Ollama, vLLM, or LocalAI. Individual models for each agent (Writer, Editor, Research, etc.) can be
           selected in the <strong>Agents</strong> screen.
         </p>
 
@@ -277,7 +263,7 @@ export function LLMSettingsPanel({
           <div className="rounded-md border border-border-subtle p-3.5">
             <span className="mb-1 block text-sm font-semibold text-fg">Custom OpenAI-Compatible Endpoint</span>
             <p className="mb-3 text-xs text-fg-subtle">
-              Point to a self-hosted Ollama (`http://localhost:11434/v1`), vLLM, LocalAI, or custom OpenAI proxy.
+              Point to a self-hosted Ollama (`http://localhost:11434/v1`), vLLM, LocalAI, or another OpenAI-compatible API.
             </p>
             <div className="grid grid-cols-2 gap-4 max-wide:grid-cols-1">
               <Field label="Custom Base URL" hint="e.g. http://localhost:11434/v1 or https://openrouter.ai/api/v1">
@@ -313,8 +299,8 @@ export function LLMSettingsPanel({
         </form>
       </PanelBody>
       <PanelFoot>
-        API keys are stored safely and routed via LiteLLM. Models configured on the <strong>Agents</strong> screen will
-        automatically use these keys.
+        Keys are scoped to this workspace. Models configured on the <strong>Agents</strong> screen automatically use the
+        matching provider directly.
       </PanelFoot>
     </Panel>
   );

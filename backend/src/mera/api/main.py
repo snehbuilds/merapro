@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -71,6 +72,7 @@ from mera.infrastructure.queue.deferrer import ProcrastinateDeferrer
 from mera.observability import (
     configure_logging,
     configure_tracing,
+    install_asyncio_exception_handler,
     instrument_fastapi,
     instrument_sqlalchemy,
 )
@@ -91,7 +93,12 @@ async def _check_database_role(engine: AsyncEngine, settings: Settings) -> None:
     except Exception as exc:
         if settings.mera_env is not Env.DEVELOPMENT:
             raise
-        log.warning("database.role_check_skipped", error_type=type(exc).__name__, error=str(exc))
+        log.warning(
+            "database.role_check_skipped",
+            message="Database role verification failed in development; continuing startup.",
+            error_type=type(exc).__name__,
+            exc_info=True,
+        )
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -101,6 +108,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        install_asyncio_exception_handler(asyncio.get_running_loop())
         await ensure_app_role(settings)
         engine = create_engine(settings)
         instrument_sqlalchemy(engine.sync_engine)

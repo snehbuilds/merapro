@@ -11,29 +11,45 @@ import { proxyToApi } from "@/lib/session/proxy-core";
  */
 
 async function handle(request: NextRequest, ctx: { params: Promise<{ path: string[] }> }): Promise<Response> {
-  const rejected = csrfRejection(request);
-  if (rejected) return rejected;
-
   const { path } = await ctx.params;
-  const { accessToken, refreshToken } = readSessionTokens(request.cookies);
-  const method = request.method.toUpperCase();
-  // Bound the body before buffering it: the API refuses oversized uploads too, but this
-  // process would otherwise hold the whole thing in memory first (review S7-M5).
-  const limit = isMediaUpload(method, path) ? MAX_UPLOAD_BODY : MAX_BODY;
-  const declared = Number(request.headers.get("content-length") ?? "0");
-  if (!Number.isFinite(declared) || declared > limit) return tooLarge();
-  const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
-  if (body && body.byteLength > limit) return tooLarge();
+  try {
+    const rejected = csrfRejection(request);
+    if (rejected) return rejected;
 
-  const { response, session } = await proxyToApi(
-    { method, path, search: request.nextUrl.search, headers: request.headers, body, accessToken, refreshToken },
-    { apiBaseUrl: apiBaseUrl(), proxySecret: process.env.MERA_WEB_PROXY_SECRET || undefined },
-  );
+    const { accessToken, refreshToken } = readSessionTokens(request.cookies);
+    const method = request.method.toUpperCase();
+    // Bound the body before buffering it: the API refuses oversized uploads too, but this
+    // process would otherwise hold the whole thing in memory first (review S7-M5).
+    const limit = isMediaUpload(method, path) ? MAX_UPLOAD_BODY : MAX_BODY;
+    const declared = Number(request.headers.get("content-length") ?? "0");
+    if (!Number.isFinite(declared) || declared > limit) return tooLarge();
+    const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
+    if (body && body.byteLength > limit) return tooLarge();
 
-  const out = new NextResponse(response.body, { status: response.status, headers: response.headers });
-  out.headers.set("cache-control", "no-store");
-  applyCookieWrites(out.cookies, cookieWritesFor(session));
-  return out;
+    const { response, session } = await proxyToApi(
+      { method, path, search: request.nextUrl.search, headers: request.headers, body, accessToken, refreshToken },
+      { apiBaseUrl: apiBaseUrl(), proxySecret: process.env.MERA_WEB_PROXY_SECRET || undefined },
+    );
+
+    const out = new NextResponse(response.body, { status: response.status, headers: response.headers });
+    out.headers.set("cache-control", "no-store");
+    applyCookieWrites(out.cookies, cookieWritesFor(session));
+    return out;
+  } catch (error) {
+    // Never log headers, cookies, the request body, or the query string: any can carry secrets.
+    console.error("web.bff_proxy_failed", {
+      message: "The web server could not proxy a request to the API.",
+      method: request.method,
+      path: `/${path.join("/")}`,
+      requestId: request.headers.get("x-request-id") ?? undefined,
+      errorType: error instanceof Error ? error.name : typeof error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    return NextResponse.json(
+      { error: { code: "service_unavailable", message: "The service is temporarily unavailable.", field_errors: [] } },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
 }
 
 const MAX_BODY = 2 * 1024 * 1024;

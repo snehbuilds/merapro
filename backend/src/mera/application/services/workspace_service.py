@@ -811,6 +811,10 @@ async def _scopes(s: AsyncSession, member: WorkspaceMember) -> MemberScopes:
 
 
 def _view(ws: Workspace, role: str) -> WorkspaceView:
+    # Provider credentials have their own masked endpoint.  Never include them in the
+    # general workspace response, which is visible to every workspace member.
+    settings = dict(ws.settings or {})
+    settings.pop("llm_config", None)
     return WorkspaceView(
         ws.id,
         ws.name,
@@ -819,7 +823,7 @@ def _view(ws: Workspace, role: str) -> WorkspaceView:
         ws.timezone,
         role,
         ws.archived_at is not None,
-        dict(ws.settings),
+        settings,
     )
 
 

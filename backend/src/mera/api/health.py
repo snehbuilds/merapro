@@ -38,7 +38,12 @@ async def readyz(request: Request) -> Readiness:
                 await session.execute(text("SELECT version_num FROM alembic_version"))
             ).scalar_one_or_none()
     except Exception as exc:  # any driver/network failure means not ready
-        log.warning("readyz.database_unavailable", error_type=type(exc).__name__, error=str(exc))
+        log.warning(
+            "readyz.database_unavailable",
+            message="Readiness check could not reach the database.",
+            error_type=type(exc).__name__,
+            exc_info=True,
+        )
         raise ServiceUnavailable("Database is unavailable.", headers={"Retry-After": "5"}) from exc
     if revision is None:
         raise ServiceUnavailable("Migrations have not been applied.", code="migrations_pending")

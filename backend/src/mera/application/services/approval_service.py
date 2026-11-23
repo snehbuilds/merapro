@@ -200,7 +200,15 @@ class ApprovalService(WorkspaceScopedService):
                 subject_id=str(subject_id),
             )
         except Exception as exc:  # pragma: no cover - logged, never raised to the approver
-            log.warning("approvals.dispatch_failed", kind=kind, error_type=type(exc).__name__)
+            log.warning(
+                "approvals.dispatch_failed",
+                message=(
+                    "Approval-channel work could not be queued; periodic reconciliation will retry."
+                ),
+                kind=kind,
+                error_type=type(exc).__name__,
+                exc_info=True,
+            )
 
     # ------------------------------------------------------------------- submit
 

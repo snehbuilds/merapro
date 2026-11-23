@@ -130,6 +130,7 @@ services:
     # MCP_SERVICE_SECRET in .env: api reads the same value.
     build: { context: ./backend, target: mcp, secrets: [corp_ca] }
     environment:
+      MERA_ENV: ${MERA_ENV:-development}
       MCP_SERVICE_SECRET: ${MCP_SERVICE_SECRET:-}
       MCP_RESOURCE_URL: ${MCP_RESOURCE_URL:-http://localhost:8002/mcp}
       MCP_ALLOWED_ORIGINS: ${MCP_ALLOWED_ORIGINS:-[]}
@@ -138,6 +139,8 @@ services:
       MERA_API_URL: ${MERA_PUBLIC_API_URL:-http://localhost:8000}
       MCP_API_URL: http://api:8000
       LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     depends_on:
       api: { condition: service_healthy }
     expose: ["8002"]
@@ -147,22 +150,6 @@ services:
       timeout: 3s
       retries: 10
 
-  litellm:
-    build:
-      context: ./infra/litellm
-    restart: unless-stopped
-    expose:
-      - "4000"
-    environment:
-      - PORT=4000
-      - DATABASE_URL=postgresql://mera:${POSTGRES_PASSWORD}@postgres:5432/litellm
-      - STORE_MODEL_IN_DB=True
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-mera-litellm-admin-key}
-      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-mera-litellm-salt-key-secure-2026}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
     depends_on:
       postgres: { condition: service_healthy }
 
@@ -186,6 +173,10 @@ services:
     environment:
       MERA_ENV: ${MERA_ENV:-development}
       MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:-change-me-sandbox-relay-token}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     # sandbox: the servers' network, whose only way out is mcp-egress. sandbox_rpc: the
     # relay's port for the API and workers (every route needs MCP_SANDBOX_TOKEN).
     networks: [sandbox, sandbox_rpc]
@@ -199,6 +190,10 @@ services:
     environment:
       MERA_ENV: ${MERA_ENV:-development}
       MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:-change-me-egress-admin-token}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     networks: [sandbox, sandbox_rpc, default]
 
   web:
