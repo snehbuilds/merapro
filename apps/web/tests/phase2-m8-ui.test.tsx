@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -103,5 +103,26 @@ describe("Confirm page and MCP screen (P2-M8)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Disconnect Claude" }));
     await waitFor(() => expect(sdk.revokeClient).toHaveBeenCalled());
     expect(router.refresh).toHaveBeenCalled();
+  });
+
+  it("shows two connected clients at a time and pages through the rest", async () => {
+    const grants = ["Claude", "Cursor", "Codex"].map((client_name, index) => ({
+      id: `g${index + 1}`,
+      user_id: "u1",
+      client_id: `https://${client_name.toLowerCase()}.example/client.json`,
+      client_name,
+      scopes: ["drafts:read"],
+      created_at: "2026-11-01T00:00:00Z",
+      last_used_at: null,
+      expires_at: "2026-11-10T00:00:00Z",
+    }));
+    render(shell(<McpScreen workspace={ws} clients={grants} calls={[]} endpoint="https://mcp.example/mcp" canManage />));
+    const list = screen.getByRole("list", { name: "Connected clients" });
+    expect(within(list).getByText("Claude")).toBeTruthy();
+    expect(within(list).getByText("Cursor")).toBeTruthy();
+    expect(within(list).queryByText("Codex")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(within(list).getByText("Codex")).toBeTruthy();
+    expect(screen.getByText("Page 2 of 2")).toBeTruthy();
   });
 });

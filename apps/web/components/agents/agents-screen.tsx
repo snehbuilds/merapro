@@ -232,6 +232,17 @@ function stepDetail(step: AgentStep, names: Map<string, string>): string {
   return parts.join(" · ");
 }
 
+function workflowName(workflow: string): string {
+  return workflow === "manual_edit" ? "Manual edit" : workflow;
+}
+
+function runNote(run: AgentRun): string {
+  if (run.workflow_key === "manual_edit") {
+    return "A person edited a post. Mera refreshed its similarity index for duplicate checks; it did not generate, publish, or bill for text.";
+  }
+  return "Every step records its target account, so cost and failures can be traced to the right post. Fallback models are shown when used.";
+}
+
 /* P2-M1.7: stop a queued or running run (the account in progress finishes first),
    or queue a failed or stopped drafting run again. */
 function RunControls({ workspace, run }: { workspace: AgentsScreenProps["workspace"]; run: AgentRun }) {
@@ -293,23 +304,26 @@ function RunDetail({
   const steps = [...run.steps].sort((a, b) => a.seq - b.seq);
   const items: TimelineItem[] = steps.map((s) => ({
     id: s.id,
-    kind: <span className="text-sm">{s.agent_key}</span>,
+    kind: <span className="text-sm">{run.workflow_key === "manual_edit" && s.step_type === "embedding" ? "Similarity index" : s.agent_key}</span>,
     detail: <span title={stepDetail(s, names)}>{stepDetail(s, names)}</span>,
     meta: <span className="text-xs">{formatUsd(s.cost_usd)}</span>,
     tone: stepTone(s),
   }));
   return (
-    <Panel aria-labelledby={`${id}-title`} aria-busy={loading} className={cn(loading && "opacity-60")}>
-      <PanelHead className="flex-wrap">
-        <h2 id={`${id}-title`} className="text-md font-semibold">
+    <Panel aria-labelledby={`${id}-title`} aria-busy={loading} className={cn("overflow-hidden", loading && "opacity-60")}>
+      <PanelHead className="flex-wrap gap-x-3 gap-y-2">
+        <h2 id={`${id}-title`} className="min-w-0 text-md font-semibold">
           Run <span className="font-mono">{shortRunId(run.id)}</span>
         </h2>
-        <Tag tone="outline">{run.workflow_key}</Tag>
-        <span className="flex-1" />
-        <RunStatus state={run.state} />
-        {canControl ? <RunControls workspace={workspace} run={run} /> : null}
-        {ms !== null ? <span className="tabular text-caption text-fg-subtle">{formatDuration(ms)}</span> : null}
-        <span className="font-mono text-caption">{formatUsd(run.cost_usd)}</span>
+        <Tag tone="outline" title={run.workflow_key} className="max-w-full truncate">
+          {workflowName(run.workflow_key)}
+        </Tag>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-1 max-narrow:ml-0 max-narrow:w-full max-narrow:justify-start">
+          <RunStatus state={run.state} />
+          {canControl ? <RunControls workspace={workspace} run={run} /> : null}
+          {ms !== null ? <span className="tabular text-caption text-fg-subtle">{formatDuration(ms)}</span> : null}
+          <span className="font-mono text-caption">{formatUsd(run.cost_usd)}</span>
+        </div>
       </PanelHead>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-border px-3.5 py-2.5 text-caption text-fg-muted">
         <span>Started</span>
@@ -345,10 +359,7 @@ function RunDetail({
       )}
       {run.children && run.children.length > 0 ? <RunGraph runs={run.children} names={names} /> : null}
       <PanelFoot className="grid gap-1">
-        <p>
-          Every step records which account it served, so cost and failure are both attributable per target. A fallback model is
-          labelled, because otherwise that account&apos;s post reading differently would look like a mystery.
-        </p>
+        <p>{runNote(run)}</p>
       </PanelFoot>
     </Panel>
   );

@@ -34,6 +34,13 @@ export function McpScreen({ workspace, clients, calls, endpoint, canManage, chil
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [clientPage, setClientPage] = useState(0);
+  const clientsPerPage = 2;
+  const clientPageCount = Math.max(1, Math.ceil(clients.length / clientsPerPage));
+  const activeClientPage = Math.min(clientPage, clientPageCount - 1);
+  const visibleClients = clients.slice(activeClientPage * clientsPerPage, activeClientPage * clientsPerPage + clientsPerPage);
+  const firstClient = clients.length === 0 ? 0 : activeClientPage * clientsPerPage + 1;
+  const lastClient = Math.min((activeClientPage + 1) * clientsPerPage, clients.length);
   const apiUrl =
     endpoint && !endpoint.includes("YOUR-")
       ? endpoint.replace(/\/mcp\/?$/, "")
@@ -90,35 +97,55 @@ export function McpScreen({ workspace, clients, calls, endpoint, canManage, chil
                 <EmptyState icon="mcp" title="No clients connected" description="When you connect Claude or another MCP client, it appears here." tone="quiet" />
               </PanelBody>
             ) : (
-              <ul className="divide-y divide-border" aria-label="Connected clients">
-                {clients.map((c) => (
-                  <li key={c.id} className="grid gap-1 px-3.5 py-2.5 text-sm">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{c.client_name ?? c.client_id}</span>
-                      <span className="flex-1" />
-                      <Button size="sm" variant="ghost" disabled={busy !== null} onClick={() => void revoke(c.id)} aria-label={`Disconnect ${c.client_name ?? c.client_id}`}>
-                        {busy === c.id ? "Disconnecting…" : "Disconnect"}
+              <>
+                <ul className="divide-y divide-border" aria-label="Connected clients">
+                  {visibleClients.map((c) => (
+                    <li key={c.id} className="grid gap-1 px-3.5 py-2.5 text-sm">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{c.client_name ?? c.client_id}</span>
+                        <span className="flex-1" />
+                        <Button size="sm" variant="ghost" disabled={busy !== null} onClick={() => void revoke(c.id)} aria-label={`Disconnect ${c.client_name ?? c.client_id}`}>
+                          {busy === c.id ? "Disconnecting…" : "Disconnect"}
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {c.scopes.map((s) => (
+                          <Tag key={s} tone="outline">
+                            {s}
+                          </Tag>
+                        ))}
+                      </div>
+                      <p className="text-caption text-fg-subtle">
+                        Connected <Time value={c.created_at} tz={workspace.timezone} format="date" />
+                        {c.last_used_at ? (
+                          <>
+                            {" "}
+                            · last used <Time value={c.last_used_at} tz={workspace.timezone} format="datetime" />
+                          </>
+                        ) : null}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                {clients.length > clientsPerPage ? (
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3.5 py-2.5 text-caption text-fg-muted">
+                    <span>
+                      Showing {firstClient}–{lastClient} of {clients.length}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <Button size="sm" variant="ghost" disabled={activeClientPage === 0} onClick={() => setClientPage((page) => Math.max(0, page - 1))}>
+                        Previous
                       </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {c.scopes.map((s) => (
-                        <Tag key={s} tone="outline">
-                          {s}
-                        </Tag>
-                      ))}
-                    </div>
-                    <p className="text-caption text-fg-subtle">
-                      Connected <Time value={c.created_at} tz={workspace.timezone} format="date" />
-                      {c.last_used_at ? (
-                        <>
-                          {" "}
-                          · last used <Time value={c.last_used_at} tz={workspace.timezone} format="datetime" />
-                        </>
-                      ) : null}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+                      <span aria-live="polite">
+                        Page {activeClientPage + 1} of {clientPageCount}
+                      </span>
+                      <Button size="sm" variant="ghost" disabled={activeClientPage >= clientPageCount - 1} onClick={() => setClientPage((page) => Math.min(clientPageCount - 1, page + 1))}>
+                        Next
+                      </Button>
+                    </span>
+                  </div>
+                ) : null}
+              </>
             )}
           </Panel>
         </div>

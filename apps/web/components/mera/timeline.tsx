@@ -37,7 +37,7 @@ export function Timeline({ items, start = 1, className, ...props }: TimelineProp
           key={item.id}
           data-tone={item.tone}
           className={cn(
-            "grid grid-cols-[28px_132px_minmax(0,1fr)_auto] items-baseline gap-2.5 border-b border-border px-3.5 py-[9px] text-sm last:border-b-0",
+            "grid grid-cols-[24px_minmax(88px,132px)_minmax(0,1fr)_auto] items-baseline gap-2.5 border-b border-border px-3.5 py-[9px] text-sm last:border-b-0",
             "max-narrow:grid-cols-[28px_minmax(0,1fr)_auto] max-narrow:[&>[data-col=kind]]:col-start-2",
             item.tone ? ROW_TONE[item.tone] : "hover:bg-surface-hover",
           )}
@@ -45,12 +45,14 @@ export function Timeline({ items, start = 1, className, ...props }: TimelineProp
           <span aria-hidden="true" className="tabular text-right font-mono text-2xs text-fg-subtle">
             {start + i}
           </span>
-          <span data-col="kind">{item.kind}</span>
+          <span data-col="kind" className="min-w-0 truncate">
+            {item.kind}
+          </span>
           <span data-col="detail" className="truncate text-fg-muted max-narrow:col-span-2 max-narrow:col-start-2">
             {item.detail}
           </span>
           {item.meta !== undefined ? (
-            <span className={cn("text-fg-subtle", item.metaMono !== false && "font-mono")}>{item.meta}</span>
+            <span className={cn("shrink-0 whitespace-nowrap text-fg-subtle", item.metaMono !== false && "font-mono")}>{item.meta}</span>
           ) : (
             <span />
           )}
