@@ -17,6 +17,7 @@ from mera.api.middleware.client_ip import TrustedClientIPMiddleware
 from mera.api.middleware.idempotency import IdempotencyMiddleware
 from mera.api.middleware.rate_limit import RateLimitMiddleware
 from mera.api.middleware.request_id import RequestIdMiddleware
+from mera.api.middleware.request_log import RequestLogMiddleware
 from mera.api.v1 import router as v1_router
 from mera.api.v1.routers.mcp import well_known as mcp_well_known
 from mera.application.channels.factory import build_bot, build_whatsapp_bot
@@ -276,6 +277,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.add_middleware(RateLimitMiddleware, secret=secret)
     # Before anything reads a body: oversized uploads never reach the multipart parser.
     app.add_middleware(BodyLimitMiddleware)
+    app.add_middleware(RequestLogMiddleware, service="mera-api")
     app.add_middleware(RequestIdMiddleware)
     # Outermost: the rate limiter, the audit metadata and login lockout all read the
     # browser's address, not the web server's, for requests the web app forwards.

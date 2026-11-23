@@ -21,6 +21,10 @@ x-backend-env: &backend-env
     SANDBOX_LLM: ${SANDBOX_LLM:-false}
     MEDIA_ROOT: /var/lib/mera/media
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    LOG_FORMAT: ${LOG_FORMAT:-json}
+    OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
 
 x-sandbox-client-env: &sandbox-client-env
   MCP_SANDBOX_URL: http://mcp-sandbox:8010

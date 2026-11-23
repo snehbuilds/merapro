@@ -30,6 +30,10 @@ x-backend-env: &backend-env
     TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
     TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
     TELEGRAM_MODE: ${TELEGRAM_MODE:-webhook}
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    LOG_FORMAT: ${LOG_FORMAT:-json}
+    OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
 
 x-sandbox-client-env: &sandbox-client-env
   MCP_SANDBOX_URL: http://mcp-sandbox:8010
@@ -160,7 +164,11 @@ services:
       MERA_PUBLIC_URL: ${MERA_PUBLIC_URL:-https://drtea.cloud}
       MERA_API_URL: ${MERA_PUBLIC_API_URL:-https://drtea.cloud/api/v1}
       MCP_API_URL: http://api:8000
+      MERA_ENV: ${MERA_ENV:?set MERA_ENV to staging or production}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     depends_on:
       api: { condition: service_healthy }
     expose: ["8002"]
@@ -192,6 +200,10 @@ services:
     environment:
       MERA_ENV: ${MERA_ENV:-development}
       MCP_SANDBOX_TOKEN: ${MCP_SANDBOX_TOKEN:?set MCP_SANDBOX_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     networks: [sandbox, sandbox_rpc]
 
   mcp-egress:
@@ -202,6 +214,10 @@ services:
     environment:
       MERA_ENV: ${MERA_ENV:-development}
       MCP_EGRESS_ADMIN_TOKEN: ${MCP_EGRESS_ADMIN_TOKEN:?set MCP_EGRESS_ADMIN_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     networks: [sandbox, sandbox_rpc, default]
 
 secrets:

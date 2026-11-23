@@ -33,6 +33,7 @@ from pydantic import BaseModel, Field
 
 from mera.api.errors import install_error_handlers
 from mera.api.middleware.request_id import RequestIdMiddleware
+from mera.api.middleware.request_log import RequestLogMiddleware
 from mera.infrastructure.http.safe_fetch import is_public as _safe_is_public
 from mera.observability import (
     EnvironmentObservabilitySettings,
@@ -230,6 +231,7 @@ def create_egress_app(proxy: EgressProxy, admin_token: str, *, port: int | None 
                 server.close()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+    app.add_middleware(RequestLogMiddleware, service="mera-mcp-egress")
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)
     instrument_fastapi(app)

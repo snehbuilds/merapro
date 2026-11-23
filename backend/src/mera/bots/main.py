@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 
 from mera.api.errors import install_error_handlers
 from mera.api.middleware.request_id import RequestIdMiddleware
+from mera.api.middleware.request_log import RequestLogMiddleware
 from mera.config import Settings, get_settings
 from mera.infrastructure.queue.deferrer import Deferrer, ProcrastinateDeferrer
 from mera.observability import configure_logging, configure_tracing, instrument_fastapi
@@ -56,6 +57,7 @@ def create_bots_app(settings: Settings | None = None, deferrer: Deferrer | None 
     configure_tracing(settings, "mera-bots")
     app = FastAPI(title="Mera bots", docs_url=None, redoc_url=None, openapi_url=None)
     instrument_fastapi(app)
+    app.add_middleware(RequestLogMiddleware, service="mera-bots")
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)
     app.state.deferrer = deferrer or ProcrastinateDeferrer(settings.libpq_dsn)

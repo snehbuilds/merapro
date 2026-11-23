@@ -24,6 +24,10 @@ x-backend-env: &backend-env
     SANDBOX_LLM: ${SANDBOX_LLM:-true}
     MEDIA_ROOT: /var/lib/mera/media
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    LOG_FORMAT: ${LOG_FORMAT:-json}
+    OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
 
 # Only api and worker talk to the stdio MCP sandbox (P2-M9): the relay token and the
 # egress grant token. The defaults work locally only; outside MERA_ENV=development the

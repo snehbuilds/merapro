@@ -27,6 +27,7 @@ from mera.config import Env
 _tracing_configured = False
 _httpx_instrumented = False
 _exception_hooks_installed = False
+_stdlib_otel_handler_installed = False
 
 
 class LoggingSettings(Protocol):
@@ -242,7 +243,7 @@ def _otlp_headers(settings: TracingSettings) -> dict[str, str] | None:
 
 def configure_tracing(settings: TracingSettings, service_name: str) -> None:
     """Configure OTLP tracing once per process and instrument outbound HTTP clients."""
-    global _httpx_instrumented, _tracing_configured
+    global _httpx_instrumented, _stdlib_otel_handler_installed, _tracing_configured
 
     if _tracing_configured:
         return
@@ -286,6 +287,16 @@ def configure_tracing(settings: TracingSettings, service_name: str) -> None:
         )
     trace.set_tracer_provider(provider)
     set_logger_provider(log_provider)
+    if settings.otel_exporter_otlp_endpoint and not _stdlib_otel_handler_installed:
+        from opentelemetry.sdk._logs import LoggingHandler
+
+        # structlog events export through ``export_otel_log`` above. This handler covers
+        # library/runtime output too, notably Uvicorn access and error logs.
+        otel_handler = LoggingHandler(level=logging.NOTSET, logger_provider=log_provider)
+        logging.getLogger().addHandler(otel_handler)
+        for name in ("uvicorn", "uvicorn.access"):
+            logging.getLogger(name).addHandler(otel_handler)
+        _stdlib_otel_handler_installed = True
     _tracing_configured = True
 
     # Instrumenting HTTPX once propagates traceparent to LLM, platform, OAuth, and fetch

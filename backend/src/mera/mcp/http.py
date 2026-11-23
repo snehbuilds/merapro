@@ -25,6 +25,7 @@ from fastapi.responses import JSONResponse
 
 from mera.api.errors import install_error_handlers
 from mera.api.middleware.request_id import RequestIdMiddleware
+from mera.api.middleware.request_log import RequestLogMiddleware
 from mera.config import Settings
 from mera.domain.policies.rbac import KNOWN_SCOPES
 from mera.mcp.api import ApiError, Caller, MeraApi, Sealer
@@ -59,6 +60,7 @@ def create_mcp_app(
     app = FastAPI(
         title="Mera MCP", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan
     )
+    app.add_middleware(RequestLogMiddleware, service="mera-mcp")
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)
     instrument_fastapi(app)

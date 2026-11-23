@@ -15,7 +15,7 @@ import structlog
 from mera.config import get_settings
 from mera.infrastructure.channels.telegram import TelegramChannel
 from mera.infrastructure.queue.deferrer import ProcrastinateDeferrer
-from mera.observability import configure_logging
+from mera.observability import configure_logging, configure_tracing
 
 log = structlog.get_logger(__name__)
 
@@ -34,7 +34,12 @@ async def run() -> None:
         try:
             updates = await channel.get_updates(offset)
         except Exception as exc:  # network blips: wait and carry on
-            log.warning("telegram.poll_failed", error_type=type(exc).__name__)
+            log.warning(
+                "telegram.poll_failed",
+                message="Telegram polling request failed; retrying in five seconds.",
+                error_type=type(exc).__name__,
+                exc_info=True,
+            )
             await asyncio.sleep(5)
             continue
         for u in updates:
@@ -48,7 +53,9 @@ async def run() -> None:
 
 
 def main() -> None:
-    configure_logging(get_settings())
+    settings = get_settings()
+    configure_logging(settings)
+    configure_tracing(settings, "mera-bots-poll")
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(run())
