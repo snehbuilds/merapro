@@ -17,7 +17,7 @@ export function Panel({ tone = "default", className, ...props }: PanelProps) {
       data-slot="panel"
       data-tone={tone}
       className={cn(
-        "group/panel min-w-0 rounded-lg border border-border bg-surface-raised",
+        "group/panel min-w-0 rounded-xl border border-border bg-card shadow-card",
         tone === "danger" && "border-[color-mix(in_srgb,var(--danger)_34%,transparent)]",
         className,
       )}
@@ -65,7 +65,7 @@ export function PanelFoot({ className, ...props }: ComponentProps<"div">) {
     <div
       data-slot="panel-foot"
       className={cn(
-        "rounded-b-lg border-t border-dashed border-border-strong px-3.5 py-2.5 text-caption text-fg-muted",
+        "rounded-b-xl border-t border-dashed border-border-strong px-3.5 py-2.5 text-caption text-fg-muted",
         "[&_a]:font-medium [&_a]:text-accent",
         className,
       )}

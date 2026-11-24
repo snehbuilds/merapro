@@ -13,11 +13,7 @@ import { WorkspaceSwitcher } from "./workspace-switcher";
 
 export const RAIL_ID = "app-rail";
 
-/*
- * mera.js renderRail + mera.css .rail: an always-dark control rail. At ≤900px
- * it goes off-canvas; while closed there it is `inert` so its links are not
- * tab stops behind the page.
- */
+/* The product shell uses the Signal To Social Studio card-and-grid language. */
 export function Rail({ liveCounts }: { liveCounts?: NavCounts }) {
   const { workspace, workspaces, counts, railOpen, setRailOpen } = useShell();
   const displayedCounts = liveCounts ?? counts;
@@ -47,16 +43,19 @@ export function Rail({ liveCounts }: { liveCounts?: NavCounts }) {
         inert={hidden}
         aria-label="Workspace navigation"
         className={cn(
-          // The rail's own controls need their own focus colour on the dark surface.
-          "sticky top-0 flex h-screen flex-col bg-rail-bg text-rail-fg [--focus:var(--rail-focus)]",
+          "sticky top-0 flex h-screen flex-col border-r border-rail-border bg-rail-bg/96 text-rail-fg backdrop-blur-xl [--focus:var(--rail-focus)]",
           "max-rail:fixed max-rail:inset-y-0 max-rail:left-0 max-rail:z-60 max-rail:w-(--rail-w) max-rail:-translate-x-full",
           "max-rail:transition-transform max-rail:duration-[180ms] max-rail:ease-[cubic-bezier(.2,.8,.3,1)]",
           "max-rail:data-[open=true]:translate-x-0 max-rail:data-[open=true]:shadow-popover",
         )}
       >
-        <div className="flex h-(--topbar-h) shrink-0 items-center gap-2 border-b border-rail-border px-4 font-label text-md font-semibold tracking-[0.14em] text-rail-hi uppercase">
-          <i aria-hidden="true" className="size-[9px] shrink-0 rotate-45 rounded-[1px] bg-rail-accent" />
-          Mera
+        <div className="flex h-(--topbar-h) shrink-0 items-center gap-2 border-b border-rail-border px-4 text-rail-hi">
+          <span className="grid size-7 place-items-center rounded-md bg-ink text-background">
+            <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
+              <path d="M4 18V6l8 7 8-7v12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="font-display text-2xl leading-none">Mera</span>
         </div>
 
         <div className="px-2.5 pt-2.5 pb-1">
@@ -86,7 +85,7 @@ export function Rail({ liveCounts }: { liveCounts?: NavCounts }) {
                         aria-current={isHere ? "page" : undefined}
                         onClick={() => setRailOpen(false)}
                         className={cn(
-                          "group relative flex h-7 items-center gap-2.5 rounded-md px-2 text-body text-rail-fg",
+                          "group relative flex h-8 items-center gap-2.5 rounded-lg px-2 text-body text-rail-fg transition-colors",
                           "hover:bg-rail-hover hover:text-rail-hi",
                           "aria-[current=page]:bg-rail-active aria-[current=page]:font-medium aria-[current=page]:text-rail-hi",
                           // 3px accent bar flush with the rail edge (mera.css .navitem::before).

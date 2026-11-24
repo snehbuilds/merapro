@@ -1,25 +1,31 @@
-import { LandingHeader } from "./landing-header";
-import { HeroSection } from "./hero-section";
-import { DispatchLedgerShowcase } from "./dispatch-ledger-showcase";
-import { ApprovalIntegritySection } from "./approval-integrity-section";
-import { AgentPipelineSection } from "./agent-pipeline-section";
-import { StaggerTimelineSection } from "./stagger-timeline-section";
-import { McpGovernanceSection } from "./mcp-governance-section";
-import { LandingFooter } from "./landing-footer";
+import { Agents } from "./lovable/Agents";
+import { FinalCta, Footer } from "./lovable/Closing";
+import { Distribution } from "./lovable/Distribution";
+import { Hero } from "./lovable/Hero";
+import { Integrity } from "./lovable/Integrity";
+import { Nav } from "./lovable/Nav";
+import { Principles } from "./lovable/Principles";
+import { Security } from "./lovable/Security";
+import { Voices } from "./lovable/Voices";
 
 export function LandingView() {
   return (
-    <div className="min-h-screen bg-[#060709] text-white selection:bg-emerald-500/30 selection:text-white">
-      <LandingHeader />
+    <div className="mera-lovable min-h-screen bg-background text-foreground">
+      <a href="#product" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-60 focus:rounded-md focus:bg-card focus:px-3 focus:py-2">
+        Skip to content
+      </a>
+      <Nav />
       <main>
-        <HeroSection />
-        <DispatchLedgerShowcase />
-        <ApprovalIntegritySection />
-        <AgentPipelineSection />
-        <StaggerTimelineSection />
-        <McpGovernanceSection />
+        <Hero />
+        <Principles />
+        <Voices />
+        <Integrity />
+        <Agents />
+        <Distribution />
+        <Security />
+        <FinalCta />
       </main>
-      <LandingFooter />
+      <Footer />
     </div>
   );
 }

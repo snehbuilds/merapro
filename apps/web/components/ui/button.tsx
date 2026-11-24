@@ -23,6 +23,14 @@ const buttonVariants = cva(
           "border-accent bg-accent font-semibold text-accent-fg",
           "hover:border-accent-hover hover:bg-accent-hover hover:text-accent-fg",
         ],
+        outline: [
+          "border-border bg-surface-raised text-fg shadow-card",
+          "hover:border-primary/45 hover:bg-accent-soft hover:text-primary",
+        ],
+        secondary: [
+          "border-secondary bg-secondary font-semibold text-secondary-foreground",
+          "hover:bg-secondary/80",
+        ],
         ghost: "border-transparent bg-transparent hover:border-transparent hover:bg-surface-active",
         danger: [
           "border-border-strong bg-surface-raised text-danger",
@@ -35,6 +43,7 @@ const buttonVariants = cva(
         sm: "h-7 px-2.5 text-caption",
         icon: "size-8 p-0 text-sm",
         "icon-sm": "size-7 p-0 text-caption",
+        lg: "h-10 px-8 text-sm",
       },
     },
     defaultVariants: { variant: "default", size: "default" },

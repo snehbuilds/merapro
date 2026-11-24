@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { LandingView } from "@/components/landing";
 
 export const metadata: Metadata = {
-  title: "Mera — Next-Gen Multi-Agent Social Dispatch Ledger",
+  title: "Mera — One story. Every account. A voice of its own.",
   description:
-    "Speak as several identities at once. Approved in ten seconds from your phone via Telegram or WhatsApp.",
+    "Self-hosted multi-agent social publishing: research stories, write distinct posts per account, and publish only after signed human approval.",
 };
 
 export default function LandingRoutePage() {

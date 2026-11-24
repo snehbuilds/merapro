@@ -40,7 +40,7 @@ export function Topbar({ title, sub, action, actionNode }: TopbarProps) {
   return (
     <header
       data-slot="topbar"
-      className="sticky top-0 z-20 flex h-(--topbar-h) shrink-0 items-center gap-3 border-b border-border bg-surface/92 px-6 backdrop-blur-[6px] backdrop-saturate-[1.2] max-rail:gap-2 max-rail:px-3"
+      className="sticky top-0 z-20 flex h-(--topbar-h) shrink-0 items-center gap-3 border-b border-border bg-background/85 px-6 backdrop-blur-md max-rail:gap-2 max-rail:px-3"
     >
       <Button
         variant="ghost"
@@ -59,7 +59,7 @@ export function Topbar({ title, sub, action, actionNode }: TopbarProps) {
       </span>
 
       <div className="flex min-w-0 flex-[0_1_auto] items-baseline gap-2.5">
-        <h1 className="min-w-0 shrink-0 truncate text-lg max-narrow:text-base">{title}</h1>
+        <h1 className="min-w-0 shrink-0 truncate font-display text-2xl leading-none text-ink max-narrow:text-xl">{title}</h1>
         {sub ? (
           <span className="min-w-0 shrink truncate font-mono text-xs whitespace-nowrap text-fg-subtle max-rail:hidden">{sub}</span>
         ) : null}
@@ -73,7 +73,7 @@ export function Topbar({ title, sub, action, actionNode }: TopbarProps) {
         onClick={() => setPaletteOpen(true)}
         aria-haspopup="dialog"
         aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"}
-        className="flex h-8 w-60 shrink-0 items-center gap-2 rounded-md border border-border bg-surface-raised pr-[7px] pl-2.5 text-sm text-fg-subtle hover:border-border-strong hover:text-fg-muted max-wide:w-45 max-rail:w-8 max-rail:justify-center max-rail:p-0"
+        className="flex h-8 w-60 shrink-0 items-center gap-2 rounded-lg border border-border bg-card pr-[7px] pl-2.5 text-sm text-fg-subtle shadow-card hover:border-primary/40 hover:text-primary max-wide:w-45 max-rail:w-8 max-rail:justify-center max-rail:p-0"
       >
         <Icon name="search" size="sm" />
         <span className="flex-1 text-left max-rail:hidden">Search</span>

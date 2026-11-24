@@ -29,7 +29,7 @@ export default async function AppShellLayout({
     <ShellProvider workspace={workspace} workspaces={workspaces} user={toShellUser(session.user)}>
       <SecondFactorProvider workspaceId={workspace.id} slug={workspace.slug}>
         <SkipLink />
-        <div className="grid min-h-screen grid-cols-[var(--rail-w)_minmax(0,1fr)] max-rail:grid-cols-[minmax(0,1fr)]">
+        <div className="grid min-h-screen grid-cols-[var(--rail-w)_minmax(0,1fr)] bg-background max-rail:grid-cols-[minmax(0,1fr)]">
           <Suspense fallback={<Rail />}>
             <WorkspaceRail workspaceId={workspace.id} here={`/w/${slug}`} />
           </Suspense>
