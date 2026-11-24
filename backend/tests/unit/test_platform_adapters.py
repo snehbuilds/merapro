@@ -104,7 +104,7 @@ def test_linkedin_commentary_escapes_and_templates_hashtags() -> None:
     assert "https://x.example" in commentary("Hi", [], "https://x.example", "body")
 
 
-async def test_linkedin_member_post_with_image_and_first_comment() -> None:
+async def test_linkedin_member_post_then_independent_first_comment() -> None:
     cas = Cassette(
         [
             (
@@ -137,7 +137,7 @@ async def test_linkedin_member_post_with_image_and_first_comment() -> None:
     )
     assert res.platform_post_id == "urn:li:share:77"
     assert res.permalink == "https://www.linkedin.com/feed/update/urn:li:share:77/"
-    assert res.extra_ids == {"first_comment": "c1"}
+    assert res.extra_ids == {}
     post = json.loads(cas.requests[2].content)
     assert post["author"] == "urn:li:person:abc"
     assert post["content"] == {
@@ -146,8 +146,17 @@ async def test_linkedin_member_post_with_image_and_first_comment() -> None:
     assert "postgresql.org" not in post["commentary"]  # the link goes in the first comment
     assert cas.requests[2].headers["LinkedIn-Version"]
     assert cas.requests[1].content == IMG.data
+    comment_id = await a.publish_comment(
+        CREDS,
+        platform_account_id="abc",
+        platform_post_id=res.platform_post_id,
+        body="https://www.postgresql.org/about/news/",
+        idempotency_key="comment-1",
+    )
+    assert comment_id == "c1"
     comment = json.loads(cas.requests[3].content)
     assert comment["message"]["text"] == "https://www.postgresql.org/about/news/"
+    assert cas.requests[3].headers["X-RestLi-Idempotency-Key"] == "comment-1"
 
 
 async def test_linkedin_org_author_and_multi_image() -> None:

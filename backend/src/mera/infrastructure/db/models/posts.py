@@ -89,6 +89,9 @@ class PostSet(UUIDPrimaryKey, TenantScoped, Timestamps, Base):
     )
     recycle_after: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    publish_mode: Mapped[str] = mapped_column(Text, nullable=False, server_default="draft")
+    requested_scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    requested_timezone: Mapped[str | None] = mapped_column(Text)
 
 
 class PostVariant(UUIDPrimaryKey, TenantScoped, Timestamps, Base):
@@ -123,6 +126,7 @@ class PostVersion(UUIDPrimaryKey, TenantScoped, Base):
     thread_parts: Mapped[list[str] | None] = mapped_column(JSONB)
     hashtags: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, server_default="{}")
     link_url: Mapped[str | None] = mapped_column(Text)
+    first_comment: Mapped[str | None] = mapped_column(Text)
     media: Mapped[list[dict[str, Any]]] = _jsonb("'[]'::jsonb")
     confidence_score: Mapped[float | None] = mapped_column(Double)
     compliance_flags: Mapped[list[dict[str, Any]]] = _jsonb("'[]'::jsonb")

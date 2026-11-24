@@ -12,6 +12,8 @@ export interface AttachedMedia {
   altText: string | null;
   width: number | null;
   height: number | null;
+  mediaType: string;
+  contentType: string | null;
 }
 
 /** One entry of PUT …/variants/{id}/media. */
@@ -41,6 +43,8 @@ export function readMedia(media: readonly Record<string, unknown>[] | null | und
       altText: typeof m.alt_text === "string" ? m.alt_text : null,
       width: num(m.width),
       height: num(m.height),
+      mediaType: str(m.media_type) ?? "image",
+      contentType: str(m.content_type),
     });
   }
   return out;

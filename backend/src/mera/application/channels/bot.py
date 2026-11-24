@@ -1852,6 +1852,7 @@ class BotRuntime:
                     hashtags=list(ver.hashtags),
                     link_url=ver.link_url,
                     media=list(ver.media),
+                    first_comment=ver.first_comment,
                 )
                 based_on = ver.id
             await self._posts.create_version(

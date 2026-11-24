@@ -117,6 +117,14 @@ async def slot_base_with_reason(
     base = base_time(req, now)
     if req.scheduled_for is not None and req.scheduled_for > now:
         return base, None
+    if req.scheduled_for is not None:
+        # Approval arrived after the requested slot. Never backdate or silently publish:
+        # place from approval time and retain an explicit explanation for the calendar/API.
+        return base, {
+            "kind": "approval_after_scheduled_time",
+            "requested": req.scheduled_for.isoformat(),
+            "approved_at": (req.approved_at or now).isoformat(),
+        }
     times = await posting_times_for(s, variant)
     tz, _quiet, _cap = await effective_rules(s, variant)
     if times:

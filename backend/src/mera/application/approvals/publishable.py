@@ -70,6 +70,7 @@ async def assert_publishable(
             list(version.hashtags),
             version.link_url,
             list(version.media),
+            version.first_comment,
         ),
     )
     if recomputed != version.content_hash:

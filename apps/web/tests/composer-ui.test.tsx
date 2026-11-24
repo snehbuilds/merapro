@@ -148,6 +148,7 @@ function version(id: string, over: Partial<Version> = {}): Version {
     thread_parts: null,
     hashtags: ["postgres"],
     link_url: "https://www.postgresql.org/about/news/",
+    first_comment: null,
     content_hash: "abc",
     confidence_score: 0.84,
     compliance_flags: [],

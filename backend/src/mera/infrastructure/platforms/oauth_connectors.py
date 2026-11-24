@@ -162,12 +162,13 @@ class LinkedInConnector:
         me = await _call(
             "GET", "https://api.linkedin.com/v2/userinfo", transport=self._t, headers=headers
         )
+        scopes = str(tok.get("scope", "")).replace(",", " ").split()
         creds = {
             "access_token": tok["access_token"],
             "refresh_token": tok.get("refresh_token"),
             "member_id": me.get("sub"),
+            "granted_scopes": scopes,
         }
-        scopes = str(tok.get("scope", "")).replace(",", " ").split()
         if self.platform is Platform.LINKEDIN_ORGANIZATION:
             acls = await _call(
                 "GET",
@@ -234,6 +235,8 @@ class LinkedInConnector:
                 **credentials,
                 "access_token": tok["access_token"],
                 "refresh_token": tok.get("refresh_token", credentials["refresh_token"]),
+                "granted_scopes": str(tok.get("scope", " ")).replace(",", " ").split()
+                or credentials.get("granted_scopes", []),
             },
             _expiry(tok.get("expires_in")),
         )
@@ -245,7 +248,24 @@ class LinkedInConnector:
             transport=self._t,
             headers={"Authorization": f"Bearer {credentials.get('access_token')}"},
         )
-        return HealthReport(token_valid=True, scopes_ok=True, rate_remaining=None)
+        info = await _call(
+            "POST",
+            "https://www.linkedin.com/oauth/v2/introspectToken",
+            transport=self._t,
+            data={
+                "token": credentials.get("access_token", ""),
+                "client_id": self._c.client_id,
+                "client_secret": self._c.client_secret,
+            },
+        )
+        granted = set(str(info.get("scope", "")).replace(",", " ").split())
+        required = set(self._scopes)
+        return HealthReport(
+            token_valid=bool(info.get("active", True)),
+            scopes_ok=required <= granted,
+            rate_remaining=None,
+            last_error=None if required <= granted else "LinkedIn publishing permissions changed",
+        )
 
     async def revoke(self, credentials: dict[str, Any]) -> None:
         await _call(

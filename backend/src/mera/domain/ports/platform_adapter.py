@@ -73,6 +73,7 @@ class PublishPayload:
     link_placement: str  # body | first_comment | reply | none
     media: list[MediaFile]
     idempotency_key: str
+    first_comment: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

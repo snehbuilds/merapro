@@ -69,6 +69,8 @@ class PlatformCapabilities(BaseModel):
     # The length the platform's writing skill aims for by default (not a limit).
     target_chars: tuple[int, int] | None = None
     supports_threads: bool
+    supports_first_comment: bool = False
+    first_comment_max_chars: int | None = None
     requires_media: bool = False
     supports_alt_text: bool = True
     # Images per post (a carousel above one) and the shapes Mera derives; the first aspect
@@ -132,6 +134,8 @@ CAPABILITIES: Final[dict[Platform, PlatformCapabilities]] = {
         ),
         PlatformCapabilities(
             platform=_P.LINKEDIN_MEMBER,
+            supports_first_comment=True,
+            first_comment_max_chars=1250,
             max_media=20,
             media_aspects=(LINK_CARD, SQUARE, PORTRAIT),
             max_image_bytes=8_000_000,
@@ -151,6 +155,8 @@ CAPABILITIES: Final[dict[Platform, PlatformCapabilities]] = {
         ),
         PlatformCapabilities(
             platform=_P.LINKEDIN_ORGANIZATION,
+            supports_first_comment=True,
+            first_comment_max_chars=1250,
             max_media=20,
             media_aspects=(LINK_CARD, SQUARE, PORTRAIT),
             max_image_bytes=8_000_000,

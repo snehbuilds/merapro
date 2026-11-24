@@ -104,6 +104,9 @@ class MeraApi:
             "POST", path, json_body=body if body is not None else {}, headers=headers
         )
 
+    async def patch(self, path: str, body: Any = None) -> Any:
+        return await self.request("PATCH", path, json_body=body if body is not None else {})
+
     async def delete(self, path: str) -> Any:
         return await self.request("DELETE", path)
 

@@ -119,6 +119,7 @@ class ApprovalVariantView:
     thread_parts: list[str] | None
     hashtags: list[str]
     link_url: str | None
+    first_comment: str | None
     media: list[dict[str, Any]]
     confidence_score: float | None
     compliance_flags: list[dict[str, Any]]
@@ -226,20 +227,22 @@ class ApprovalService(WorkspaceScopedService):
         (so after a partial outcome or an edit, only the remaining accounts are asked),
         or exactly ``variant_ids``. Two open requests never share an account."""
         now = datetime.now(UTC)
-        if scheduled_for is not None and (
-            scheduled_for.tzinfo is None or scheduled_for <= now + timedelta(minutes=1)
-        ):
-            raise InvalidInput(
-                "Pick a publish time in the future (with a time zone).",
-                code="invalid_scheduled_for",
-                field="scheduled_for",
-            )
         async with self._tx(user, workspace_id, meta) as s:
             principal = await load_user_principal(s, user, workspace_id)
             await self._writable(s, workspace_id)
             ps = await s.get(PostSet, set_id, with_for_update=True)
             if ps is None:
                 raise NotFoundError("Post set not found.")
+            if scheduled_for is None and ps.publish_mode == "scheduled":
+                scheduled_for = ps.requested_scheduled_at
+            if scheduled_for is not None and (
+                scheduled_for.tzinfo is None or scheduled_for <= now + timedelta(minutes=1)
+            ):
+                raise InvalidInput(
+                    "Pick a publish time in the future (with a time zone).",
+                    code="invalid_scheduled_for",
+                    field="scheduled_for",
+                )
             variants = await _enabled_variants(s, set_id)
             if variant_ids is not None:
                 wanted = set(variant_ids)
@@ -1343,6 +1346,7 @@ class ApprovalService(WorkspaceScopedService):
                     thread_parts=list(ver.thread_parts) if ver.thread_parts else None,
                     hashtags=list(ver.hashtags),
                     link_url=ver.link_url,
+                    first_comment=ver.first_comment,
                     media=list(ver.media),
                     confidence_score=ver.confidence_score,
                     compliance_flags=list(ver.compliance_flags),

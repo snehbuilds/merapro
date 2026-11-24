@@ -201,7 +201,19 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
     setItems((list) =>
       list.some((m) => m.masterId === asset.id)
         ? list
-        : [...list, { masterId: asset.id, assetId: null, aspect: aspects[0]?.key ?? null, altText: asset.default_alt_text, width: null, height: null }],
+        : [
+            ...list,
+            {
+              masterId: asset.id,
+              assetId: null,
+              aspect: aspects[0]?.key ?? null,
+              altText: asset.default_alt_text,
+              width: null,
+              height: null,
+              mediaType: "image",
+              contentType: null,
+            },
+          ],
     );
   }
 

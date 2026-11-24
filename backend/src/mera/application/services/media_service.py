@@ -73,6 +73,12 @@ UPLOAD_LIMIT: Final = Limit(capacity=60, per_seconds=60)
 WORKSPACE_MEDIA_BYTES: Final = 2 * 1024**3  # masters and renditions together
 MAX_ALT: Final = 1000
 MAX_ATTACHED: Final = 20  # the largest carousel any platform takes
+MAX_FILE_BYTES: Final = 200 * 1024**2
+GENERIC_TYPES: Final = {
+    "application/pdf": ("document", "pdf"),
+    "video/mp4": ("video", "mp4"),
+    "video/quicktime": ("video", "mov"),
+}
 VERSION_CONFLICT: Final = (
     "This account's post changed since you opened it; reload and reapply your change."
 )
@@ -93,6 +99,8 @@ class MediaView:
     checksum: str
     default_alt_text: str | None
     created_at: datetime
+    original_filename: str | None = None
+    status: str = "ready"
     renditions: list[MediaView] = field(default_factory=list)
 
 
@@ -118,6 +126,8 @@ def _view(a: MediaAsset, renditions: list[MediaAsset] | None = None) -> MediaVie
         checksum=a.checksum.hex(),
         default_alt_text=a.default_alt_text,
         created_at=a.created_at,
+        original_filename=a.original_filename,
+        status=a.status,
         renditions=[_view(r) for r in renditions or []],
     )
 
@@ -238,6 +248,150 @@ class MediaService(WorkspaceScopedService):
             alt=alt,
             source_url=None,
             content_item_id=None,
+        )
+
+    async def upload_file(
+        self,
+        user: AuthenticatedUser,
+        workspace_id: uuid.UUID,
+        meta: RequestMeta,
+        *,
+        data: bytes,
+        content_type: str,
+        filename: str | None,
+        alt_text: str | None,
+        origin: str = "upload",
+        source_url: str | None = None,
+    ) -> MediaView:
+        """Ingest an image, MP4/QuickTime video, or PDF after signature and size checks."""
+        if len(data) > MAX_FILE_BYTES:
+            raise InvalidInput("Files can be at most 200 MB.", code="file_too_large", field="file")
+        if content_type.startswith("image/"):
+            if origin == "upload":
+                return await self.upload(user, workspace_id, meta, data=data, alt_text=alt_text)
+            await self._upload_budget(user)
+            async with self._tx(user, workspace_id, meta) as s:
+                principal = await load_user_principal(s, user, workspace_id)
+                rbac.require(principal, Permission.UPLOAD_MEDIA, workspace_id)
+                await self._writable(s, workspace_id)
+            try:
+                info = await asyncio.to_thread(images.probe, data)
+            except images.ImageRejected as exc:
+                raise _reject(exc) from exc
+            return await self._ingest(
+                user,
+                workspace_id,
+                meta,
+                data,
+                info,
+                origin=origin,
+                alt=_alt(alt_text),
+                source_url=source_url,
+                content_item_id=None,
+            )
+        kind_ext = GENERIC_TYPES.get(content_type.lower().split(";", 1)[0])
+        if kind_ext is None:
+            raise InvalidInput(
+                "Unsupported media type.", code="unsupported_media_type", field="content_type"
+            )
+        if content_type.startswith("application/pdf") and not data.startswith(b"%PDF-"):
+            raise InvalidInput("The file is not a valid PDF.", code="mime_mismatch", field="file")
+        if content_type.startswith("video/") and b"ftyp" not in data[:32]:
+            raise InvalidInput(
+                "The file is not a supported video.", code="mime_mismatch", field="file"
+            )
+        await self._upload_budget(user)
+        async with self._tx(user, workspace_id, meta) as s:
+            principal = await load_user_principal(s, user, workspace_id)
+            rbac.require(principal, Permission.UPLOAD_MEDIA, workspace_id)
+            await self._writable(s, workspace_id)
+        media_type, ext = kind_ext
+        checksum = hashlib.sha256(data).digest()
+        async with self._tx(user, workspace_id, meta) as s:
+            existing = await _master_by_checksum(s, checksum)
+            if existing is not None:
+                return _view(existing)
+            await self._within_quota(s, len(data))
+        asset_id = uuid7()
+        key = f"ws/{workspace_id}/{asset_id}.{ext}"
+        await self._store.put(key, data, content_type)
+        try:
+            async with self._tx(user, workspace_id, meta) as s:
+                await self._within_quota(s, len(data), lock=True)
+                asset = MediaAsset(
+                    id=asset_id,
+                    workspace_id=workspace_id,
+                    media_type=media_type,
+                    object_key=key,
+                    content_type=content_type,
+                    width=0,
+                    height=0,
+                    byte_size=len(data),
+                    origin=origin,
+                    source_url=source_url,
+                    rendition_key="master",
+                    checksum=checksum,
+                    default_alt_text=_alt(alt_text),
+                    original_filename=(filename or "")[:255] or None,
+                    uploaded_by_user_id=user.user_id,
+                )
+                s.add(asset)
+                await s.flush()
+                await record(
+                    s,
+                    self._actor_entry(
+                        user,
+                        meta,
+                        "media_asset.created",
+                        workspace_id=workspace_id,
+                        subject_type="media_asset",
+                        subject_id=asset_id,
+                        after={
+                            "origin": origin,
+                            "media_type": media_type,
+                            "bytes": len(data),
+                            "sha256": checksum.hex(),
+                        },
+                    ),
+                )
+                await s.refresh(asset)
+                return _view(asset)
+        except BaseException:
+            await self._store.delete(key)
+            raise
+
+    async def from_remote_url(
+        self,
+        user: AuthenticatedUser,
+        workspace_id: uuid.UUID,
+        meta: RequestMeta,
+        *,
+        url: str,
+        content_type: str | None,
+        filename: str | None,
+        alt_text: str | None,
+    ) -> MediaView:
+        try:
+            fetched = await self._fetcher.get(
+                url,
+                headers={"Accept": "image/*,video/mp4,video/quicktime,application/pdf"},
+                max_bytes=MAX_FILE_BYTES,
+                accept_statuses=frozenset({200}),
+            )
+        except FetchError as exc:
+            code, message = public_message(exc.kind, str(exc))
+            raise InvalidInput(message, code=f"remote_{code}", field="url") from exc
+        detected = content_type or fetched.headers.get("content-type", "").split(";", 1)[0]
+        return await self.upload_file(
+            user,
+            workspace_id,
+            meta,
+            data=fetched.body,
+            content_type=detected,
+            filename=filename,
+            alt_text=alt_text,
+            origin="remote_url",
+            source_url=url,
         )
 
     async def from_content_item(
@@ -527,23 +681,39 @@ class MediaService(WorkspaceScopedService):
                 s, user, workspace_id, set_id, variant_id, based_on_version_id
             )
             caps = capabilities_for(Platform(v.platform))
-            plans: list[tuple[MediaAsset, MediaAspect, str | None]] = []
+            plans: list[tuple[MediaAsset, MediaAspect | None, str | None]] = []
             for c in choices:
                 master = await _master(s, c.asset_id)
-                aspect = _aspect(caps.media_aspects, c.aspect)
+                if master.media_type != "image" and choices != [c]:
+                    raise InvalidInput(
+                        "Videos and documents must be attached alone.", code="mixed_media"
+                    )
+                if master.media_type == "document" and not v.platform.startswith("linkedin"):
+                    raise InvalidInput(
+                        "Documents are only supported for LinkedIn.",
+                        code="platform_media_unsupported",
+                    )
+                aspect = (
+                    _aspect(caps.media_aspects, c.aspect) if master.media_type == "image" else None
+                )
                 alt = _alt(c.alt_text) if c.alt_text is not None else master.default_alt_text
                 plans.append((master, aspect, alt))
         # Renditions are derived outside the variant lock (CPU work, file writes).
         entries = []
         for master, aspect, alt in plans:
-            r = await self._ensure_rendition(user, workspace_id, meta, master, aspect, caps)
+            r = (
+                await self._ensure_rendition(user, workspace_id, meta, master, aspect, caps)
+                if aspect is not None
+                else master
+            )
             entries.append(
                 {
                     "asset_id": str(r.id),
                     "master_id": str(master.id),
                     "checksum": r.checksum.hex(),
                     "alt_text": alt,
-                    "aspect": aspect.key,
+                    "aspect": aspect.key if aspect is not None else None,
+                    "media_type": master.media_type,
                     "width": r.width,
                     "height": r.height,
                     "content_type": r.content_type,
@@ -585,6 +755,7 @@ class MediaService(WorkspaceScopedService):
                     list(prior.hashtags),
                     prior.link_url,
                     entries,
+                    prior.first_comment,
                 ),
                 source="human",
                 # The text is unchanged, so its embedding and the Editor's review still hold.

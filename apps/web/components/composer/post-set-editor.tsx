@@ -141,7 +141,12 @@ export function PostSetEditor({ workspace, postSet, accounts, voices, canEdit: c
   }
 
   const handlers = (v: Variant) => ({
-    onSave: (content: { body: string; thread_parts: string[] | null; hashtags: string[] }) =>
+    onSave: (content: {
+      body: string;
+      thread_parts: string[] | null;
+      hashtags: string[];
+      first_comment: string | null;
+    }) =>
       act(
         settle(
           createVersion({
@@ -152,6 +157,7 @@ export function PostSetEditor({ workspace, postSet, accounts, voices, canEdit: c
               thread_parts: content.thread_parts,
               hashtags: content.hashtags,
               link_url: v.current_version?.link_url ?? null,
+              first_comment: content.first_comment,
               based_on_version_id: v.current_version?.id ?? null,
             },
           }),

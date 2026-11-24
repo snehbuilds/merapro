@@ -98,12 +98,14 @@ class SetStatusOut(_Out):
 
 class RescheduleIn(BaseModel):
     scheduled_for: datetime
+    timezone: str | None = Field(default=None, max_length=64)
 
 
 class ScheduleSetIn(BaseModel):
     scheduled_for: datetime | None = Field(
         default=None, description="Base time; stagger offsets are added"
     )
+    timezone: str | None = Field(default=None, max_length=64)
 
 
 class ScheduleResult(BaseModel):
@@ -153,7 +155,14 @@ async def reschedule(
     """Reschedule only. Quiet hours, the daily cap and spacing still apply; ``moved_by`` says
     if they moved the slot."""
     return ScheduledPostOut.model_validate(
-        await svc.reschedule(user, workspace_id, sp_id, meta, scheduled_for=body.scheduled_for)
+        await svc.reschedule(
+            user,
+            workspace_id,
+            sp_id,
+            meta,
+            scheduled_for=body.scheduled_for,
+            timezone=body.timezone,
+        )
     )
 
 
@@ -168,7 +177,14 @@ async def calendar_move(
 ) -> ScheduledPostOut:
     """The calendar's drag-and-drop (and keyboard) target: the same as a reschedule."""
     return ScheduledPostOut.model_validate(
-        await svc.reschedule(user, workspace_id, sp_id, meta, scheduled_for=body.scheduled_for)
+        await svc.reschedule(
+            user,
+            workspace_id,
+            sp_id,
+            meta,
+            scheduled_for=body.scheduled_for,
+            timezone=body.timezone,
+        )
     )
 
 
@@ -207,7 +223,12 @@ async def schedule_set(
     accounts: the per-account result says what landed (an unapproved account is
     ``approval_required``)."""
     results = await svc.schedule_set(
-        user, workspace_id, set_id, meta, scheduled_for=body.scheduled_for if body else None
+        user,
+        workspace_id,
+        set_id,
+        meta,
+        scheduled_for=body.scheduled_for if body else None,
+        timezone=body.timezone if body else None,
     )
     return ScheduleResult(results=results)
 

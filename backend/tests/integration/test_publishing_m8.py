@@ -15,7 +15,12 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from mera.application.publishing.publisher import Publisher
 from mera.domain.context import WorkspaceContext
-from mera.infrastructure.db.models import PostVariant, ScheduledPost, SocialAccount
+from mera.infrastructure.db.models import (
+    PostVariant,
+    PublishedComment,
+    ScheduledPost,
+    SocialAccount,
+)
 from mera.infrastructure.db.session import workspace_transaction
 from mera.infrastructure.platforms.adapters.fake import FakePlatformAdapter
 from tests.integration.test_accounts_m3 import _app, _connect, _setup
@@ -221,6 +226,53 @@ async def test_lost_response_is_reconciled_not_double_posted(
     )
     assert len(adapters["x"].posts) == 1  # one post on the platform, despite two attempts
     assert adapters["x"].attempts[sp.idempotency_key] == 1  # the retry reconciled, it did not post
+
+
+async def test_first_comment_is_delivered_after_post_with_its_own_idempotency(
+    api: httpx.AsyncClient, deferrer: CapturingDeferrer, quiet: CapturingDeferrer
+) -> None:
+    s, ws = await _setup(api, "firstcomment")
+    ps, acc, _ = await _four(api, s, ws, deferrer)
+    li = next(v for v in ps["variants"] if v["social_account_id"] == acc["li"])
+    current = li["current_version"]
+    r = await api.post(
+        _sets(ws, ps["id"], f"/variants/{li['id']}/versions"),
+        headers=_h(s),
+        json={
+            "body": current["body"],
+            "thread_parts": current["thread_parts"],
+            "hashtags": current["hashtags"],
+            "link_url": current["link_url"],
+            "first_comment": "Implementation notes are in the comments.",
+            "based_on_version_id": current["id"],
+        },
+    )
+    assert r.status_code == 201, r.text
+    req = await _submit(api, s, ws, ps["id"])
+    by = _by(req, acc)
+    assert (await _decide(api, s, ws, req, "approve", [by["li"]])).status_code == 200
+    assert (
+        await _decide(api, s, ws, req, "reject", [by["fb"], by["th"], by["xx"]])
+    ).status_code == 200
+    pub, adapters = _publisher(api)
+    sp = (await _slots(api, ws, ps["id"]))[0]
+    assert await pub.publish(uuid.UUID(ws), sp.id, now=sp.scheduled_for) == "published"
+    assert [call["op"] for call in adapters["linkedin_member"].calls] == ["publish"]
+    comment_time = sp.scheduled_for + timedelta(minutes=1)
+    due = [c for c in await pub.comments_due(comment_time)]
+    comment = next(c for c in due if str(c.workspace_id) == ws)
+    assert (
+        await pub.publish_comment(uuid.UUID(ws), comment.comment_id, now=comment_time)
+        == "published"
+    )
+    assert await pub.publish_comment(uuid.UUID(ws), comment.comment_id) == "skipped"
+    assert [call["op"] for call in adapters["linkedin_member"].calls] == ["publish", "comment"]
+    assert len(adapters["linkedin_member"].posts) == 1
+    async with workspace_transaction(_sm(api), WorkspaceContext(uuid.UUID(ws))) as tx:
+        row = await tx.get(PublishedComment, comment.comment_id)
+        assert row is not None
+        assert row.state == "published"
+        assert row.platform_comment_id is not None
 
 
 async def test_rate_limit_backs_off_then_publishes(

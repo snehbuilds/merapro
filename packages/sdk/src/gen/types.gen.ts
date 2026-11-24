@@ -443,6 +443,10 @@ export type ApprovalVariantOut = {
      */
     decided_at: string | null;
     /**
+     * First Comment
+     */
+    first_comment: string | null;
+    /**
      * Handle
      */
     handle: string;
@@ -2850,6 +2854,38 @@ export type MediaChoiceIn = {
 };
 
 /**
+ * MediaIngestIn
+ */
+export type MediaIngestIn = {
+    /**
+     * Alt Text
+     */
+    alt_text?: string | null;
+    /**
+     * Base64 Data
+     */
+    base64_data?: string | null;
+    /**
+     * Content Type
+     */
+    content_type?: string | null;
+    /**
+     * Filename
+     */
+    filename?: string | null;
+    /**
+     * Presigned Url
+     *
+     * A caller-managed presigned download URL after its upload completes
+     */
+    presigned_url?: string | null;
+    /**
+     * Remote Url
+     */
+    remote_url?: string | null;
+};
+
+/**
  * MediaList
  */
 export type MediaList = {
@@ -2904,6 +2940,10 @@ export type MediaOut = {
      */
     origin: string;
     /**
+     * Original Filename
+     */
+    original_filename?: string | null;
+    /**
      * Parent Asset Id
      */
     parent_asset_id: string | null;
@@ -2921,6 +2961,10 @@ export type MediaOut = {
      * Source Url
      */
     source_url: string | null;
+    /**
+     * Status
+     */
+    status?: string;
     /**
      * Width
      */
@@ -3504,6 +3548,10 @@ export type PlatformCapabilities = {
      */
     display_name: string;
     /**
+     * First Comment Max Chars
+     */
+    first_comment_max_chars?: number | null;
+    /**
      * Hook Chars
      */
     hook_chars?: number | null;
@@ -3576,6 +3624,10 @@ export type PlatformCapabilities = {
      * Supports Edit
      */
     supports_edit: boolean;
+    /**
+     * Supports First Comment
+     */
+    supports_first_comment?: boolean;
     /**
      * Supports Hide Comments
      */
@@ -3842,6 +3894,14 @@ export type PostSetIn = {
      * Queue drafting immediately
      */
     generate?: boolean;
+    /**
+     * Publish Mode
+     */
+    publish_mode?: 'draft' | 'immediate' | 'scheduled';
+    /**
+     * Scheduled At
+     */
+    scheduled_at?: string | null;
     targets?: TargetsIn;
     /**
      * Template Id
@@ -3849,6 +3909,10 @@ export type PostSetIn = {
      * Start from a template: its brief, outline and hashtags fill in what is not given here, and its groups are the targets when none are
      */
     template_id?: string | null;
+    /**
+     * Timezone
+     */
+    timezone?: string | null;
     /**
      * Title
      */
@@ -3925,9 +3989,21 @@ export type PostSetOut = {
      */
     origin: string;
     /**
+     * Publish Mode
+     */
+    publish_mode?: string;
+    /**
      * Recycle After
      */
     recycle_after?: string | null;
+    /**
+     * Requested Scheduled At
+     */
+    requested_scheduled_at?: string | null;
+    /**
+     * Requested Timezone
+     */
+    requested_timezone?: string | null;
     /**
      * Set Guardrails
      */
@@ -4290,6 +4366,10 @@ export type RescheduleIn = {
      * Scheduled For
      */
     scheduled_for: string;
+    /**
+     * Timezone
+     */
+    timezone?: string | null;
 };
 
 /**
@@ -4600,6 +4680,10 @@ export type ScheduleSetIn = {
      * Base time; stagger offsets are added
      */
     scheduled_for?: string | null;
+    /**
+     * Timezone
+     */
+    timezone?: string | null;
 };
 
 /**
@@ -6145,6 +6229,12 @@ export type VersionIn = {
      */
     body: string;
     /**
+     * First Comment
+     *
+     * Optional comment published only after the main post succeeds
+     */
+    first_comment?: string | null;
+    /**
      * Hashtags
      */
     hashtags?: Array<string>;
@@ -6212,6 +6302,10 @@ export type VersionOut = {
      * Created At
      */
     created_at: string;
+    /**
+     * First Comment
+     */
+    first_comment: string | null;
     /**
      * Hashtag Suggestions
      */
@@ -12415,6 +12509,36 @@ export type EstimateGenerationResponses = {
 };
 
 export type EstimateGenerationResponse = EstimateGenerationResponses[keyof EstimateGenerationResponses];
+
+export type IngestMediaData = {
+    body: MediaIngestIn;
+    path: {
+        /**
+         * Workspace Id
+         */
+        workspace_id: string;
+    };
+    query?: never;
+    url: '/api/v1/workspaces/{workspace_id}/media/ingest';
+};
+
+export type IngestMediaErrors = {
+    /**
+     * Error envelope
+     */
+    default: ErrorEnvelope;
+};
+
+export type IngestMediaError = IngestMediaErrors[keyof IngestMediaErrors];
+
+export type IngestMediaResponses = {
+    /**
+     * Successful Response
+     */
+    201: MediaOut;
+};
+
+export type IngestMediaResponse = IngestMediaResponses[keyof IngestMediaResponses];
 
 export type ListMediaJobsData = {
     body?: never;
