@@ -46,6 +46,7 @@ def compute_content_hash(
     hashtags: Iterable[str],
     link_url: str | None,
     media: Sequence[MediaRef],
+    first_comment: str | None = None,
 ) -> bytes:
     payload = {
         "platform": platform,
@@ -57,6 +58,10 @@ def compute_content_hash(
         # Order matters for media (it is the carousel order), so it is not sorted.
         "media": [{"checksum": m.checksum.hex(), "alt": _norm(m.alt_text)} for m in media],
     }
+    # Preserve hashes created before first-comment support when no comment is present.
+    # This keeps existing approvals/published audit anchors valid across the migration.
+    if first_comment is not None:
+        payload["first_comment"] = _norm(first_comment)
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256(canonical.encode("utf-8")).digest()
 

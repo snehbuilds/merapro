@@ -24,6 +24,7 @@ from urllib.parse import quote
 
 from mera.domain.ports.platform_adapter import (
     MetricReading,
+    PermanentError,
     PublishPayload,
     PublishResult,
 )
@@ -85,6 +86,67 @@ class LinkedInAdapter:
         )
         return str(value["image"])
 
+    async def _upload_document(
+        self, credentials: dict[str, Any], owner: str, data: bytes, mime: str
+    ) -> str:
+        init = await self._http.json(
+            "POST",
+            f"{API}/documents",
+            params={"action": "initializeUpload"},
+            headers=self._headers(credentials),
+            json_body={"initializeUploadRequest": {"owner": owner}},
+        )
+        value = init.get("value", {})
+        await self._http.request(
+            "PUT", value["uploadUrl"], headers={"Content-Type": mime}, content=data
+        )
+        return str(value["document"])
+
+    async def _upload_video(
+        self, credentials: dict[str, Any], owner: str, data: bytes, mime: str
+    ) -> str:
+        init = await self._http.json(
+            "POST",
+            f"{API}/videos",
+            params={"action": "initializeUpload"},
+            headers=self._headers(credentials),
+            json_body={
+                "initializeUploadRequest": {
+                    "owner": owner,
+                    "fileSizeBytes": len(data),
+                    "uploadCaptions": False,
+                    "uploadThumbnail": False,
+                }
+            },
+        )
+        value = init.get("value", {})
+        etags = []
+        for instruction in value.get("uploadInstructions") or []:
+            first = int(instruction.get("firstByte", 0))
+            last = int(instruction.get("lastByte", len(data) - 1))
+            response = await self._http.request(
+                "PUT",
+                instruction["uploadUrl"],
+                headers={"Content-Type": mime},
+                content=data[first : last + 1],
+                expect_json=False,
+            )
+            etags.append(response.headers.get("etag", ""))
+        await self._http.json(
+            "POST",
+            f"{API}/videos",
+            params={"action": "finalizeUpload"},
+            headers=self._headers(credentials),
+            json_body={
+                "finalizeUploadRequest": {
+                    "video": value["video"],
+                    "uploadToken": value.get("uploadToken", ""),
+                    "uploadedPartIds": etags,
+                }
+            },
+        )
+        return str(value["video"])
+
     async def publish(self, credentials: dict[str, Any], payload: PublishPayload) -> PublishResult:
         author = author_urn(self.platform, payload.platform_account_id)
         post: dict[str, Any] = {
@@ -102,33 +164,82 @@ class LinkedInAdapter:
             "isReshareDisabledByAuthor": False,
         }
         images = []
+        single_media: dict[str, str] | None = None
         for m in payload.media:
-            urn = await self._upload_image(credentials, author, m.data, m.mime_type)
-            images.append({"id": urn, "altText": (m.alt_text or "")[:4086]})
+            if m.mime_type.startswith("image/"):
+                urn = await self._upload_image(credentials, author, m.data, m.mime_type)
+                images.append({"id": urn, "altText": (m.alt_text or "")[:4086]})
+            elif m.mime_type == "application/pdf":
+                if len(payload.media) != 1:
+                    raise PermanentError("LinkedIn documents must be attached alone")
+                urn = await self._upload_document(credentials, author, m.data, m.mime_type)
+                single_media = {"id": urn, "title": "Document"}
+            elif m.mime_type.startswith("video/"):
+                if len(payload.media) != 1:
+                    raise PermanentError("LinkedIn videos must be attached alone")
+                urn = await self._upload_video(credentials, author, m.data, m.mime_type)
+                single_media = {"id": urn, "title": "Video"}
+            else:
+                raise PermanentError(f"Unsupported LinkedIn media type: {m.mime_type}")
         if len(images) == 1:
             post["content"] = {"media": images[0]}
         elif images:
             post["content"] = {"multiImage": {"images": images}}
+        elif single_media:
+            post["content"] = {"media": single_media}
         resp = await self._http.request(
             "POST", f"{API}/posts", headers=self._headers(credentials), json_body=post
         )
         urn = resp.headers.get("x-restli-id") or resp.headers.get("x-linkedin-id") or ""
         if not urn:
             urn = str((resp.json() if resp.content else {}).get("id", ""))
-        extra: dict[str, str] = {}
-        if payload.link_url and payload.link_placement == "first_comment":
-            comment = await self._http.request(
-                "POST",
-                f"{API}/socialActions/{quote(urn, safe='')}/comments",
-                headers=self._headers(credentials),
-                json_body={"actor": author, "object": urn, "message": {"text": payload.link_url}},
-            )
-            extra["first_comment"] = comment.headers.get("x-restli-id", "") or "created"
         return PublishResult(
             platform_post_id=urn,
             permalink=f"https://www.linkedin.com/feed/update/{urn}/",
-            extra_ids=extra,
         )
+
+    async def publish_comment(
+        self,
+        credentials: dict[str, Any],
+        *,
+        platform_account_id: str,
+        platform_post_id: str,
+        body: str,
+        idempotency_key: str,
+    ) -> str:
+        if len(body) > 1250:
+            raise ValueError("LinkedIn comments can be at most 1,250 characters")
+        author = author_urn(self.platform, platform_account_id)
+        comment = await self._http.request(
+            "POST",
+            f"{API}/socialActions/{quote(platform_post_id, safe='')}/comments",
+            headers={**self._headers(credentials), "X-RestLi-Idempotency-Key": idempotency_key},
+            json_body={"actor": author, "object": platform_post_id, "message": {"text": body}},
+        )
+        return comment.headers.get("x-restli-id", "") or str(
+            (comment.json() if comment.content else {}).get("id", "created")
+        )
+
+    async def find_comment(
+        self,
+        credentials: dict[str, Any],
+        *,
+        platform_account_id: str,
+        platform_post_id: str,
+        body: str,
+    ) -> str | None:
+        author = author_urn(self.platform, platform_account_id)
+        found = await self._http.json(
+            "GET",
+            f"{API}/socialActions/{quote(platform_post_id, safe='')}/comments",
+            headers=self._headers(credentials),
+            params={"count": 100},
+        )
+        for item in found.get("elements") or []:
+            text = ((item.get("message") or {}).get("text"))
+            if str(item.get("actor")) == author and text == body:
+                return str(item.get("id"))
+        return None
 
     async def find_existing(
         self, credentials: dict[str, Any], payload: PublishPayload, since: datetime

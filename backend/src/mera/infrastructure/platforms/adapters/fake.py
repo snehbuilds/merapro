@@ -49,6 +49,8 @@ class FakePlatformAdapter:
     posts: dict[str, PublishResult] = field(default_factory=dict)  # idempotency_key → post
     attempts: dict[str, int] = field(default_factory=dict)
     calls: list[dict[str, Any]] = field(default_factory=list)
+    comments: dict[str, str] = field(default_factory=dict)
+    comment_payloads: dict[str, tuple[str, str]] = field(default_factory=dict)
 
     async def publish(self, credentials: dict[str, Any], payload: PublishPayload) -> PublishResult:
         handle = str(credentials.get("handle", ""))
@@ -76,11 +78,11 @@ class FakePlatformAdapter:
             return self.posts[payload.idempotency_key]  # the platform's own dedupe
         post_id = f"{self.platform}-{secrets.token_hex(6)}"
         extra: dict[str, str] = {}
-        if payload.link_url and payload.link_placement in ("first_comment", "reply"):
-            extra[payload.link_placement] = f"{post_id}-link"
         for i, _ in enumerate(payload.thread_parts or [], start=1):
             if i > 1:
                 extra[f"part_{i}"] = f"{post_id}-{i}"
+        if payload.link_url and payload.link_placement == "reply":
+            extra["reply"] = f"{post_id}-reply"
         result = PublishResult(
             platform_post_id=post_id,
             permalink=_BASES.get(self.platform, "https://sandbox.example/") + post_id,
@@ -90,6 +92,43 @@ class FakePlatformAdapter:
         if "lost" in handle and n == 1:
             raise TransientError("Sandbox platform timed out after accepting (simulated)")
         return result
+
+    async def publish_comment(
+        self,
+        credentials: dict[str, Any],
+        *,
+        platform_account_id: str,
+        platform_post_id: str,
+        body: str,
+        idempotency_key: str,
+    ) -> str:
+        if idempotency_key in self.comments:
+            return self.comments[idempotency_key]
+        handle = str(credentials.get("handle", ""))
+        self.calls.append({"op": "comment", "post_id": platform_post_id, "body": body})
+        if "commentfail" in handle:
+            raise TransientError("Sandbox comment failed (simulated)", status=500)
+        comment_id = f"{platform_post_id}-comment-{secrets.token_hex(3)}"
+        self.comments[idempotency_key] = comment_id
+        self.comment_payloads[idempotency_key] = (platform_post_id, body)
+        return comment_id
+
+    async def find_comment(
+        self,
+        credentials: dict[str, Any],
+        *,
+        platform_account_id: str,
+        platform_post_id: str,
+        body: str,
+    ) -> str | None:
+        return next(
+            (
+                self.comments[key]
+                for key, payload in self.comment_payloads.items()
+                if payload == (platform_post_id, body)
+            ),
+            None,
+        )
 
     async def find_existing(
         self, credentials: dict[str, Any], payload: PublishPayload, since: datetime

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import uuid
 from datetime import datetime
 from typing import Annotated
@@ -44,6 +46,8 @@ class MediaOut(BaseModel):
     checksum: str = Field(description="sha256 hex; what a version's content hash covers")
     default_alt_text: str | None
     created_at: datetime
+    original_filename: str | None = None
+    status: str = "ready"
     renditions: list[MediaOut] = Field(default_factory=list)
 
 
@@ -53,6 +57,68 @@ class MediaList(BaseModel):
 
 class FromContentItemIn(BaseModel):
     content_item_id: uuid.UUID
+
+
+class MediaIngestIn(BaseModel):
+    remote_url: str | None = Field(default=None, max_length=4096)
+    base64_data: str | None = Field(default=None, max_length=280_000_000)
+    presigned_url: str | None = Field(
+        default=None,
+        max_length=4096,
+        description="A caller-managed presigned download URL after its upload completes",
+    )
+    content_type: str | None = Field(default=None, max_length=120)
+    filename: str | None = Field(default=None, max_length=255)
+    alt_text: str | None = Field(default=None, max_length=1000)
+
+
+@router.post(f"{WS}/media/ingest", response_model=MediaOut, status_code=status.HTTP_201_CREATED)
+async def ingest_media(
+    workspace_id: uuid.UUID,
+    body: MediaIngestIn,
+    user: CurrentUser,
+    svc: Media,
+    meta: Meta,
+) -> MediaOut:
+    sources = [body.remote_url, body.base64_data, body.presigned_url]
+    if sum(x is not None for x in sources) != 1:
+        raise InvalidInput(
+            "Provide exactly one of remote_url, base64_data or presigned_url.",
+            code="invalid_media_source",
+        )
+    if body.base64_data is not None:
+        try:
+            data = base64.b64decode(body.base64_data, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise InvalidInput(
+                "Invalid Base64 data.", code="invalid_base64", field="base64_data"
+            ) from exc
+        if not body.content_type:
+            raise InvalidInput(
+                "content_type is required for Base64 uploads.",
+                code="content_type_required",
+                field="content_type",
+            )
+        view = await svc.upload_file(
+            user,
+            workspace_id,
+            meta,
+            data=data,
+            content_type=body.content_type,
+            filename=body.filename,
+            alt_text=body.alt_text,
+        )
+    else:
+        view = await svc.from_remote_url(
+            user,
+            workspace_id,
+            meta,
+            url=body.remote_url or body.presigned_url or "",
+            content_type=body.content_type,
+            filename=body.filename,
+            alt_text=body.alt_text,
+        )
+    return MediaOut.model_validate(view)
 
 
 class AltTextIn(BaseModel):

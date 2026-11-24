@@ -73,7 +73,6 @@ export function Topbar({ title, sub, action, actionNode }: TopbarProps) {
         onClick={() => setPaletteOpen(true)}
         aria-haspopup="dialog"
         aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"}
-        aria-label="Search screens"
         className="flex h-8 w-60 shrink-0 items-center gap-2 rounded-md border border-border bg-surface-raised pr-[7px] pl-2.5 text-sm text-fg-subtle hover:border-border-strong hover:text-fg-muted max-wide:w-45 max-rail:w-8 max-rail:justify-center max-rail:p-0"
       >
         <Icon name="search" size="sm" />

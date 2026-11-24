@@ -47,6 +47,7 @@ from mera.infrastructure.db.models import (
     PostSet,
     PostVariant,
     PostVersion,
+    PublishedComment,
     PublishedPost,
     ScheduledPost,
     SocialAccount,
@@ -318,6 +319,18 @@ class PublishingService(WorkspaceScopedService):
                     if sp
                     else None
                 )
+                pc = (
+                    (
+                        await s.execute(
+                            select(PublishedComment)
+                            .where(PublishedComment.published_post_id == pp.id)
+                            .order_by(PublishedComment.created_at.desc())
+                            .limit(1)
+                        )
+                    ).scalar_one_or_none()
+                    if pp
+                    else None
+                )
                 accounts.append(
                     {
                         "post_variant_id": str(v.id),
@@ -334,6 +347,9 @@ class PublishingService(WorkspaceScopedService):
                         "last_error": sp.last_error if sp else None,
                         "permalink": pp.permalink if pp else None,
                         "published_at": pp.published_at.isoformat() if pp else None,
+                        "first_comment_state": pc.state if pc else None,
+                        "platform_comment_id": pc.platform_comment_id if pc else None,
+                        "first_comment_error": pc.last_error if pc else None,
                     }
                 )
             return SetStatusView(ps.id, ps.state, accounts)
@@ -446,6 +462,7 @@ class PublishingService(WorkspaceScopedService):
         meta: RequestMeta,
         *,
         scheduled_for: datetime,
+        timezone: str | None = None,
     ) -> ScheduledView:
         """Move one account's slot (calendar drag, the bot's Reschedule). The new time is
         still subject to quiet hours, the daily cap and spacing; the response says if it
@@ -480,6 +497,7 @@ class PublishingService(WorkspaceScopedService):
                 "moved_by": moved,
                 "requested": scheduled_for.isoformat(),
                 "rescheduled": True,
+                **({"requested_timezone": timezone} if timezone else {}),
             }
             variant.scheduled_for = at
             await record(
@@ -676,6 +694,7 @@ class PublishingService(WorkspaceScopedService):
         *,
         scheduled_for: datetime | None,
         now_mode: bool = False,
+        timezone: str | None = None,
     ) -> list[dict[str, Any]]:
         """Place every approved account that has no live slot (docs/04 §4.10: not a
         transaction across accounts; a per-account result says what landed). Used to
@@ -740,6 +759,10 @@ class PublishingService(WorkspaceScopedService):
                     ):
                         at, _ = await place_variant(s, v, base=base, now=now, exclude=sp.id)
                         sp.scheduled_for = sp.next_attempt_at = at
+                        sp.placement = {
+                            **(sp.placement or {}),
+                            **({"requested_timezone": timezone} if timezone else {}),
+                        }
                         kicks.append((sp.id, sp.social_account_id))
                         results.append(
                             {
@@ -766,7 +789,11 @@ class PublishingService(WorkspaceScopedService):
                         approval_request_id=anchor.approval_request_id,
                         scheduled_for=at,
                         stagger_offset_seconds=v.stagger_offset_seconds,
-                        placement={"moved_by": moved, "requested": base.isoformat()},
+                        placement={
+                            "moved_by": moved,
+                            "requested": base.isoformat(),
+                            **({"requested_timezone": timezone} if timezone else {}),
+                        },
                         state=ScheduledState.QUEUED.value,
                         idempotency_key=key,
                         next_attempt_at=at,
@@ -777,7 +804,11 @@ class PublishingService(WorkspaceScopedService):
                     sp.state = ScheduledState.QUEUED.value
                     sp.scheduled_for = sp.next_attempt_at = at
                     sp.attempt_count = 0
-                    sp.placement = {"moved_by": moved, "requested": base.isoformat()}
+                    sp.placement = {
+                        "moved_by": moved,
+                        "requested": base.isoformat(),
+                        **({"requested_timezone": timezone} if timezone else {}),
+                    }
                 v.state = VariantState.SCHEDULED.value
                 v.scheduled_for = at
                 kicks.append((sp.id, sp.social_account_id))

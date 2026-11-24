@@ -97,6 +97,26 @@ class PublishedPost(UUIDPrimaryKey, TenantScoped, Base):
     created_at: Mapped[datetime] = _now()
 
 
+class PublishedComment(UUIDPrimaryKey, TenantScoped, Base):
+    """A first comment is a separate delivery with its own idempotency and retries."""
+
+    __tablename__ = "published_comment"
+
+    published_post_id: Mapped[uuid.UUID] = _fk("published_post.id")
+    social_account_id: Mapped[uuid.UUID] = _fk("social_account.id")
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    content_hash: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    state: Mapped[str] = mapped_column(Text, nullable=False, server_default="queued")
+    platform_comment_id: Mapped[str | None] = mapped_column(Text)
+    idempotency_key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    next_attempt_at: Mapped[datetime | None] = _ts()
+    last_error: Mapped[str | None] = mapped_column(Text)
+    published_at: Mapped[datetime | None] = _ts()
+    created_at: Mapped[datetime] = _now()
+    updated_at: Mapped[datetime] = _now()
+
+
 class DeadLetter(UUIDPrimaryKey, TenantScoped, Base):
     __tablename__ = "dead_letter"
 

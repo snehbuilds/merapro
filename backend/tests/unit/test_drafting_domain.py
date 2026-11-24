@@ -49,6 +49,7 @@ def test_content_hash_properties() -> None:
     assert _h(media=[MediaRef(b"\x02" * 32, "chart")]) != h  # media by checksum
     assert _h(media=[MediaRef(b"\x01" * 32, "other alt")]) != h
     assert _h(link_url=None) != h
+    assert _h(first_comment="Read the full benchmark below") != h
     assert _h(thread_parts=["a", "b"]) != _h(thread_parts=["b", "a"])
     # NFC: composed and decomposed é hash alike.
     assert _h(body="café") == _h(body="café")

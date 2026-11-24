@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, Query, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from mera.api.deps import AgentRuns, CurrentUser, Meta, Orchestration, Posts, Templates, Voices
 from mera.application.drafting.core import ContentInput
+from mera.application.errors import InvalidInput
 from mera.application.services.post_service import TargetSelection
 from mera.application.services.voice_service import VoiceFields
 from mera.domain.value_objects.platform import Platform
@@ -44,6 +46,7 @@ class VersionOut(_Out):
     thread_parts: list[str] | None
     hashtags: list[str]
     link_url: str | None
+    first_comment: str | None
     media: list[dict[str, Any]]
     content_hash: str = Field(description="sha256 hex; what an approval binds to")
     confidence_score: float | None
@@ -113,6 +116,9 @@ class PostSetOut(_Out):
     ab_parent_id: uuid.UUID | None = Field(default=None, description="Set on version B")
     ab_label: str | None = None
     ab_hypothesis: str | None = None
+    publish_mode: str = "draft"
+    requested_scheduled_at: datetime | None = None
+    requested_timezone: str | None = None
 
 
 class PostSetList(BaseModel):
@@ -138,6 +144,9 @@ class PostSetIn(BaseModel):
         "not given here, and its groups are the targets when none are",
     )
     generate: bool = Field(default=True, description="Queue drafting immediately")
+    publish_mode: Literal["draft", "immediate", "scheduled"] = "draft"
+    scheduled_at: datetime | None = None
+    timezone: str | None = Field(default=None, max_length=64)
 
 
 class PostSetPatch(BaseModel):
@@ -175,6 +184,11 @@ class VersionIn(BaseModel):
         default_factory=list, max_length=30
     )
     link_url: str | None = Field(default=None, max_length=2048)
+    first_comment: str | None = Field(
+        default=None,
+        max_length=1250,
+        description="Optional comment published only after the main post succeeds",
+    )
     based_on_version_id: uuid.UUID | None = Field(
         default=None, description="The version you edited; a newer one makes this a 409"
     )
@@ -253,6 +267,35 @@ async def create_post_set(
         title = title or applied.title
         if not targets["account_group_ids"] and not targets["social_account_ids"]:
             targets["account_group_ids"] = applied.account_group_ids
+    scheduled_at = body.scheduled_at
+    if body.publish_mode == "scheduled":
+        if scheduled_at is None:
+            raise InvalidInput(
+                "scheduled_at is required for scheduled publishing.",
+                code="scheduled_at_required",
+                field="scheduled_at",
+            )
+        try:
+            tz = ZoneInfo(body.timezone or "UTC")
+        except ZoneInfoNotFoundError as exc:
+            raise InvalidInput(
+                "Use a valid IANA time zone.", code="invalid_timezone", field="timezone"
+            ) from exc
+        if scheduled_at.tzinfo is None:
+            scheduled_at = scheduled_at.replace(tzinfo=tz)
+        scheduled_at = scheduled_at.astimezone(UTC)
+        if scheduled_at <= datetime.now(UTC) + timedelta(minutes=1):
+            raise InvalidInput(
+                "Pick a time at least one minute in the future.",
+                code="invalid_scheduled_at",
+                field="scheduled_at",
+            )
+    elif scheduled_at is not None:
+        raise InvalidInput(
+            "scheduled_at is only valid in scheduled mode.",
+            code="unexpected_scheduled_at",
+            field="scheduled_at",
+        )
     view = await svc.create(
         user,
         workspace_id,
@@ -262,6 +305,9 @@ async def create_post_set(
         title=title,
         selection=TargetSelection(**targets),
         generate=body.generate,
+        publish_mode=body.publish_mode,
+        scheduled_at=scheduled_at,
+        timezone=body.timezone,
     )
     return _set(view)
 
@@ -463,7 +509,14 @@ async def create_version(
         set_id,
         variant_id,
         meta,
-        content=ContentInput(body.body, body.thread_parts, body.hashtags, body.link_url, []),
+        content=ContentInput(
+            body.body,
+            body.thread_parts,
+            body.hashtags,
+            body.link_url,
+            [],
+            body.first_comment,
+        ),
         based_on_version_id=body.based_on_version_id,
     )
     return _set(view)

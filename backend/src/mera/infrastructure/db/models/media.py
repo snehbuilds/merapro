@@ -44,6 +44,8 @@ class MediaAsset(UUIDPrimaryKey, TenantScoped, Base):
     rendition_key: Mapped[str] = mapped_column(Text, nullable=False, server_default="master")
     checksum: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     default_alt_text: Mapped[str | None] = mapped_column(Text)
+    original_filename: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="ready")
     uploaded_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="SET NULL")
     )

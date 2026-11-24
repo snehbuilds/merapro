@@ -808,6 +808,17 @@
             ],
             "title": "Decided At"
           },
+          "first_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Comment"
+          },
           "handle": {
             "title": "Handle",
             "type": "string"
@@ -935,6 +946,7 @@
           "thread_parts",
           "hashtags",
           "link_url",
+          "first_comment",
           "media",
           "confidence_score",
           "compliance_flags",
@@ -5145,6 +5157,85 @@
         "title": "MediaChoiceIn",
         "type": "object"
       },
+      "MediaIngestIn": {
+        "properties": {
+          "alt_text": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alt Text"
+          },
+          "base64_data": {
+            "anyOf": [
+              {
+                "maxLength": 280000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base64 Data"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename"
+          },
+          "presigned_url": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A caller-managed presigned download URL after its upload completes",
+            "title": "Presigned Url"
+          },
+          "remote_url": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Url"
+          }
+        },
+        "title": "MediaIngestIn",
+        "type": "object"
+      },
       "MediaList": {
         "properties": {
           "data": {
@@ -5210,6 +5301,17 @@
             "title": "Origin",
             "type": "string"
           },
+          "original_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Filename"
+          },
           "parent_asset_id": {
             "anyOf": [
               {
@@ -5244,6 +5346,11 @@
               }
             ],
             "title": "Source Url"
+          },
+          "status": {
+            "default": "ready",
+            "title": "Status",
+            "type": "string"
           },
           "width": {
             "title": "Width",
@@ -6252,6 +6359,17 @@
             "title": "Display Name",
             "type": "string"
           },
+          "first_comment_max_chars": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Comment Max Chars"
+          },
           "hook_chars": {
             "anyOf": [
               {
@@ -6387,6 +6505,11 @@
           },
           "supports_edit": {
             "title": "Supports Edit",
+            "type": "boolean"
+          },
+          "supports_first_comment": {
+            "default": false,
+            "title": "Supports First Comment",
             "type": "boolean"
           },
           "supports_hide_comments": {
@@ -6904,6 +7027,28 @@
             "title": "Generate",
             "type": "boolean"
           },
+          "publish_mode": {
+            "default": "draft",
+            "enum": [
+              "draft",
+              "immediate",
+              "scheduled"
+            ],
+            "title": "Publish Mode",
+            "type": "string"
+          },
+          "scheduled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled At"
+          },
           "targets": {
             "$ref": "#/components/schemas/TargetsIn"
           },
@@ -6919,6 +7064,18 @@
             ],
             "description": "Start from a template: its brief, outline and hashtags fill in what is not given here, and its groups are the targets when none are",
             "title": "Template Id"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
           },
           "title": {
             "anyOf": [
@@ -7070,6 +7227,11 @@
             "title": "Origin",
             "type": "string"
           },
+          "publish_mode": {
+            "default": "draft",
+            "title": "Publish Mode",
+            "type": "string"
+          },
           "recycle_after": {
             "anyOf": [
               {
@@ -7081,6 +7243,29 @@
               }
             ],
             "title": "Recycle After"
+          },
+          "requested_scheduled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Scheduled At"
+          },
+          "requested_timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Timezone"
           },
           "set_guardrails": {
             "items": {
@@ -7696,6 +7881,18 @@
             "format": "date-time",
             "title": "Scheduled For",
             "type": "string"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
           }
         },
         "required": [
@@ -8258,6 +8455,18 @@
             ],
             "description": "Base time; stagger offsets are added",
             "title": "Scheduled For"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
           }
         },
         "title": "ScheduleSetIn",
@@ -10952,6 +11161,19 @@
             "title": "Body",
             "type": "string"
           },
+          "first_comment": {
+            "anyOf": [
+              {
+                "maxLength": 1250,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional comment published only after the main post succeeds",
+            "title": "First Comment"
+          },
           "hashtags": {
             "items": {
               "maxLength": 80,
@@ -11061,6 +11283,17 @@
             "title": "Created At",
             "type": "string"
           },
+          "first_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Comment"
+          },
           "hashtag_suggestions": {
             "items": {
               "additionalProperties": true,
@@ -11150,6 +11383,7 @@
           "thread_parts",
           "hashtags",
           "link_url",
+          "first_comment",
           "media",
           "content_hash",
           "confidence_score",
@@ -22575,6 +22809,64 @@
           }
         ],
         "summary": "Estimate Generation",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{workspace_id}/media/ingest": {
+      "post": {
+        "operationId": "ingest_media_api_v1_workspaces__workspace_id__media_ingest_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaIngestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error envelope"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ingest Media",
         "tags": [
           "media"
         ]

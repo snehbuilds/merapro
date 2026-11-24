@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from mera.mcp.api import MeraApi
 
@@ -133,11 +133,15 @@ def _variant(v: dict[str, Any]) -> dict[str, Any]:
     cur = v.get("current_version") or {}
     return {
         "id": v.get("id"),
+        "social_account_id": v.get("social_account_id"),
         "account": v.get("nickname"),
         "platform": v.get("platform"),
         "state": v.get("state"),
         "body": cur.get("body"),
         "hashtags": cur.get("hashtags"),
+        "first_comment": cur.get("first_comment"),
+        "media": cur.get("media"),
+        "version_id": cur.get("id"),
         "guardrails": v.get("guardrails"),
     }
 
@@ -220,11 +224,13 @@ async def create_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any
     accounts = list(a.get("social_account_ids") or [])
     if not groups and not accounts:
         raise ValueError("Name the target groups or accounts explicitly; Mera never guesses.")
-    
+
     body = a.get("body") or a.get("content") or a.get("text")
     brief = str(a.get("topic") or body or "").strip()
     if not brief:
-        raise ValueError("Provide 'body' (the drafted post text) or 'topic' (a brief for drafting).")
+        raise ValueError(
+            "Provide 'body' (the drafted post text) or 'topic' (a brief for drafting)."
+        )
     if a.get("link"):
         brief = f"{brief}\n\nLink to write about: {a['link']}"
 
@@ -232,7 +238,7 @@ async def create_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any
     # do NOT invoke Mera's internal LLM. If generate is explicitly set, honor it.
     generate = a.get("generate")
     if generate is None:
-        generate = False if body is not None else True
+        generate = body is None
 
     ps = await api.post(
         _w(ws, "/post-sets"),
@@ -241,6 +247,9 @@ async def create_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any
             "title": a.get("title"),
             "targets": {"account_group_ids": groups, "social_account_ids": accounts},
             "generate": bool(generate),
+            "publish_mode": a.get("publish_mode", "draft"),
+            "scheduled_at": a.get("scheduled_at"),
+            "timezone": a.get("timezone"),
         },
     )
 
@@ -250,29 +259,207 @@ async def create_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any
         for v in ps.get("variants") or []:
             vid = v.get("id")
             if vid:
-                try:
-                    await api.post(
-                        _w(ws, f"/post-sets/{ps['id']}/variants/{vid}/versions"),
-                        {
-                            "body": content_to_save,
-                            "link_url": a.get("link"),
-                            "hashtags": a.get("hashtags") or [],
-                        },
-                    )
-                except Exception:
-                    pass
+                await api.post(
+                    _w(ws, f"/post-sets/{ps['id']}/variants/{vid}/versions"),
+                    {
+                        "body": content_to_save,
+                        "link_url": a.get("link"),
+                        "hashtags": a.get("hashtags") or [],
+                        "first_comment": a.get("first_comment"),
+                    },
+                )
+
+    media_ids = list(a.get("media_ids") or [])
+    if media_ids and ps.get("variants"):
+        refreshed = await api.get(_w(ws, f"/post-sets/{ps['id']}"))
+        for v in refreshed.get("variants") or []:
+            current = v.get("current_version") or {}
+            if current.get("id"):
+                await api.request(
+                    "PUT",
+                    _w(ws, f"/post-sets/{ps['id']}/variants/{v['id']}/media"),
+                    json_body={
+                        "media": [
+                            {
+                                "asset_id": media_id,
+                                "alt_text": (a.get("media_alt_text") or {}).get(media_id),
+                            }
+                            for media_id in media_ids
+                        ],
+                        "based_on_version_id": current["id"],
+                    },
+                )
+
+    approval = None
+    mode = a.get("publish_mode", "draft")
+    if mode in ("immediate", "scheduled") and content_to_save:
+        approval = await api.post(
+            _w(ws, f"/post-sets/{ps['id']}/request-approval"),
+            {
+                "scheduled_for": ps.get("requested_scheduled_at")
+                if mode == "scheduled"
+                else None
+            },
+        )
 
     return {
         "post_set_id": ps["id"],
         "state": ps.get("state"),
         "accounts": [v.get("nickname") for v in ps.get("variants") or []],
+        "approval_request_id": approval.get("id") if approval else None,
         "next": (
-            "Draft created with your text. Call get_post_set to review or request_approval to send for human approval."
+            "Draft created with your text. Call get_post_set to review or "
+            "request_approval to send for human approval."
             if content_to_save
             else "Drafting is queued. Call get_post_set to read the drafts, then "
             "request_approval. Nothing is published without an approval."
         ),
     }
+
+
+async def update_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    ps = await api.get(_w(ws, f"/post-sets/{a['post_set_id']}"))
+    wanted = set(a.get("variant_ids") or [])
+    changed = []
+    for v in ps.get("variants") or []:
+        if wanted and v.get("id") not in wanted:
+            continue
+        cur = v.get("current_version") or {}
+        if not cur.get("id"):
+            continue
+        await api.post(
+            _w(ws, f"/post-sets/{ps['id']}/variants/{v['id']}/versions"),
+            {
+                "body": a.get("body", cur.get("body", "")),
+                "thread_parts": a.get("thread_parts", cur.get("thread_parts")),
+                "hashtags": a.get("hashtags", cur.get("hashtags") or []),
+                "link_url": a.get("link", cur.get("link_url")),
+                "first_comment": a.get("first_comment", cur.get("first_comment")),
+                "based_on_version_id": cur["id"],
+            },
+        )
+        changed.append(v["id"])
+    media_ids = list(a.get("media_ids") or [])
+    if "media_ids" in a:
+        refreshed = await api.get(_w(ws, f"/post-sets/{ps['id']}"))
+        for v in refreshed.get("variants") or []:
+            if wanted and v.get("id") not in wanted:
+                continue
+            current = v.get("current_version") or {}
+            if not current.get("id"):
+                continue
+            await api.request(
+                "PUT",
+                _w(ws, f"/post-sets/{ps['id']}/variants/{v['id']}/media"),
+                json_body={
+                    "media": [
+                        {
+                            "asset_id": media_id,
+                            "alt_text": (a.get("media_alt_text") or {}).get(media_id),
+                        }
+                        for media_id in media_ids
+                    ],
+                    "based_on_version_id": current["id"],
+                },
+            )
+            if v["id"] not in changed:
+                changed.append(v["id"])
+    return {
+        "post_set_id": ps["id"],
+        "updated_variant_ids": changed,
+        "approval_invalidated": bool(changed),
+    }
+
+
+async def add_first_comment(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return await update_post(api, ws, {**a, "first_comment": a["first_comment"]})
+
+
+async def schedule_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return cast(
+        dict[str, Any],
+        await api.post(
+            _w(ws, f"/post-sets/{a['post_set_id']}/schedule"),
+            {
+                "scheduled_for": a["scheduled_at"],
+                "timezone": a.get("timezone"),
+            },
+        ),
+    )
+
+
+async def reschedule_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return cast(
+        dict[str, Any],
+        await api.patch(
+            _w(ws, f"/scheduled-posts/{a['scheduled_post_id']}"),
+            {
+                "scheduled_for": a["scheduled_at"],
+                "timezone": a.get("timezone"),
+            },
+        ),
+    )
+
+
+async def cancel_post(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    post_set_id = a["post_set_id"]
+    cancelled = {"approvals": 0, "scheduled_posts": 0, "draft_archived": False}
+    approvals = (await api.get(_w(ws, "/approval-requests"), state="open", limit=100))["data"]
+    for req in approvals:
+        if req.get("post_set_id") == post_set_id:
+            await api.post(
+                _w(ws, f"/approval-requests/{req['id']}/cancel"), {"reason": a.get("reason")}
+            )
+            cancelled["approvals"] += 1
+    scheduled = (await api.get(_w(ws, "/scheduled-posts"), post_set_id=post_set_id, limit=500))[
+        "data"
+    ]
+    for row in scheduled:
+        if row.get("state") in ("queued", "failed"):
+            await api.delete(_w(ws, f"/scheduled-posts/{row['id']}"))
+            cancelled["scheduled_posts"] += 1
+    if not cancelled["approvals"] and not cancelled["scheduled_posts"]:
+        await api.delete(_w(ws, f"/post-sets/{post_set_id}"))
+        cancelled["draft_archived"] = True
+    return {"post_set_id": post_set_id, **cancelled}
+
+
+async def get_post_status(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return cast(dict[str, Any], await api.get(_w(ws, f"/post-sets/{a['post_set_id']}/status")))
+
+
+async def upload_media(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return cast(
+        dict[str, Any],
+        await api.post(
+            _w(ws, "/media/ingest"),
+            {
+                k: a.get(k)
+                for k in (
+                    "remote_url",
+                    "base64_data",
+                    "presigned_url",
+                    "content_type",
+                    "filename",
+                    "alt_text",
+                )
+                if a.get(k) is not None
+            },
+        ),
+    )
+
+
+async def list_media(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return cast(dict[str, Any], await api.get(_w(ws, "/media"), limit=a.get("limit", 50)))
+
+
+async def get_media(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    return cast(dict[str, Any], await api.get(_w(ws, f"/media/{a['media_id']}")))
+
+
+async def delete_media(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    await api.delete(_w(ws, f"/media/{a['media_id']}"))
+    return {"deleted": a["media_id"]}
 
 
 async def request_approval(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
@@ -450,9 +637,9 @@ TOOLS: tuple[Tool, ...] = (
     Tool(
         "create_post",
         "Create a post",
-        "Create a post set for the named groups and/or accounts. When you (Claude / the MCP client) "
-        "have drafted the post text, provide it in 'body' so Mera saves your draft directly without "
-        "needing internal LLM generation. If 'body' is omitted, Mera queues its internal Writer agent. "
+        "Create a post set for the named groups and/or accounts. When the MCP client "
+        "has drafted the post text, provide it in 'body' so Mera saves it directly. "
+        "If 'body' is omitted, Mera queues its internal Writer agent. "
         "Targets are required; nothing is published without human approval.",
         _obj(
             {
@@ -460,7 +647,9 @@ TOOLS: tuple[Tool, ...] = (
                 "body": {
                     "type": "string",
                     "maxLength": 6000,
-                    "description": "The drafted post text written by Claude. Saves directly to the post.",
+                    "description": (
+                        "The drafted post text written by the client. Saves directly to the post."
+                    ),
                 },
                 "topic": {
                     "type": "string",
@@ -470,11 +659,26 @@ TOOLS: tuple[Tool, ...] = (
                 "link": {"type": "string", "format": "uri", "maxLength": 2048},
                 "title": {"type": "string", "maxLength": 200},
                 "hashtags": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
+                "first_comment": {"type": "string", "maxLength": 1250},
+                "media_ids": {"type": "array", "items": UUID, "maxItems": 20},
+                "media_alt_text": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string", "maxLength": 1000},
+                },
+                "publish_mode": {
+                    "type": "string",
+                    "enum": ["draft", "immediate", "scheduled"],
+                    "default": "draft",
+                },
+                "scheduled_at": {"type": "string", "format": "date-time"},
+                "timezone": {"type": "string", "maxLength": 64},
                 "account_group_ids": {"type": "array", "items": UUID, "maxItems": 20},
                 "social_account_ids": {"type": "array", "items": UUID, "maxItems": 50},
                 "generate": {
                     "type": "boolean",
-                    "description": "Set to true only if you want Mera's internal Writer agent to draft the post from topic.",
+                    "description": (
+                        "True asks Mera's internal Writer agent to draft the post from topic."
+                    ),
                 },
             },
         ),
@@ -485,6 +689,168 @@ TOOLS: tuple[Tool, ...] = (
         output_schema=_obj(
             {"post_set_id": {"type": "string"}, "state": {"type": "string"}}, ["post_set_id"]
         ),
+    ),
+    Tool(
+        "update_post",
+        "Update a post",
+        "Create new immutable versions for selected accounts. Content changes invalidate "
+        "prior approvals.",
+        _obj(
+            {
+                **WS_ARG,
+                "post_set_id": UUID,
+                "variant_ids": {"type": "array", "items": UUID, "maxItems": 25},
+                "body": {"type": "string", "maxLength": 6000},
+                "thread_parts": {"type": "array", "items": {"type": "string"}, "maxItems": 12},
+                "hashtags": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
+                "link": {"type": "string", "format": "uri"},
+                "first_comment": {"type": ["string", "null"], "maxLength": 1250},
+                "media_ids": {"type": "array", "items": UUID, "maxItems": 20},
+                "media_alt_text": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string", "maxLength": 1000},
+                },
+            },
+            ["post_set_id"],
+        ),
+        update_post,
+        "drafts:write",
+        mutating=True,
+        annotations=dict(WRITE),
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "add_first_comment",
+        "Add first comment",
+        "Add or replace the first comment before publication; this invalidates approval "
+        "for changed variants.",
+        _obj(
+            {
+                **WS_ARG,
+                "post_set_id": UUID,
+                "variant_ids": {"type": "array", "items": UUID},
+                "first_comment": {"type": "string", "maxLength": 1250},
+            },
+            ["post_set_id", "first_comment"],
+        ),
+        add_first_comment,
+        "drafts:write",
+        mutating=True,
+        annotations=dict(WRITE),
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "schedule_post",
+        "Schedule a post",
+        "Schedule approved variants. Unapproved variants return approval_required and are "
+        "never published.",
+        _obj(
+            {
+                **WS_ARG,
+                "post_set_id": UUID,
+                "scheduled_at": {"type": "string", "format": "date-time"},
+                "timezone": {"type": "string"},
+            },
+            ["post_set_id", "scheduled_at"],
+        ),
+        schedule_post,
+        "publishing:write",
+        mutating=True,
+        annotations=dict(WRITE),
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "reschedule_post",
+        "Reschedule a post",
+        "Move one scheduled account post without changing its approved content.",
+        _obj(
+            {
+                **WS_ARG,
+                "scheduled_post_id": UUID,
+                "scheduled_at": {"type": "string", "format": "date-time"},
+                "timezone": {"type": "string"},
+            },
+            ["scheduled_post_id", "scheduled_at"],
+        ),
+        reschedule_post,
+        "publishing:write",
+        mutating=True,
+        annotations=dict(WRITE),
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "cancel_post",
+        "Cancel a post",
+        "Cancel this post's draft, pending approval and queued account slots without "
+        "stopping account automation.",
+        _obj(
+            {**WS_ARG, "post_set_id": UUID, "reason": {"type": "string", "maxLength": 500}},
+            ["post_set_id"],
+        ),
+        cancel_post,
+        "publishing:write",
+        mutating=True,
+        annotations={**WRITE, "destructiveHint": True, "idempotentHint": True},
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "get_post_status",
+        "Get post status",
+        "Read per-account approval, schedule, publish and error status.",
+        _obj({**WS_ARG, "post_set_id": UUID}, ["post_set_id"]),
+        get_post_status,
+        "publishing:read",
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "upload_media",
+        "Upload media",
+        "Ingest an image, video or PDF from a public URL, Base64 data, or a completed "
+        "caller-managed presigned URL. Remote fetches are SSRF-protected.",
+        _obj(
+            {
+                **WS_ARG,
+                "remote_url": {"type": "string", "format": "uri", "maxLength": 4096},
+                "base64_data": {"type": "string", "contentEncoding": "base64"},
+                "presigned_url": {"type": "string", "format": "uri", "maxLength": 4096},
+                "content_type": {"type": "string", "maxLength": 120},
+                "filename": {"type": "string", "maxLength": 255},
+                "alt_text": {"type": "string", "maxLength": 1000},
+            }
+        ),
+        upload_media,
+        "media:write",
+        mutating=True,
+        annotations=dict(WRITE),
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "list_media",
+        "List media",
+        "List media owned by this workspace.",
+        _obj({**WS_ARG, "limit": {"type": "integer", "minimum": 1, "maximum": 100}}),
+        list_media,
+        "drafts:read",
+    ),
+    Tool(
+        "get_media",
+        "Get media",
+        "Read one workspace media asset and its renditions.",
+        _obj({**WS_ARG, "media_id": UUID}, ["media_id"]),
+        get_media,
+        "drafts:read",
+        output_schema={"type": "object"},
+    ),
+    Tool(
+        "delete_media",
+        "Delete media",
+        "Delete unused workspace media. Assets referenced by post history cannot be deleted.",
+        _obj({**WS_ARG, "media_id": UUID}, ["media_id"]),
+        delete_media,
+        "media:write",
+        mutating=True,
+        annotations={**WRITE, "destructiveHint": True, "idempotentHint": True},
+        output_schema={"type": "object"},
     ),
     Tool(
         "request_approval",

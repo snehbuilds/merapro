@@ -82,6 +82,7 @@ class ContentInput:
     hashtags: list[str]
     link_url: str | None
     media: list[dict[str, Any]]
+    first_comment: str | None = None
 
 
 def platform_spec(platform: str) -> PlatformSpec:
@@ -178,6 +179,7 @@ def content_hash_for(variant: PostVariant, content: ContentInput) -> bytes:
         thread_parts=content.thread_parts,
         hashtags=content.hashtags,
         link_url=content.link_url,
+        first_comment=content.first_comment,
         media=media,
     )
 
@@ -207,6 +209,7 @@ def normalize_content(content: ContentInput) -> ContentInput:
         hashtags=tags,
         link_url=(content.link_url or "").replace("\x00", "").strip() or None,
         media=content.media,
+        first_comment=(content.first_comment or "").replace("\x00", "").strip() or None,
     )
 
 
@@ -244,6 +247,22 @@ async def create_version(
         select(func.max(PostVersion.version_no)).where(PostVersion.post_variant_id == variant.id)
     )
     caps = capabilities_for(Platform(variant.platform))
+    if content.first_comment and not caps.supports_first_comment:
+        raise InvalidInput(
+            f"{caps.display_name} does not support first comments through its publishing API.",
+            code="first_comment_unsupported",
+            field="first_comment",
+        )
+    if content.first_comment or (content.link_url and caps.link_placement == "first_comment"):
+        comment = content.first_comment or ""
+        if content.link_url and caps.link_placement == "first_comment":
+            comment = f"{comment}\n\n{content.link_url}".strip()
+        if caps.first_comment_max_chars is not None and len(comment) > caps.first_comment_max_chars:
+            raise InvalidInput(
+                f"The first comment exceeds {caps.first_comment_max_chars} characters.",
+                code="first_comment_too_long",
+                field="first_comment",
+            )
     issues = text_checks.validate(
         platform=variant.platform,
         body=content.body,
@@ -272,6 +291,7 @@ async def create_version(
         thread_parts=content.thread_parts,
         hashtags=content.hashtags,
         link_url=content.link_url,
+        first_comment=content.first_comment,
         media=content.media,
         confidence_score=confidence,
         compliance_flags=[_mask_flag(f) for f in compliance_flags or []],

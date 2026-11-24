@@ -267,6 +267,7 @@ function VariantRow({
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const media = readMedia(v.media);
+  const firstComment = (v as ApprovalVariant & { first_comment?: string | null }).first_comment;
   const q = quorumLine(v);
   const flags = v.compliance_flags.filter((f) => f.severity === "warning" || f.severity === "block");
   return (
@@ -285,17 +286,27 @@ function VariantRow({
         {v.hashtags.length ? <span className="text-accent"> {v.hashtags.map((t) => `#${t}`).join(" ")}</span> : null}
       </p>
       {v.link_url ? <p className="truncate text-caption text-fg-subtle">Link: {v.link_url}</p> : null}
+      {firstComment ? (
+        <div className="rounded-sm border border-border bg-surface-subtle px-3 py-2">
+          <p className="text-caption font-semibold text-fg-muted">First comment</p>
+          <p className="text-sm whitespace-pre-wrap">{firstComment}</p>
+        </div>
+      ) : null}
       {media.length ? (
         <div className="flex flex-wrap gap-2">
           {media.map((m) => (
             <figure key={m.assetId ?? m.masterId} className="grid max-w-40 gap-1">
-              {/* eslint-disable-next-line @next/next/no-img-element -- authenticated, same-origin bytes */}
-              <img
-                src={mediaContentUrl(workspaceId, m.assetId ?? m.masterId)}
-                alt={m.altText ?? ""}
-                className="h-24 w-auto rounded-sm border border-border object-cover"
-              />
-              <figcaption className="text-caption text-fg-subtle">{m.altText ? `Alt: ${m.altText}` : "No alt text"}</figcaption>
+              {m.mediaType === "video" ? (
+                <video controls preload="metadata" className="h-24 w-auto rounded-sm border border-border">
+                  <source src={mediaContentUrl(workspaceId, m.assetId ?? m.masterId)} type={m.contentType ?? "video/mp4"} />
+                </video>
+              ) : m.mediaType === "document" ? (
+                <a className="grid h-24 place-items-center rounded-sm border border-border px-3 text-sm text-accent underline" href={mediaContentUrl(workspaceId, m.assetId ?? m.masterId)} target="_blank" rel="noreferrer">Preview document</a>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element -- authenticated, same-origin bytes
+                <img src={mediaContentUrl(workspaceId, m.assetId ?? m.masterId)} alt={m.altText ?? ""} className="h-24 w-auto rounded-sm border border-border object-cover" />
+              )}
+              <figcaption className="text-caption text-fg-subtle">{m.mediaType === "image" ? (m.altText ? `Alt: ${m.altText}` : "No alt text") : m.contentType}</figcaption>
             </figure>
           ))}
         </div>

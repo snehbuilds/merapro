@@ -59,3 +59,11 @@ async def publish_task(workspace_id: str, scheduled_post_id: str) -> None:
         uuid.UUID(workspace_id), uuid.UUID(scheduled_post_id)
     )
     log.info("publish.outcome", scheduled_post_id=scheduled_post_id, outcome=outcome)
+
+
+@blueprint.task(name="comment", queue="publish", retry=False)
+async def comment_task(workspace_id: str, published_comment_id: str) -> None:
+    outcome = await worker_publisher().publish_comment(
+        uuid.UUID(workspace_id), uuid.UUID(published_comment_id)
+    )
+    log.info("publish.comment_outcome", published_comment_id=published_comment_id, outcome=outcome)

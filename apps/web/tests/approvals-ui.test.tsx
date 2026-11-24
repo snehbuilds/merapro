@@ -70,6 +70,7 @@ function variant(id: string, nickname: string, platform: string, over: Partial<A
     thread_parts: null,
     hashtags: ["postgres"],
     link_url: null,
+    first_comment: null,
     media: [],
     confidence_score: 0.82,
     compliance_flags: [],

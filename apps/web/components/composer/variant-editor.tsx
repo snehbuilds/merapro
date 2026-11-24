@@ -64,7 +64,12 @@ export interface VariantEditorProps {
   canEdit: boolean;
   /** A drafting job is queued or running for this set. */
   generating: boolean;
-  onSave: (content: { body: string; thread_parts: string[] | null; hashtags: string[] }) => Promise<ActionResult>;
+  onSave: (content: {
+    body: string;
+    thread_parts: string[] | null;
+    hashtags: string[];
+    first_comment: string | null;
+  }) => Promise<ActionResult>;
   onRewrite: (instruction: string) => Promise<ActionResult>;
   onRegenerate: () => Promise<ActionResult>;
   onDraft: () => Promise<ActionResult>;
@@ -110,6 +115,7 @@ export function VariantEditor({
   const [body, setBody] = useState(version?.body ?? "");
   const [parts, setParts] = useState<string[]>(thread ? [...thread] : []);
   const [tags, setTags] = useState<string[]>(version?.hashtags ?? []);
+  const [firstComment, setFirstComment] = useState(version?.first_comment ?? "");
   const [newTag, setNewTag] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ message: string; code: string } | null>(null);
@@ -135,7 +141,8 @@ export function VariantEditor({
     !!version &&
     (body !== version.body ||
       (thread ? parts.some((p, i) => p !== thread[i]) : false) ||
-      tags.join(" ") !== version.hashtags.join(" "));
+      tags.join(" ") !== version.hashtags.join(" ") ||
+      firstComment !== (version.first_comment ?? ""));
   const sourceLabel = variant.brand_voice_id ? voiceSourceLabel("variant") : voiceSourceLabel(notes.voiceSource);
 
   async function run<T>(key: string, action: () => Promise<ActionResult<T>>, done?: (data?: T) => void) {
@@ -153,7 +160,14 @@ export function VariantEditor({
   }
 
   function save(nextTags = tags) {
-    return run("save", () => onSave({ body, thread_parts: thread ? parts : null, hashtags: nextTags }));
+    return run("save", () =>
+      onSave({
+        body,
+        thread_parts: thread ? parts : null,
+        hashtags: nextTags,
+        first_comment: firstComment.trim() || null,
+      }),
+    );
   }
 
   function addTag(raw: string) {
@@ -408,6 +422,7 @@ export function VariantEditor({
                       setBody(version.body);
                       setParts(thread ? [...thread] : []);
                       setTags(version.hashtags);
+                      setFirstComment(version.first_comment ?? "");
                     }}
                   >
                     Discard changes
@@ -423,6 +438,23 @@ export function VariantEditor({
                   {version.revision_instruction ? ` · “${version.revision_instruction}”` : ""}
                 </p>
               )}
+
+              <Divider />
+
+              <div className="grid gap-1.5">
+                <Label htmlFor={`${id}-first-comment`}>First comment (optional)</Label>
+                <Textarea
+                  id={`${id}-first-comment`}
+                  value={firstComment}
+                  readOnly={!editable}
+                  maxLength={1250}
+                  className="min-h-24"
+                  onChange={(e) => setFirstComment(e.target.value)}
+                />
+                <p className="text-caption text-fg-subtle">
+                  Published only after the main post succeeds · {firstComment.length.toLocaleString()}/1,250
+                </p>
+              </div>
 
               <Divider />
 

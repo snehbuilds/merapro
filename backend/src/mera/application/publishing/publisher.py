@@ -20,6 +20,7 @@ one account never race, and different accounts never wait on each other.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from dataclasses import dataclass
@@ -61,6 +62,7 @@ from mera.infrastructure.db.models import (
     PostSet,
     PostVariant,
     PostVersion,
+    PublishedComment,
     PublishedPost,
     SandboxCapture,
     ScheduledPost,
@@ -74,6 +76,7 @@ from mera.infrastructure.queue.deferrer import Deferrer
 
 log = structlog.get_logger(__name__)
 PUBLISH_TASK = "publish:publish"
+COMMENT_TASK = "publish:comment"
 DISPATCH_TASK = "approvals:dispatch"
 CREDENTIALS_PURPOSE = "social_account.credentials"
 MEDIA_URL_TTL = timedelta(hours=1)
@@ -87,6 +90,13 @@ SAME_PLATFORM_GAP = timedelta(minutes=3)
 class Due:
     workspace_id: uuid.UUID
     scheduled_post_id: uuid.UUID
+    social_account_id: uuid.UUID
+
+
+@dataclass(frozen=True, slots=True)
+class CommentDue:
+    workspace_id: uuid.UUID
+    comment_id: uuid.UUID
     social_account_id: uuid.UUID
 
 
@@ -170,7 +180,50 @@ class Publisher:
                 scheduled_post_id=str(d.scheduled_post_id),
             ):
                 n += 1
+        for c in await self.comments_due(now):
+            if await self._deferrer.defer(
+                COMMENT_TASK,
+                queue="publish",
+                lock=f"account:{c.social_account_id}",
+                queueing_lock=f"comment:{c.comment_id}",
+                workspace_id=str(c.workspace_id),
+                published_comment_id=str(c.comment_id),
+            ):
+                n += 1
         return n
+
+    async def comments_due(
+        self, now: datetime | None = None, *, horizon: timedelta = timedelta(seconds=15)
+    ) -> list[CommentDue]:
+        now = now or datetime.now(UTC)
+        async with system_scan_transaction(self._sm) as s:
+            ws_ids = list(
+                (
+                    await s.execute(
+                        select(Workspace.id).where(
+                            Workspace.deleted_at.is_(None), Workspace.archived_at.is_(None)
+                        )
+                    )
+                ).scalars()
+            )
+        out: list[CommentDue] = []
+        for ws in ws_ids:
+            async with workspace_transaction(self._sm, WorkspaceContext(ws)) as s:
+                rows = (
+                    await s.execute(
+                        select(PublishedComment.id, PublishedComment.social_account_id)
+                        .where(
+                            PublishedComment.state.in_(["queued", "failed"]),
+                            PublishedComment.next_attempt_at <= now + horizon,
+                        )
+                        .order_by(PublishedComment.next_attempt_at)
+                        .limit(200)
+                    )
+                ).all()
+                out.extend(
+                    CommentDue(ws, comment_id, account_id) for comment_id, account_id in rows
+                )
+        return out
 
     # -------------------------------------------------------------------- publishing
 
@@ -289,6 +342,7 @@ class Publisher:
                 link_placement=caps.link_placement,
                 media=media,
                 idempotency_key=sp.idempotency_key,
+                first_comment=version.first_comment,
             )
             sp.state = ScheduledState.PUBLISHING.value
             sp.attempt_count += 1
@@ -388,6 +442,24 @@ class Publisher:
                 next_comments_at=now + timedelta(minutes=5),  # P2-M6.2
             )
             s.add(pp)
+            comment_body = _first_comment(
+                version, capabilities_for(Platform(p.platform)).link_placement
+            )
+            comment: PublishedComment | None = None
+            if comment_body:
+                digest = hashlib.sha256(comment_body.encode("utf-8")).digest()
+                comment = PublishedComment(
+                    id=uuid7(),
+                    workspace_id=p.workspace_id,
+                    published_post_id=pp.id,
+                    social_account_id=sp.social_account_id,
+                    body=comment_body,
+                    content_hash=digest,
+                    state="queued",
+                    idempotency_key=f"comment:{pp.id}:{digest.hex()}",
+                    next_attempt_at=now,
+                )
+                s.add(comment)
             sp.state = ScheduledState.PUBLISHED.value
             sp.published_at = now
             sp.next_attempt_at = None
@@ -425,7 +497,137 @@ class Publisher:
             finished = await self._after_terminal(s, sp)
         if finished:
             await self._report(p.workspace_id, finished)
+        if comment is not None and self._deferrer is not None:
+            await self._deferrer.defer(
+                COMMENT_TASK,
+                queue="publish",
+                lock=f"account:{p.account_id}",
+                queueing_lock=f"comment:{comment.id}",
+                workspace_id=str(p.workspace_id),
+                published_comment_id=str(comment.id),
+            )
         return "published"
+
+    async def publish_comment(
+        self, workspace_id: uuid.UUID, comment_id: uuid.UUID, *, now: datetime | None = None
+    ) -> str:
+        """Deliver only the comment; retries here can never invoke main-post publishing."""
+        now = now or datetime.now(UTC)
+        async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
+            row = await s.get(PublishedComment, comment_id, with_for_update=True)
+            if row is None or row.state not in ("queued", "failed"):
+                return "skipped"
+            if row.next_attempt_at and row.next_attempt_at > now + timedelta(seconds=15):
+                return "not_due"
+            pp = await s.get(PublishedPost, row.published_post_id)
+            account = await s.get(SocialAccount, row.social_account_id)
+            if pp is None or account is None:
+                row.state, row.last_error = (
+                    "dead_lettered",
+                    "Published post or account is missing.",
+                )
+                return "dead_lettered"
+            raw = self._kp.decrypt(
+                str(account.credentials_ct),
+                workspace_id=workspace_id,
+                purpose=CREDENTIALS_PURPOSE,
+                record_id=account.id,
+            )
+            credentials: dict[str, Any] = json.loads(raw)
+            adapter = self._adapters.get(pp.platform)
+            method = getattr(adapter, "publish_comment", None) if adapter else None
+            if method is None:
+                row.state, row.last_error = (
+                    "dead_lettered",
+                    "Platform does not support first comments.",
+                )
+                return "dead_lettered"
+            row.state = "publishing"
+            row.attempt_count += 1
+            attempt = row.attempt_count
+            account_id = account.platform_account_id
+            post_id, body, key = pp.platform_post_id, row.body, row.idempotency_key
+        try:
+            finder = getattr(adapter, "find_comment", None)
+            platform_id = (
+                await finder(
+                    credentials,
+                    platform_account_id=account_id,
+                    platform_post_id=post_id,
+                    body=body,
+                )
+                if attempt > 1 and finder is not None
+                else None
+            )
+            if platform_id is None:
+                platform_id = await method(
+                    credentials,
+                    platform_account_id=account_id,
+                    platform_post_id=post_id,
+                    body=body,
+                    idempotency_key=key,
+                )
+        except AuthExpired as exc:
+            async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
+                row = await s.get(PublishedComment, comment_id, with_for_update=True)
+                assert row is not None
+                account = await s.get(SocialAccount, row.social_account_id, with_for_update=True)
+                row.state = "failed"
+                row.last_error = "On hold: the account needs reconnecting."
+                row.next_attempt_at = now + REAUTH_RECHECK
+                row.attempt_count = max(0, row.attempt_count - 1)
+                if account is not None:
+                    account.status = AccountStatus.NEEDS_REAUTH.value
+                    account.status_reason = exc.message[:200]
+                    account.health = {
+                        **account.health,
+                        "token_valid": False,
+                        "last_error": exc.message[:200],
+                    }
+            return "needs_reauth"
+        except PublishError as exc:
+            error = exc
+        except ValueError as exc:
+            error = PublishError(str(exc))
+        else:
+            async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
+                row = await s.get(PublishedComment, comment_id, with_for_update=True)
+                assert row is not None
+                row.state = "published"
+                row.platform_comment_id = platform_id
+                row.published_at = datetime.now(UTC)
+                row.next_attempt_at = None
+                row.last_error = None
+                await record(
+                    s,
+                    AuditEntry(
+                        action="first_comment.published",
+                        actor_type="system",
+                        surface="worker",
+                        workspace_id=workspace_id,
+                        subject_type="published_comment",
+                        subject_id=row.id,
+                        social_account_id=row.social_account_id,
+                        after={
+                            "platform_comment_id": platform_id,
+                            "attempt": row.attempt_count,
+                        },
+                    ),
+                )
+            return "published"
+        async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
+            row = await s.get(PublishedComment, comment_id, with_for_update=True)
+            assert row is not None
+            row.last_error = error.message[:300]
+            if not error.retryable or row.attempt_count >= MAX_PUBLISH_ATTEMPTS:
+                row.state, row.next_attempt_at = "dead_lettered", None
+                return "dead_lettered"
+            retry_after = error.retry_after if isinstance(error, RateLimited) else None
+            row.state = "failed"
+            row.next_attempt_at = now + timedelta(
+                seconds=backoff_seconds(row.attempt_count, retry_after)
+            )
+            return "retrying"
 
     async def _fail(
         self, p: _Prepared, exc: PublishError, now: datetime, *, permanent: bool
@@ -683,6 +885,16 @@ def _approved_slot(sp: ScheduledPost) -> datetime | None:
         return datetime.fromisoformat(raw) if isinstance(raw, str) else None
     except ValueError:
         return None
+
+
+def _first_comment(version: PostVersion, link_placement: str) -> str | None:
+    parts = [version.first_comment.strip()] if version.first_comment else []
+    # Reply-placement adapters publish their link as part of their own thread flow. Only
+    # first-comment placement is a separately retried comment job.
+    if version.link_url and link_placement == "first_comment":
+        parts.append(version.link_url)
+    body = "\n\n".join(p for p in parts if p).strip()
+    return body or None
 
 
 async def _budget_wait(

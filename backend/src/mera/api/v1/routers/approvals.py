@@ -43,6 +43,7 @@ class ApprovalVariantOut(_Out):
     thread_parts: list[str] | None
     hashtags: list[str]
     link_url: str | None
+    first_comment: str | None
     media: list[dict[str, Any]]
     confidence_score: float | None
     compliance_flags: list[dict[str, Any]]

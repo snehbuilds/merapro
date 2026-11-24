@@ -93,6 +93,7 @@ class VersionView:
     thread_parts: list[str] | None
     hashtags: list[str]
     link_url: str | None
+    first_comment: str | None
     media: list[dict[str, Any]]
     content_hash: str
     confidence_score: float | None
@@ -167,6 +168,9 @@ class PostSetView:
     ab_parent_id: uuid.UUID | None = None
     ab_label: str | None = None
     ab_hypothesis: str | None = None
+    publish_mode: str = "draft"
+    requested_scheduled_at: datetime | None = None
+    requested_timezone: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -201,6 +205,9 @@ class PostService(WorkspaceScopedService):
         title: str | None,
         selection: TargetSelection,
         generate: bool,
+        publish_mode: str = "draft",
+        scheduled_at: datetime | None = None,
+        timezone: str | None = None,
     ) -> PostSetView:
         if content_item_id is None and not (topic_brief or "").strip():
             raise InvalidInput(
@@ -256,6 +263,9 @@ class PostService(WorkspaceScopedService):
                 target_social_account_ids=list(dict.fromkeys(selection.social_account_ids)),
                 generation_status=GenerationStatus.IDLE.value,
                 created_by_user_id=user.user_id,
+                publish_mode=publish_mode,
+                requested_scheduled_at=scheduled_at,
+                requested_timezone=timezone,
             )
             s.add(ps)
             await s.flush()
@@ -801,7 +811,12 @@ class PostService(WorkspaceScopedService):
         await self._llm_budget(user)
         normalized = core.normalize_content(
             core.ContentInput(
-                content.body, content.thread_parts, content.hashtags, content.link_url, prior_media
+                content.body,
+                content.thread_parts,
+                content.hashtags,
+                content.link_url,
+                prior_media,
+                content.first_comment,
             )
         )
         embedding = await self._embed(
@@ -1174,6 +1189,7 @@ def _version_view(v: PostVersion, platform: str) -> VersionView:
         thread_parts=v.thread_parts,
         hashtags=list(v.hashtags),
         link_url=v.link_url,
+        first_comment=v.first_comment,
         media=list(v.media),
         content_hash=v.content_hash.hex(),
         confidence_score=v.confidence_score,
@@ -1330,4 +1346,7 @@ async def _set_view(
         ab_parent_id=ps.ab_parent_id,
         ab_label=ps.ab_label,
         ab_hypothesis=ps.ab_hypothesis,
+        publish_mode=ps.publish_mode,
+        requested_scheduled_at=ps.requested_scheduled_at,
+        requested_timezone=ps.requested_timezone,
     )
