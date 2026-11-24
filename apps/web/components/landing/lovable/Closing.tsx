@@ -9,7 +9,7 @@ import { principles } from "./Principles";
 export function FinalCta() {
   return (
     <section className="px-5 pb-24 sm:px-8">
-      <Reveal className="relative mx-auto max-w-7xl overflow-hidden rounded-2xl bg-ink px-6 py-16 text-center text-background sm:px-12 sm:py-24">
+      <Reveal className="lovable-inverse relative mx-auto max-w-7xl overflow-hidden rounded-2xl px-6 py-16 text-center sm:px-12 sm:py-24">
         <div className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-gradient-accent opacity-40 blur-3xl" aria-hidden />
         <h2 className="relative mx-auto max-w-3xl font-display text-4xl leading-[1.05] sm:text-6xl">Every account its own voice. Every post a human&apos;s call.</h2>
         <p className="relative mx-auto mt-5 max-w-xl text-background/70">Set up your workspace, connect your feeds and accounts, and keep the final say.</p>

@@ -75,7 +75,7 @@ function HeroComposition() {
           <span className="ml-auto font-mono text-[9px] text-muted-foreground">Telegram</span>
         </div>
         <div className="p-3">
-          <p className="text-[11px] leading-snug text-ink">3 posts ready for <b>@grid_insights</b>. Each token is bound to its exact version.</p>
+          <p className="text-[11px] leading-snug text-ink">3 posts ready for <b>@usemera</b>. Each token is bound to its exact version.</p>
           <div className="mt-2.5 grid grid-cols-2 gap-1.5">
             <span className="rounded-md bg-primary py-1.5 text-center text-[11px] font-medium text-primary-foreground">Approve</span>
             <span className="rounded-md border border-border py-1.5 text-center text-[11px] text-muted-foreground">Reject</span>

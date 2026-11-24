@@ -7,7 +7,7 @@ import { Reveal } from "./Reveal";
 import { cn } from "@/lib/utils";
 
 const ORIGINAL = "Grid-scale storage finally has a rulebook. Fixed 120-day interconnection studies and one permit path for solar + storage.";
-const ACCOUNT = "@northwind_grid";
+const ACCOUNT = "@usemera";
 
 /** Illustrative non-cryptographic hash (FNV-1a variant) for the front-end demo only. */
 export function demoHash(s: string) {
@@ -31,7 +31,7 @@ export function Integrity() {
     setText(text.slice(0, i) + c + text.slice(i + 1));
   };
   return (
-    <section className="bg-ink py-24 text-background lg:py-32" aria-labelledby="integrity-title">
+    <section className="lovable-inverse py-24 lg:py-32" aria-labelledby="integrity-title">
       <div className="mx-auto grid max-w-7xl gap-14 px-5 sm:px-8 lg:grid-cols-2">
         <div>
           <Reveal>
