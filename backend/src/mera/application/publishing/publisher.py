@@ -36,7 +36,7 @@ from mera.application.events import emit
 from mera.application.publishing.scheduler import rollup_set
 from mera.domain.context import WorkspaceContext
 from mera.domain.ports.key_provider import KeyProvider
-from mera.domain.ports.object_store import ObjectStore
+from mera.domain.ports.object_store import ObjectNotFound, ObjectStore
 from mera.domain.ports.platform_adapter import (
     AuthExpired,
     MediaFile,
@@ -110,6 +110,14 @@ class _Prepared:
     payload: PublishPayload
     attempt: int
     created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparationTerminal:
+    """A permanent failure discovered before a platform request can be made."""
+
+    outcome: str
+    finished_post_set_id: uuid.UUID | None = None
 
 
 class Publisher:
@@ -232,6 +240,10 @@ class Publisher:
     ) -> str:
         now = now or datetime.now(UTC)
         prepared = await self._prepare(workspace_id, scheduled_post_id, now)
+        if isinstance(prepared, _PreparationTerminal):
+            if prepared.finished_post_set_id is not None:
+                await self._report(workspace_id, prepared.finished_post_set_id)
+            return prepared.outcome
         if isinstance(prepared, str):
             return prepared
         adapter = self._adapters.get(prepared.platform)
@@ -271,7 +283,7 @@ class Publisher:
 
     async def _prepare(
         self, workspace_id: uuid.UUID, sp_id: uuid.UUID, now: datetime
-    ) -> _Prepared | str:
+    ) -> _Prepared | _PreparationTerminal | str:
         async with workspace_transaction(self._sm, WorkspaceContext(workspace_id)) as s:
             sp = await s.get(ScheduledPost, sp_id, with_for_update=True)
             if sp is None or sp.state not in (
@@ -329,7 +341,24 @@ class Publisher:
                 record_id=account.id,
             )
             credentials: dict[str, Any] = json.loads(raw)
-            media = await self._media(s, version)
+            try:
+                media = await self._media(s, version)
+            except ObjectNotFound as exc:
+                # The object-store key is safe to expose to operators and makes recovery
+                # possible, while deliberately avoiding the host filesystem path. This is
+                # permanent until an operator restores the object, so leaving the slot
+                # queued would make the minute dispatcher create jobs forever.
+                key = str(exc.args[0]) if exc.args else "unknown"
+                message = f"MEDIA_NOT_FOUND: attached media object is missing ({key})."
+                log.error(
+                    "publish.media_not_found",
+                    workspace_id=str(workspace_id),
+                    scheduled_post_id=str(sp.id),
+                    object_key=key,
+                )
+                await self._dead_letter(s, sp, message, now)
+                finished = await self._after_terminal(s, sp)
+                return _PreparationTerminal("dead_lettered", finished)
             caps = capabilities_for(Platform(account.platform))
             payload = PublishPayload(
                 platform=account.platform,

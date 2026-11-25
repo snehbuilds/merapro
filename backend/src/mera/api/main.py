@@ -184,6 +184,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.hashtag_service = HashtagService(sessionmaker)
         app.state.template_service = TemplateService(sessionmaker)
         object_store = build_object_store(settings)
+        storage = await object_store.check_ready()
+        log.info("media.storage_ready", **storage)
         app.state.object_store = object_store
         app.state.media_service = MediaService(
             sessionmaker, object_store, build_media_fetcher(settings), drafting=drafting

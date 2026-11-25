@@ -52,6 +52,29 @@ class FilesystemObjectStore:
             raise InvalidKey("invalid object key")
         return path
 
+    async def check_ready(self) -> dict[str, str | int]:
+        """Fail startup when the configured mount is absent or not writable.
+
+        The device and inode are logged by API and worker so operators can compare the
+        effective mounts without exposing any object names.
+        """
+
+        def check() -> dict[str, str | int]:
+            self._root.mkdir(parents=True, exist_ok=True)
+            if not self._root.is_dir():
+                raise NotADirectoryError(str(self._root))
+            fd, probe = tempfile.mkstemp(dir=self._root, prefix=".mera-storage-probe-")
+            try:
+                os.write(fd, b"ready")
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+                Path(probe).unlink(missing_ok=True)
+            stat = self._root.stat()
+            return {"root": str(self._root), "device": stat.st_dev, "inode": stat.st_ino}
+
+        return await asyncio.to_thread(check)
+
     async def put(self, key: str, data: bytes, content_type: str) -> StoredObject:
         path = self._path(key)
 

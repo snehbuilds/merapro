@@ -49,7 +49,12 @@ services:
     depends_on:
       migrate: { condition: service_completed_successfully }
     expose: ["8000"]
-    volumes: ["media:/var/lib/mera/media"]
+    # API and worker are separate Coolify resources. A shared host directory prevents
+    # Coolify from allocating one resource-local named volume per application.
+    volumes:
+      - type: bind
+        source: ${MERA_MEDIA_HOST_PATH:?set the same Coolify media host path for API and worker}
+        target: /var/lib/mera/media
     networks:
       coolify:
         aliases:
@@ -67,9 +72,4 @@ secrets:
 networks:
   coolify:
     name: coolify
-    external: true
-
-volumes:
-  media:
-    name: pvjn6cqpxzd9ji1q49sl9eew_media
     external: true

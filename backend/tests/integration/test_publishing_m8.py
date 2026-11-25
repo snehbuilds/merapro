@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from mera.application.publishing.publisher import Publisher
 from mera.domain.context import WorkspaceContext
+from mera.domain.ports.object_store import ObjectNotFound
 from mera.infrastructure.db.models import (
     PostVariant,
     PublishedComment,
@@ -201,6 +202,44 @@ async def test_one_account_failing_leaves_the_others_published(
     assert (await api.get(f"/api/v1/workspaces/{ws}/dead-letters", headers=_h(s))).json()[
         "data"
     ] == []
+
+
+async def test_missing_media_object_dead_letters_once_and_stops_dispatch(
+    api: httpx.AsyncClient,
+    deferrer: CapturingDeferrer,
+    quiet: CapturingDeferrer,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    s, ws = await _setup(api, "missingmedia")
+    ps, _acc, _ = await _four(api, s, ws, deferrer)
+    await _approve_all(api, s, ws, ps["id"])
+    pub, adapters = _publisher(api)
+    target = (await _slots(api, ws, ps["id"]))[0]
+    missing_key = f"ws/{ws}/missing-rendition.jpg"
+
+    async def missing_media(*_args: Any) -> list[Any]:
+        raise ObjectNotFound(missing_key)
+
+    monkeypatch.setattr(pub, "_media", missing_media)
+    outcome = await pub.publish(
+        uuid.UUID(ws), target.id, now=target.scheduled_for + timedelta(seconds=1)
+    )
+
+    assert outcome == "dead_lettered"
+    row = next(slot for slot in await _slots(api, ws, ps["id"]) if slot.id == target.id)
+    assert row.state == "dead_lettered"
+    assert row.next_attempt_at is None
+    assert row.attempt_count == 0
+    assert row.last_error == f"MEDIA_NOT_FOUND: attached media object is missing ({missing_key})."
+    assert target.id not in {item.scheduled_post_id for item in await pub.due()}
+    assert all(not adapter.posts for adapter in adapters.values())
+
+    dead_letters = (await api.get(f"/api/v1/workspaces/{ws}/dead-letters", headers=_h(s))).json()[
+        "data"
+    ]
+    matching = [item for item in dead_letters if item["subject_id"] == str(target.id)]
+    assert len(matching) == 1
+    assert matching[0]["error"].startswith("MEDIA_NOT_FOUND:")
 
 
 async def test_lost_response_is_reconciled_not_double_posted(

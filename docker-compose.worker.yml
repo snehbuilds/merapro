@@ -41,7 +41,11 @@ services:
       <<: [*backend-environment, *sandbox-client-env]
     command: ["python", "-m", "mera.workers.main",
               "--queues", "ingest,agents,media,publish,accounts,metrics,approvals,notify,integrations"]
-    volumes: ["media:/var/lib/mera/media"]
+    # Must be the exact same host directory used by the API resource.
+    volumes:
+      - type: bind
+        source: ${MERA_MEDIA_HOST_PATH:?set the same Coolify media host path for API and worker}
+        target: /var/lib/mera/media
     networks:
       coolify:
         aliases:
@@ -61,9 +65,4 @@ secrets:
 networks:
   coolify:
     name: coolify
-    external: true
-
-volumes:
-  media:
-    name: pvjn6cqpxzd9ji1q49sl9eew_media
     external: true

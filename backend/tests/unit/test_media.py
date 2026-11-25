@@ -164,6 +164,13 @@ async def test_store_round_trip(store: FilesystemObjectStore) -> None:
     await store.delete(key)  # idempotent
 
 
+async def test_store_readiness_checks_the_configured_mount(store: FilesystemObjectStore) -> None:
+    ready = await store.check_ready()
+    assert ready["root"]
+    assert isinstance(ready["device"], int)
+    assert isinstance(ready["inode"], int)
+
+
 @pytest.mark.parametrize(
     "key",
     ["../etc/passwd", "ws/../../x.jpg", "/abs/x.jpg", "WS/Upper.jpg", "ws", "ws/a\\b.jpg", "ws/.x"],

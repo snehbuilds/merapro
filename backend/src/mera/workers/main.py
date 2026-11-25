@@ -12,6 +12,7 @@ import sys
 
 import structlog
 
+from mera.application.media_factory import build_object_store
 from mera.config import get_settings
 from mera.infrastructure.db.session import assert_rls_bound, create_engine, ensure_app_role
 from mera.infrastructure.queue.app import QUEUES, build_app
@@ -45,6 +46,9 @@ def _parse(argv: list[str] | None) -> argparse.Namespace:
 async def _run(queues: list[str], concurrency: int) -> None:
     settings = get_settings()
     install_asyncio_exception_handler(asyncio.get_running_loop())
+    if {"media", "publish"}.intersection(queues):
+        storage = await build_object_store(settings).check_ready()
+        log.info("media.storage_ready", **storage)
     await ensure_app_role(settings)
     engine = create_engine(settings)
     try:
