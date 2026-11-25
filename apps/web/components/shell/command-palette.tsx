@@ -5,17 +5,9 @@ import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Kbd } from "@/components/ui/kbd";
-import { useTheme } from "@/hooks/use-theme";
 import { paletteScreens, screenHref } from "@/lib/nav";
-import type { ThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useShell } from "./shell-provider";
-
-const THEME_ACTIONS: { pref: ThemePreference; label: string }[] = [
-  { pref: "system", label: "Theme: follow system" },
-  { pref: "light", label: "Theme: light" },
-  { pref: "dark", label: "Theme: dark" },
-];
 
 const groupClass =
   "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-1.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:font-label [&_[cmdk-group-heading]]:text-2xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:tracking-[0.12em] [&_[cmdk-group-heading]]:text-fg-subtle [&_[cmdk-group-heading]]:uppercase";
@@ -31,7 +23,6 @@ const itemClass =
  */
 export function CommandPalette() {
   const { workspace, paletteOpen, setPaletteOpen } = useShell();
-  const { preference, setPreference } = useTheme();
   const router = useRouter();
 
   function go(href: string) {
@@ -98,28 +89,6 @@ export function CommandPalette() {
                   </strong>
                   <span className="text-caption text-fg-subtle">Set up a new workspace for your accounts and team</span>
                 </Command.Item>
-                {THEME_ACTIONS.map((a) => (
-                  <Command.Item
-                    key={a.pref}
-                    value={`theme-${a.pref}`}
-                    keywords={[a.label, "appearance", "mode"]}
-                    onSelect={() => {
-                      setPreference(a.pref);
-                      setPaletteOpen(false);
-                    }}
-                    className={itemClass}
-                  >
-                    <strong className="flex items-center gap-2 text-body font-semibold">
-                      {a.label}
-                      {preference === a.pref ? (
-                        <>
-                          <Icon name="check" size="sm" className="text-accent" />
-                          <span className="sr-only">(current)</span>
-                        </>
-                      ) : null}
-                    </strong>
-                  </Command.Item>
-                ))}
               </Command.Group>
             </Command.List>
           </Command>

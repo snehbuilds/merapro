@@ -1,5 +1,6 @@
 import { ArrowRight, Check, FileSearch, ShieldCheck, Send } from "./icons";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const posts = [
   { p: "LinkedIn", t: "What the new grid-storage rules mean for mid-size utilities — three takeaways.", x: "left-[52%] top-[2%]" },
@@ -13,14 +14,15 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_at_70%_30%,black,transparent_70%)]" aria-hidden />
       <div className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:pb-28 lg:pt-24">
         <div className="flex flex-col justify-center">
-          <p className="animate-rise inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" /> Self-hosted multi-agent publishing
+          <p className="animate-rise inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground shadow-card">
+            <Image src="/brand/talonic-mark.png" alt="" width={24} height={24} className="h-5 w-5" />
+            Self-hosted multi-agent publishing
           </p>
           <h1 className="animate-rise mt-6 font-display text-5xl leading-[0.98] text-ink sm:text-6xl lg:text-7xl" style={{ ["--d" as string]: "80ms" }}>
             One story. Every account. <em className="text-gradient-accent">A voice of its own.</em>
           </h1>
           <p className="animate-rise mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground" style={{ ["--d" as string]: "160ms" }}>
-            Mera researches the stories in your industry feeds, writes a distinct, platform-native post set for every account you run, and waits for an explicit human sign-off before anything is published.
+            Talonic researches the stories in your industry feeds, writes a distinct, platform-native post set for every account you run, and waits for an explicit human sign-off before anything is published.
           </p>
           <div className="animate-rise mt-9 flex flex-wrap gap-3" style={{ ["--d" as string]: "240ms" }}>
             <Button asChild size="lg" className="group"><a href="/register">Launch console <ArrowRight className="transition-transform group-hover:translate-x-0.5" /></a></Button>
@@ -75,7 +77,7 @@ function HeroComposition() {
           <span className="ml-auto font-mono text-[9px] text-muted-foreground">Telegram</span>
         </div>
         <div className="p-3">
-          <p className="text-[11px] leading-snug text-ink">3 posts ready for <b>@usemera</b>. Each token is bound to its exact version.</p>
+          <p className="text-[11px] leading-snug text-ink">3 posts ready for <b>@talonic</b>. Each token is bound to its exact version.</p>
           <div className="mt-2.5 grid grid-cols-2 gap-1.5">
             <span className="rounded-md bg-primary py-1.5 text-center text-[11px] font-medium text-primary-foreground">Approve</span>
             <span className="rounded-md border border-border py-1.5 text-center text-[11px] text-muted-foreground">Reject</span>

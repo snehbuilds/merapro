@@ -431,7 +431,7 @@
 }
 
 /* ========================================================================
-   Signal To Social Studio — Lovable visual system
+   Talonic landing — Lovable visual system
 
    Ported from the approved Lovable project. Existing semantic token names
    remain available so the product screens keep their behavior while sharing
@@ -650,7 +650,19 @@ body {
 .animate-pulse-ring { animation: lovable-pulse-ring 2.4s ease-out infinite; }
 .animate-swap { animation: lovable-swap .45s cubic-bezier(.2,.7,.2,1); }
 
-.mera-lovable a:hover { text-decoration: none; }
+.talonic-landing {
+  --primary: oklch(0.61 0.22 251);
+  --primary-foreground: white;
+  --accent-hover: oklch(0.56 0.24 255);
+  --accent-lovable: oklch(0.94 0.045 235);
+  --accent-foreground: oklch(0.34 0.16 255);
+  --focus: oklch(0.68 0.2 235);
+  --focus-ring: oklch(0.68 0.2 235 / 0.28);
+  --selection: oklch(0.68 0.2 235 / 0.2);
+  --gradient-accent: linear-gradient(120deg, #04d9f7 0%, #0788ff 45%, #2342ff 100%);
+}
+
+.talonic-landing a:hover { text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

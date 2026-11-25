@@ -12,7 +12,7 @@ export function Security() {
   return (
     <section id="security" className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
       <SectionHeading eyebrow="Security & governance" title={<>Self-hosted, and <span className="text-primary">yours to stop.</span></>}
-        body="Mera runs on infrastructure you control. Governance is built into the data layer and the publishing path, not bolted on." />
+        body="Talonic runs on infrastructure you control. Governance is built into the data layer and the publishing path, not bolted on." />
       <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
         {items.map((it, i) => (
           <Reveal key={it.t} delay={i * 90} className="group bg-card p-7 transition-colors hover:bg-surface sm:p-9">

@@ -7,7 +7,7 @@ import { Reveal } from "./Reveal";
 import { cn } from "@/lib/utils";
 
 const ORIGINAL = "Grid-scale storage finally has a rulebook. Fixed 120-day interconnection studies and one permit path for solar + storage.";
-const ACCOUNT = "@usemera";
+const ACCOUNT = "@talonic";
 
 /** Illustrative non-cryptographic hash (FNV-1a variant) for the front-end demo only. */
 export function demoHash(s: string) {
@@ -68,7 +68,7 @@ export function Integrity() {
               <p className="text-xs text-muted-foreground">{valid ? "Content matches the signed version. Publisher may proceed." : "Content no longer matches. A new approval request is required."}</p>
             </div>
           </div>
-          <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">This runs entirely in your browser with a simple non-cryptographic hash to illustrate the behaviour. It is not Mera&apos;s real signature scheme or verification.</p>
+          <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">This runs entirely in your browser with a simple non-cryptographic hash to illustrate the behaviour. It is not Talonic&apos;s real signature scheme or verification.</p>
         </Reveal>
       </div>
     </section>

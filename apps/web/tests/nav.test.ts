@@ -32,9 +32,9 @@ describe("navigation model", () => {
 });
 
 describe("theme", () => {
-  it("resolves system to the OS preference and pins explicit choices", () => {
-    expect(resolveTheme("system", "dark")).toBe("dark");
+  it("keeps the application in light mode", () => {
+    expect(resolveTheme("system", "dark")).toBe("light");
     expect(resolveTheme("light", "dark")).toBe("light");
-    expect(resolveTheme("dark", "light")).toBe("dark");
+    expect(resolveTheme("dark", "light")).toBe("light");
   });
 });

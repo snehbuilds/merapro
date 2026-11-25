@@ -40,9 +40,9 @@ export function Footer() {
           <ul className="mt-4 space-y-2 text-sm text-ink">{principles.map((p) => <li key={p.t}>{p.t}</li>)}</ul>
         </div>
       </div>
-      <div className="border-t border-border"><p className="mx-auto max-w-7xl px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8">© {new Date().getFullYear()} Mera</p></div>
+      <div className="border-t border-border"><p className="mx-auto max-w-7xl px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8">© {new Date().getFullYear()} Talonic</p></div>
       <div className="overflow-hidden px-5 pb-5 sm:px-8" aria-hidden="true">
-        <p className="mx-auto max-w-7xl select-none text-center font-display text-[7rem] leading-[0.7] text-muted-foreground/20 sm:text-[12rem] md:text-[16rem]">mera</p>
+        <p className="mx-auto max-w-7xl select-none text-center font-display text-[5.5rem] leading-[0.7] text-muted-foreground/20 sm:text-[10rem] md:text-[14rem]">talonic</p>
       </div>
     </footer>
   );

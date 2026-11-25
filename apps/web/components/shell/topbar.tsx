@@ -8,7 +8,6 @@ import { Kbd } from "@/components/ui/kbd";
 import { screenHref, type ScreenId } from "@/lib/nav";
 import { RAIL_ID } from "./rail";
 import { useShell } from "./shell-provider";
-import { ThemeToggle } from "./theme-toggle";
 
 export interface TopbarProps {
   title: string;
@@ -82,8 +81,6 @@ export function Topbar({ title, sub, action, actionNode }: TopbarProps) {
           <Kbd>K</Kbd>
         </span>
       </button>
-
-      <ThemeToggle />
 
       {actionNode ?? null}
 

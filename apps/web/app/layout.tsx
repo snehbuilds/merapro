@@ -46,15 +46,13 @@ const plexMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Mera", template: "%s · Mera" },
+  title: { default: "Talonic", template: "%s · Talonic" },
   description: "Speak as several accounts at once, with approval on every post.",
+  applicationName: "Talonic",
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f3ed" },
-    { media: "(prefers-color-scheme: dark)", color: "#111315" },
-  ],
+  themeColor: "#f5f3ed",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

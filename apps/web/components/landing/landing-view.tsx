@@ -10,7 +10,7 @@ import { Voices } from "./lovable/Voices";
 
 export function LandingView() {
   return (
-    <div className="mera-lovable min-h-screen bg-background text-foreground">
+    <div className="talonic-landing min-h-screen bg-background text-foreground">
       <a href="#product" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-60 focus:rounded-md focus:bg-card focus:px-3 focus:py-2">
         Skip to content
       </a>

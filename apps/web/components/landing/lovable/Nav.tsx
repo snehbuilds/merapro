@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Menu, X } from "./icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,11 +14,26 @@ export const navLinks = [
 
 export function Wordmark() {
   return (
-    <a href="#top" className="flex items-center gap-2" aria-label="Mera home">
-      <span className="grid h-7 w-7 place-items-center rounded-md bg-ink text-background">
-        <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden><path d="M4 18V6l8 7 8-7v12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      </span>
-      <span className="font-display text-2xl leading-none text-ink">Mera</span>
+    <a
+      href="#top"
+      className="inline-flex items-center md:rounded-lg md:bg-white/95 md:px-2.5 md:py-1 md:shadow-[0_1px_0_rgba(255,255,255,.7),0_8px_24px_-16px_rgba(0,70,255,.8)] md:ring-1 md:ring-slate-900/5"
+      aria-label="Talonic home"
+    >
+      <Image
+        src="/brand/talonic-mark.png"
+        alt=""
+        width={48}
+        height={48}
+        className="h-9 w-9 object-contain md:hidden"
+      />
+      <Image
+        src="/brand/talonic-wordmark.png"
+        alt="Talonic"
+        width={326}
+        height={109}
+        preload
+        className="hidden h-8 w-auto md:block"
+      />
     </a>
   );
 }

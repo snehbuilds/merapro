@@ -4,11 +4,11 @@ import { Reveal, SectionHeading, useInView } from "./Reveal";
 import { cn } from "@/lib/utils";
 
 const rows = [
-  { acct: "@usemera · LinkedIn", at: 0 },
-  { acct: "@usemera · X", at: 18 },
-  { acct: "@usemera · Threads", at: 37 },
-  { acct: "@usemera · Bluesky", at: 59 },
-  { acct: "@usemera · X", at: 82 },
+  { acct: "@talonic · LinkedIn", at: 0 },
+  { acct: "@talonic · X", at: 18 },
+  { acct: "@talonic · Threads", at: 37 },
+  { acct: "@talonic · Bluesky", at: 59 },
+  { acct: "@talonic · X", at: 82 },
 ];
 
 export function Distribution() {

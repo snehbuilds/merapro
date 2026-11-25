@@ -6,16 +6,16 @@ import { Reveal, SectionHeading } from "./Reveal";
 import { cn } from "@/lib/utils";
 
 const voices = [
-  { id: "linkedin", name: "LinkedIn", handle: "@usemera", tone: "Analytical, operator-focused", limit: "Long-form",
+  { id: "linkedin", name: "LinkedIn", handle: "@talonic", tone: "Analytical, operator-focused", limit: "Long-form",
     body: "The first national framework for grid-scale battery storage landed this week. For mid-size utilities, three things change immediately:\n\n1. Interconnection studies get a fixed 120-day window\n2. Storage counts toward capacity obligations\n3. Co-located solar + storage gets a single permit path\n\nWe've summarised what it means for planning cycles in 2027.",
     tags: ["#EnergyStorage", "#GridModernization"] },
-  { id: "x", name: "X", handle: "@usemera", tone: "Punchy, thread opener", limit: "≤ 280 chars",
+  { id: "x", name: "X", handle: "@talonic", tone: "Punchy, thread opener", limit: "≤ 280 chars",
     body: "Grid-scale storage finally has a rulebook.\n\nFixed 120-day interconnection studies. Storage counts toward capacity. One permit path for solar + storage.\n\nWhat it means for utilities 👇",
     tags: ["#energy"] },
-  { id: "threads", name: "Threads", handle: "@usemera", tone: "Conversational", limit: "Casual",
+  { id: "threads", name: "Threads", handle: "@talonic", tone: "Conversational", limit: "Casual",
     body: "Not the flashiest headline this week, but probably the one that matters most for the grid: batteries now have clear rules. The single permit path for solar + storage is the sleeper detail here.",
     tags: [] },
-  { id: "bluesky", name: "Bluesky", handle: "@usemera", tone: "Plain, source-first", limit: "≤ 300 chars",
+  { id: "bluesky", name: "Bluesky", handle: "@talonic", tone: "Plain, source-first", limit: "≤ 300 chars",
     body: "New federal framework for grid-scale battery storage: fixed interconnection timelines, capacity credit for storage, and a combined permit path for co-located solar. Full text linked from the regulator's notice.",
     tags: [] },
 ];
