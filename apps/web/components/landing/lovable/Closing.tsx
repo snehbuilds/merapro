@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowRight } from "./icons";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "./Reveal";
@@ -41,8 +42,8 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border"><p className="mx-auto max-w-7xl px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8">© {new Date().getFullYear()} Talonic</p></div>
-      <div className="overflow-hidden px-5 pb-5 sm:px-8" aria-hidden="true">
-        <p className="mx-auto max-w-7xl select-none text-center font-display text-[5.5rem] leading-[0.7] text-muted-foreground/20 sm:text-[10rem] md:text-[14rem]">talonic</p>
+      <div className="flex justify-center px-5 pb-10 sm:px-8" aria-hidden="true">
+        <Image src="/brand/talonic-mark.png" alt="" width={128} height={128} className="h-20 w-20 object-contain opacity-80" />
       </div>
     </footer>
   );

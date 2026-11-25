@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Menu, X } from "./icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { MotionMark } from "./MotionMark";
 
 export const navLinks = [
   { href: "#product", label: "Product" },
@@ -12,20 +13,24 @@ export const navLinks = [
   { href: "#security", label: "Security" },
 ];
 
-export function Wordmark() {
+export function Wordmark({ motionOnMobile = false }: { motionOnMobile?: boolean }) {
   return (
     <a
       href="#top"
       className="inline-flex items-center md:rounded-lg md:bg-white/95 md:px-2.5 md:py-1 md:shadow-[0_1px_0_rgba(255,255,255,.7),0_8px_24px_-16px_rgba(0,70,255,.8)] md:ring-1 md:ring-slate-900/5"
       aria-label="Talonic home"
     >
-      <Image
-        src="/brand/talonic-mark.png"
-        alt=""
-        width={48}
-        height={48}
-        className="h-9 w-9 object-contain md:hidden"
-      />
+      {motionOnMobile ? (
+        <MotionMark className="h-10 w-12 overflow-visible md:hidden" />
+      ) : (
+        <Image
+          src="/brand/talonic-mark.png"
+          alt=""
+          width={48}
+          height={48}
+          className="h-10 w-12 object-contain md:hidden"
+        />
+      )}
       <Image
         src="/brand/talonic-wordmark.png"
         alt="Talonic"
@@ -50,7 +55,7 @@ export function Nav() {
     <header className={cn("sticky top-0 z-50 border-b transition-colors", scrolled ? "border-border bg-background/85 backdrop-blur-md" : "border-transparent bg-background")}>
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8" aria-label="Main">
         <div className="flex items-center gap-10">
-          <Wordmark />
+          <Wordmark motionOnMobile />
           <ul className="hidden items-center gap-7 md:flex">
             {navLinks.map((l) => (
               <li key={l.href}><a href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-ink">{l.label}</a></li>
