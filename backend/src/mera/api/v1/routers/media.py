@@ -87,6 +87,13 @@ async def ingest_media(
             code="invalid_media_source",
         )
     if body.base64_data is not None:
+        if body.base64_data.startswith("data:application/vnd.openai.code-mode-image"):
+            raise InvalidInput(
+                "ChatGPT supplied an opaque image reference, not transferable image bytes. "
+                "Use the MCP file input, a public URL, or actual Base64 image data.",
+                code="opaque_asset_reference",
+                field="base64_data",
+            )
         try:
             data = base64.b64decode(body.base64_data, validate=True)
         except (binascii.Error, ValueError) as exc:

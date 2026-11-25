@@ -6,6 +6,20 @@ must approve the exact immutable post version before a worker can publish it.
 
 ## Create with media, a first comment, and a schedule
 
+When ChatGPT generates or has access to an image, pass it directly as the `file` input:
+
+```json
+{"name":"upload_media","arguments":{"file":{"download_url":"https://temporary-chatgpt-file-url.example/image.png","file_id":"file_123","mime_type":"image/png","file_name":"ai-production-support.png"},"alt_text":"AI-assisted incident investigation"}}
+```
+
+The MCP descriptor declares `_meta["openai/fileParams"] = ["file"]`, so ChatGPT supplies
+the authorized temporary download URL and file metadata automatically. Mera downloads the
+exact bytes through its SSRF-safe fetcher and stores them on the shared Coolify media volume.
+
+ChatGPT-internal `data:application/vnd.openai.code-mode-image` references are not image
+bytes. `upload_media` returns `opaque_asset_reference` if a client sends that opaque value
+instead of using the declared `file` parameter.
+
 Upload media from one of three mutually exclusive sources:
 
 ```json

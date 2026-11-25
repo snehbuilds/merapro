@@ -54,6 +54,17 @@ WS_ARG = {
 }
 UUID = {"type": "string", "format": "uuid"}
 LIST_OUT = _obj({"data": {"type": "array", "items": {"type": "object"}}}, ["data"])
+OPENAI_FILE = {
+    "type": "object",
+    "properties": {
+        "download_url": {"type": "string"},
+        "file_id": {"type": "string"},
+        "mime_type": {"type": "string"},
+        "file_name": {"type": "string"},
+    },
+    "required": ["download_url", "file_id"],
+    "additionalProperties": False,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +79,7 @@ class Tool:
     annotations: dict[str, Any] = field(default_factory=lambda: dict(READ))
     output_schema: dict[str, Any] = field(default_factory=lambda: dict(LIST_OUT))
     second_factor: str | None = None  # the action a pending confirmation runs
+    meta: dict[str, Any] = field(default_factory=dict)
 
     def describe(self) -> dict[str, Any]:
         # ChatGPT uses tool-level security schemes to determine which OAuth scopes a
@@ -81,7 +93,7 @@ class Tool:
             "inputSchema": self.input_schema,
             "outputSchema": self.output_schema,
             "annotations": {"title": self.title, **self.annotations},
-            "_meta": {"securitySchemes": security_schemes},
+            "_meta": {"securitySchemes": security_schemes, **self.meta},
         }
 
 
@@ -429,21 +441,25 @@ async def get_post_status(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str,
 
 
 async def upload_media(api: MeraApi, ws: str, a: dict[str, Any]) -> dict[str, Any]:
+    file = a.get("file") or {}
+    remote_url = file.get("download_url") or a.get("remote_url")
+    content_type = file.get("mime_type") or a.get("content_type")
+    filename = file.get("file_name") or a.get("filename")
     return cast(
         dict[str, Any],
         await api.post(
             _w(ws, "/media/ingest"),
             {
-                k: a.get(k)
-                for k in (
-                    "remote_url",
-                    "base64_data",
-                    "presigned_url",
-                    "content_type",
-                    "filename",
-                    "alt_text",
-                )
-                if a.get(k) is not None
+                k: value
+                for k, value in {
+                    "remote_url": remote_url,
+                    "base64_data": a.get("base64_data"),
+                    "presigned_url": a.get("presigned_url"),
+                    "content_type": content_type,
+                    "filename": filename,
+                    "alt_text": a.get("alt_text"),
+                }.items()
+                if value is not None
             },
         ),
     )
@@ -805,24 +821,30 @@ TOOLS: tuple[Tool, ...] = (
     Tool(
         "upload_media",
         "Upload media",
-        "Ingest an image, video or PDF from a public URL, Base64 data, or a completed "
-        "caller-managed presigned URL. Remote fetches are SSRF-protected.",
-        _obj(
-            {
-                **WS_ARG,
-                "remote_url": {"type": "string", "format": "uri", "maxLength": 4096},
-                "base64_data": {"type": "string", "contentEncoding": "base64"},
-                "presigned_url": {"type": "string", "format": "uri", "maxLength": 4096},
-                "content_type": {"type": "string", "maxLength": 120},
-                "filename": {"type": "string", "maxLength": 255},
-                "alt_text": {"type": "string", "maxLength": 1000},
-            }
-        ),
+        "Store an image generated or selected in ChatGPT, or ingest an image, video, or "
+        "PDF from a public URL, Base64 data, or presigned URL. Remote fetches are "
+        "SSRF-protected.",
+        {
+            **_obj(
+                {
+                    **WS_ARG,
+                    "file": {"$ref": "#/$defs/OpenAIFile"},
+                    "remote_url": {"type": "string", "format": "uri", "maxLength": 4096},
+                    "base64_data": {"type": "string", "contentEncoding": "base64"},
+                    "presigned_url": {"type": "string", "format": "uri", "maxLength": 4096},
+                    "content_type": {"type": "string", "maxLength": 120},
+                    "filename": {"type": "string", "maxLength": 255},
+                    "alt_text": {"type": "string", "maxLength": 1000},
+                }
+            ),
+            "$defs": {"OpenAIFile": OPENAI_FILE},
+        },
         upload_media,
         "media:write",
         mutating=True,
         annotations=dict(WRITE),
         output_schema={"type": "object"},
+        meta={"openai/fileParams": ["file"]},
     ),
     Tool(
         "list_media",
