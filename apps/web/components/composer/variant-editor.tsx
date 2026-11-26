@@ -194,9 +194,9 @@ export function VariantEditor({
   const counted = (text: string) => weightedLength(text, variant.platform);
 
   return (
-    <div className={cn("grid items-start gap-4", version && "xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]")}>
+    <div className={cn("grid items-start gap-4", version && "lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)]")}>
       {version ? (
-        <Panel aria-labelledby={`${id}-preview`} className="xl:sticky xl:top-4">
+        <Panel aria-labelledby={`${id}-preview`} className="lg:sticky lg:top-4">
           <PanelHead>
             <h2 id={`${id}-preview`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">
               Preview
@@ -781,12 +781,14 @@ function previewMedia(workspaceId: string, media: readonly Record<string, unknow
   const items = readMedia(media);
   const first = items[0];
   if (!first) return null;
-  const size = first.width && first.height ? `${first.width} × ${first.height}` : (first.aspect ?? "image");
+  const fallback = first.mediaType === "video" ? "video" : first.mediaType === "document" ? "document" : "image";
+  const size = first.width && first.height ? `${first.width} × ${first.height}` : (first.aspect ?? fallback);
   return {
     label: items.length > 1 ? `${size} · 1 of ${items.length}` : size,
-    summary: items.length > 1 ? `${items.length} images` : size,
+    summary: items.length > 1 ? `${items.length} items` : size,
     src: first.assetId ? mediaContentUrl(workspaceId, first.assetId) : undefined,
     alt: first.altText ?? "",
     ratio: first.width && first.height ? `${first.width} / ${first.height}` : undefined,
+    mediaType: first.mediaType,
   };
 }

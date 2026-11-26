@@ -20,11 +20,13 @@ import { AccountMark } from "./account-chip";
 export interface PreviewMedia {
   label: ReactNode;
   summary?: ReactNode;
-  /** The image itself (same-origin); without it a placeholder shows the label. */
+  /** The image/video itself (same-origin); without it a placeholder shows the label. */
   src?: string;
   alt?: string;
   /** CSS aspect-ratio, e.g. "1080 / 1350". */
   ratio?: string;
+  /** "image", "video", or "document". */
+  mediaType?: string;
 }
 
 export interface PlatformPreviewProps extends Omit<ComponentProps<"figure">, "children"> {
@@ -122,8 +124,25 @@ export function PlatformPreview({
       )}
       {media && !compact && media.src ? (
         <figure className="mx-3 mb-3 overflow-hidden rounded-md border border-border bg-surface-sunken">
-          {/* eslint-disable-next-line @next/next/no-img-element -- authenticated, same-origin bytes */}
-          <img src={media.src} alt={media.alt ?? ""} className="block w-full object-cover" style={{ aspectRatio: media.ratio }} />
+          {media.mediaType === "video" ? (
+            <video
+              src={media.src}
+              controls
+              playsInline
+              preload="metadata"
+              aria-label={media.alt || "Video preview"}
+              className="block max-h-[420px] w-full bg-black object-contain"
+              style={media.ratio ? { aspectRatio: media.ratio } : undefined}
+            />
+          ) : media.mediaType === "document" ? (
+            <div className="grid min-h-24 place-items-center gap-1.5 p-4 text-caption text-fg-muted">
+              <Icon name="copy" size="lg" />
+              <span>{media.alt || "PDF document"}</span>
+            </div>
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element -- authenticated, same-origin bytes */
+            <img src={media.src} alt={media.alt ?? ""} className="block w-full object-cover" style={{ aspectRatio: media.ratio }} />
+          )}
           <figcaption className="px-2.5 py-1.5 text-caption text-fg-subtle">{media.label}</figcaption>
         </figure>
       ) : media && !compact ? (

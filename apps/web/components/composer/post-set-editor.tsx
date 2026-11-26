@@ -422,26 +422,44 @@ export function PostSetEditor({ workspace, postSet, accounts, voices, canEdit: c
         ) : null}
       </Panel>
 
-      <div className="grid grid-cols-[280px_minmax(0,1fr)] items-start gap-4 max-wide:grid-cols-[250px_minmax(0,1fr)] max-rail:grid-cols-1">
-        <div className="grid gap-3.5 lg:sticky lg:top-4">
-          <Panel aria-labelledby={`${id}-accounts`}>
-            <PanelHead>
-              <h2 id={`${id}-accounts`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">
-                Accounts
-              </h2>
-              <span className="flex-1" />
-              <Tag tone="outline">{enabled.length} enabled</Tag>
-            </PanelHead>
-            <ul aria-labelledby={`${id}-accounts`}>
-              {ordered.map((v) => (
-                <li key={v.id}>
-                  <AccountRow variant={v} selected={v.id === selected?.id} generating={generating} onSelect={() => setSelectedId(v.id)} />
-                </li>
-              ))}
-            </ul>
-            <PanelFoot>Each account is drafted, approved, scheduled and published on its own.</PanelFoot>
-          </Panel>
+      <Panel aria-labelledby={`${id}-accounts`}>
+        <PanelHead>
+          <h2 id={`${id}-accounts`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">
+            Accounts
+          </h2>
+          <span className="flex-1" />
+          <Tag tone="outline">{enabled.length} enabled</Tag>
+        </PanelHead>
+        <ul aria-labelledby={`${id}-accounts`} className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
+          {ordered.map((v) => (
+            <li key={v.id}>
+              <AccountRow variant={v} selected={v.id === selected?.id} generating={generating} onSelect={() => setSelectedId(v.id)} />
+            </li>
+          ))}
+        </ul>
+      </Panel>
 
+      <div className="grid min-w-0 gap-4">
+        {selected ? (
+          <VariantEditor
+            key={`${selected.id}:${selected.current_version?.id ?? "none"}`}
+            workspaceId={workspace.id}
+            contentItemId={set.content?.id ?? null}
+            variant={selected}
+            voices={voices}
+            canEdit={canEdit}
+            generating={generating}
+            {...handlers(selected)}
+          />
+        ) : (
+          <Panel>
+            <PanelBody>
+              <p className="text-sm text-fg-muted">This post set has no accounts.</p>
+            </PanelBody>
+          </Panel>
+        )}
+
+        <div className="grid items-start gap-3.5 lg:grid-cols-2">
           <Panel aria-labelledby={`${id}-order`}>
             <PanelHead>
               <h2 id={`${id}-order`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">
@@ -463,68 +481,47 @@ export function PostSetEditor({ workspace, postSet, accounts, voices, canEdit: c
               </p>
             </PanelBody>
           </Panel>
-        </div>
-
-        <div className="grid min-w-0 gap-3.5">
-          {selected ? (
-            <VariantEditor
-              key={`${selected.id}:${selected.current_version?.id ?? "none"}`}
-              workspaceId={workspace.id}
-              contentItemId={set.content?.id ?? null}
-              variant={selected}
-              voices={voices}
-              canEdit={canEdit}
-              generating={generating}
-              {...handlers(selected)}
-            />
-          ) : (
-            <Panel>
-              <PanelBody>
-                <p className="text-sm text-fg-muted">This post set has no accounts.</p>
-              </PanelBody>
-            </Panel>
-          )}
 
           <ExperimentsPanel workspace={workspace} set={set} variantId={selected?.id ?? null} canEdit={canEdit} />
-
-          <Panel aria-label="Commit">
-            <PanelBody className="flex flex-wrap items-center justify-between gap-3.5">
-              <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                <StatusPill tone={summary.distinct.tone} shape={summary.distinct.tone === "neutral" ? "ring" : "full"} label={summary.distinct.label} />
-                <StatusPill
-                  tone={summary.guardrails.tone}
-                  shape={summary.guardrails.tone === "neutral" ? "ring" : "full"}
-                  label={summary.guardrails.label}
-                />
-              </div>
-              <div className="flex flex-none flex-wrap items-center gap-2">
-                <Button disabled aria-describedby={scheduleNoteId}>
-                  Schedule…
-                </Button>
-                {inApproval ? (
-                  <Link
-                    href={`/w/${workspace.slug}/approvals`}
-                    className="inline-flex h-8 items-center rounded-md border border-accent bg-accent px-3 text-sm font-semibold text-accent-fg hover:bg-accent-hover"
-                  >
-                    Waiting in Approvals
-                  </Link>
-                ) : (
-                  <Button variant="primary" disabled={!readyToSend || sending} aria-describedby={approvalNoteId} onClick={() => void sendForApproval()}>
-                    {sending ? "Sending…" : `Send ${enabled.length} for approval`}
-                  </Button>
-                )}
-              </div>
-            </PanelBody>
-            <PanelFoot className="grid gap-0.5">
-              <p id={scheduleNoteId}>Scheduling arrives with the calendar (M8).</p>
-              <p id={approvalNoteId}>
-                {inApproval
-                  ? "Waiting for approval. Editing an account's text takes that account out of the request; the others stay."
-                  : "Each account is approved on its own, for the exact text saved here. Guardrails run again before it is sent."}
-              </p>
-            </PanelFoot>
-          </Panel>
         </div>
+
+        <Panel aria-label="Commit">
+          <PanelBody className="flex flex-wrap items-center justify-between gap-3.5">
+            <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+              <StatusPill tone={summary.distinct.tone} shape={summary.distinct.tone === "neutral" ? "ring" : "full"} label={summary.distinct.label} />
+              <StatusPill
+                tone={summary.guardrails.tone}
+                shape={summary.guardrails.tone === "neutral" ? "ring" : "full"}
+                label={summary.guardrails.label}
+              />
+            </div>
+            <div className="flex flex-none flex-wrap items-center gap-2">
+              <Button disabled aria-describedby={scheduleNoteId}>
+                Schedule…
+              </Button>
+              {inApproval ? (
+                <Link
+                  href={`/w/${workspace.slug}/approvals`}
+                  className="inline-flex h-8 items-center rounded-md border border-accent bg-accent px-3 text-sm font-semibold text-accent-fg hover:bg-accent-hover"
+                >
+                  Waiting in Approvals
+                </Link>
+              ) : (
+                <Button variant="primary" disabled={!readyToSend || sending} aria-describedby={approvalNoteId} onClick={() => void sendForApproval()}>
+                  {sending ? "Sending…" : `Send ${enabled.length} for approval`}
+                </Button>
+              )}
+            </div>
+          </PanelBody>
+          <PanelFoot className="grid gap-0.5">
+            <p id={scheduleNoteId}>Scheduling arrives with the calendar (M8).</p>
+            <p id={approvalNoteId}>
+              {inApproval
+                ? "Waiting for approval. Editing an account's text takes that account out of the request; the others stay."
+                : "Each account is approved on its own, for the exact text saved here. Guardrails run again before it is sent."}
+            </p>
+          </PanelFoot>
+        </Panel>
       </div>
     </div>
   );
@@ -539,8 +536,8 @@ function AccountRow({ variant: v, selected, generating, onSelect }: { variant: V
       aria-current={selected ? "true" : undefined}
       onClick={onSelect}
       className={cn(
-        "grid w-full gap-[5px] border-b border-border px-3.5 py-3 text-left hover:bg-surface-hover",
-        "aria-[current=true]:bg-accent-soft",
+        "grid h-full w-full gap-[5px] rounded-lg border border-border px-3.5 py-2.5 text-left transition-colors hover:bg-surface-hover",
+        "aria-[current=true]:border-accent aria-[current=true]:bg-accent-soft",
       )}
     >
       <span className="flex items-center gap-2">
