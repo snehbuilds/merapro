@@ -37,7 +37,9 @@ from mera.domain.ports.platform_adapter import (
 )
 from mera.infrastructure.platforms.adapters.http import PlatformHTTP, same_text
 
-GRAPH_VERSION = "v23.0"
+# Keep this pinned to Meta's current Graph release.  A version is deliberately explicit:
+# relying on an app's default version makes a platform upgrade an invisible production change.
+GRAPH_VERSION = "v27.0"
 GRAPH = f"https://graph.facebook.com/{GRAPH_VERSION}"
 CONTAINER_POLLS = 20
 CONTAINER_POLL_SECONDS = 3.0

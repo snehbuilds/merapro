@@ -4,6 +4,7 @@ shapes and classifies its errors, against an ``httpx.MockTransport`` cassette.""
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
@@ -75,7 +76,13 @@ class Cassette:
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(request)
         for i, (method, prefix, fn) in enumerate(self.rules):
-            if request.method == method and str(request.url).startswith(prefix):
+            # The cassette describes Graph endpoint shapes, not a particular retired API
+            # version. Normalize Graph versions so an intentional version bump preserves
+            # the contract coverage for each endpoint.
+            url = str(request.url)
+            if request.url.host == "graph.facebook.com":
+                url = re.sub(r"/v\d+\.\d+/", "/v23.0/", url)
+            if request.method == method and url.startswith(prefix):
                 self.rules.pop(i)
                 return fn(request)
         raise AssertionError(f"unexpected {request.method} {request.url}")

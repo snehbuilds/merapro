@@ -29,7 +29,7 @@ from typing import Any
 from mera.domain.ports.engagement import CommentRef, EngagementAdapter, PlatformComment, PostRef
 from mera.infrastructure.platforms.adapters.http import PlatformHTTP
 
-GRAPH = "https://graph.facebook.com/v23.0"
+GRAPH = "https://graph.facebook.com/v27.0"
 THREADS = "https://graph.threads.net/v1.0"
 _TAG = re.compile(r"<[^>]+>")
 
