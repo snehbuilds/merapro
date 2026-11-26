@@ -66,6 +66,7 @@ class VariantOut(_Out):
     social_account_id: uuid.UUID
     nickname: str
     handle: str
+    avatar_url: str | None
     account_type: str
     platform: Platform
     via_account_group_id: uuid.UUID | None

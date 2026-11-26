@@ -16,7 +16,7 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tag } from "@/components/ui/tag";
-import { accountTypeLabel, platformIcon, platformLabel } from "@/lib/accounts";
+import { platformIcon, platformLabel } from "@/lib/accounts";
 import type { HashtagSuggestion, Variant, Voice } from "@/lib/api/models";
 import {
   HOOK_TYPE_LABEL,
@@ -200,8 +200,8 @@ export function VariantEditor({
           <AccountChip
             id={`${id}-name`}
             size="lg"
-            account={{ platform: platformIcon(variant.platform), name: variant.nickname, handle: variant.handle }}
-            meta={`${variant.handle} · ${accountTypeLabel(variant.account_type)}${variant.group_name ? ` · via ${variant.group_name}` : ""}`}
+            account={{ platform: platformIcon(variant.platform), name: variant.nickname, handle: variant.handle, avatar_url: variant.avatar_url, platformLabel: label }}
+            meta={variant.group_name ? `via ${variant.group_name}` : undefined}
           />
           <span className="flex-1" />
           <span className="text-caption text-fg-subtle">Voice:</span>

@@ -764,6 +764,17 @@
             "title": "Approve Count",
             "type": "integer"
           },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
           "body": {
             "title": "Body",
             "type": "string"
@@ -932,6 +943,7 @@
           "platform",
           "nickname",
           "handle",
+          "avatar_url",
           "state",
           "required",
           "quorum",
@@ -1490,7 +1502,7 @@
           },
           "file": {
             "contentMediaType": "application/octet-stream",
-            "description": "JPEG, PNG or WebP, up to 20 MB",
+            "description": "JPEG, PNG, WebP, MP4, MOV or PDF, up to 200 MB",
             "title": "File",
             "type": "string"
           }
@@ -5297,7 +5309,7 @@
             "type": "string"
           },
           "origin": {
-            "description": "upload, og_image, generated or rendition",
+            "description": "upload, remote_url, og_image, generated or rendition",
             "title": "Origin",
             "type": "string"
           },
@@ -8490,6 +8502,17 @@
       },
       "ScheduledPostOut": {
         "properties": {
+          "account_avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Avatar Url"
+          },
           "account_group_id": {
             "anyOf": [
               {
@@ -8657,6 +8680,7 @@
           "social_account_id",
           "account_nickname",
           "account_handle",
+          "account_avatar_url",
           "platform",
           "account_group_id",
           "group_name",
@@ -10832,6 +10856,17 @@
             "title": "Account Type",
             "type": "string"
           },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
           "brand_voice_id": {
             "anyOf": [
               {
@@ -10935,6 +10970,7 @@
           "social_account_id",
           "nickname",
           "handle",
+          "avatar_url",
           "account_type",
           "platform",
           "via_account_group_id",
@@ -22580,7 +22616,7 @@
         ]
       },
       "post": {
-        "description": "Upload an image. The same bytes uploaded twice return the existing asset.",
+        "description": "Upload a supported media file. Duplicate bytes return the existing asset.",
         "operationId": "upload_media_api_v1_workspaces__workspace_id__media_post",
         "parameters": [
           {
@@ -23446,7 +23482,7 @@
     },
     "/api/v1/workspaces/{workspace_id}/media/{asset_id}/content": {
       "get": {
-        "description": "The image bytes of a master or a rendition (immutable: cache by checksum).",
+        "description": "The media bytes of a master or image rendition (immutable: cache by checksum).",
         "operationId": "media_content_api_v1_workspaces__workspace_id__media__asset_id__content_get",
         "parameters": [
           {
@@ -23473,9 +23509,12 @@
         "responses": {
           "200": {
             "content": {
+              "application/pdf": {},
               "image/jpeg": {},
               "image/png": {},
-              "image/webp": {}
+              "image/webp": {},
+              "video/mp4": {},
+              "video/quicktime": {}
             },
             "description": "Successful Response"
           },

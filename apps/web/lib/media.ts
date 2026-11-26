@@ -57,17 +57,17 @@ export function mediaContentUrl(workspaceId: string, assetId: string): string {
 
 /** Product copy for media error codes (the API's own message is the fallback). */
 export const MEDIA_ERROR_TEXT: Record<string, string> = {
-  unsupported_media_type: "Upload a JPEG, PNG or WebP image.",
+  unsupported_media_type: "Upload a JPEG, PNG, WebP, MP4, MOV or PDF file.",
   unreadable_image: "That file isn't a readable image.",
   animated_image: "Animated images aren't supported yet; upload a still.",
   image_too_small: "That image is too small; use one at least 200 pixels on each side.",
   image_too_large: "That image has too many pixels to process safely.",
-  file_too_large: "Images can be at most 20 MB.",
+  file_too_large: "Files can be at most 200 MB.",
   no_og_image: "This article has no preview image.",
-  media_quota_exceeded: "This workspace's media storage is full; delete unused images first.",
+  media_quota_exceeded: "This workspace's media storage is full; delete unused media first.",
   version_conflict: "This post changed since you opened it. Reload to see the latest, then try again.",
   unsupported_aspect: "This platform doesn't take that shape.",
-  not_drafted: "Draft this account's text before adding images.",
+  not_drafted: "Draft this account's text before adding media.",
   duplicate_media: "Each image can be attached once.",
   media_budget_spent: "This would go over the workspace's monthly media budget. An Admin can raise it in Settings.",
   unsafe_prompt: "Mera doesn't generate that kind of image. Describe something else.",

@@ -14,9 +14,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from mera.api.deps import CurrentUser, Media, Meta, Posts
 from mera.api.v1.routers.posts import SETS, WS, PostSetOut, _set
 from mera.application.errors import InvalidInput, NotFoundError
-from mera.application.services.media_service import MediaChoice
+from mera.application.services.media_service import MAX_FILE_BYTES, MediaChoice
 from mera.domain.ports.object_store import ObjectNotFound
-from mera.infrastructure.media.images import MAX_UPLOAD_BYTES
 
 router = APIRouter(tags=["media"])
 files_router = APIRouter(tags=["media"])
@@ -27,7 +26,14 @@ _FILE_HEADERS = {
     "Content-Security-Policy": "default-src 'none'; sandbox",
     "Cross-Origin-Resource-Policy": "same-site",
 }
-_TYPES = {"jpg": "image/jpeg", "png": "image/png", "webp": "image/webp"}
+_TYPES = {
+    "jpg": "image/jpeg",
+    "png": "image/png",
+    "webp": "image/webp",
+    "mp4": "video/mp4",
+    "mov": "video/quicktime",
+    "pdf": "application/pdf",
+}
 
 
 class MediaOut(BaseModel):
@@ -150,17 +156,35 @@ class VariantMediaIn(BaseModel):
 @router.post(f"{WS}/media", response_model=MediaOut, status_code=status.HTTP_201_CREATED)
 async def upload_media(
     workspace_id: uuid.UUID,
-    file: Annotated[UploadFile, File(description="JPEG, PNG or WebP, up to 20 MB")],
+    file: Annotated[
+        UploadFile,
+        File(description="JPEG, PNG, WebP, MP4, MOV or PDF, up to 200 MB"),
+    ],
     user: CurrentUser,
     svc: Media,
     meta: Meta,
     alt_text: Annotated[str | None, Form(max_length=1000)] = None,
 ) -> MediaOut:
-    """Upload an image. The same bytes uploaded twice return the existing asset."""
-    data = await file.read(MAX_UPLOAD_BYTES + 1)
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise InvalidInput("Images can be at most 20 MB.", code="file_too_large", field="file")
-    view = await svc.upload(user, workspace_id, meta, data=data, alt_text=alt_text)
+    """Upload a supported media file. Duplicate bytes return the existing asset."""
+    data = await file.read(MAX_FILE_BYTES + 1)
+    if len(data) > MAX_FILE_BYTES:
+        raise InvalidInput("Files can be at most 200 MB.", code="file_too_large", field="file")
+    content_type = file.content_type or _TYPES.get((file.filename or "").rsplit(".", 1)[-1].lower())
+    if not content_type:
+        raise InvalidInput(
+            "The file's media type could not be determined.",
+            code="unsupported_media_type",
+            field="file",
+        )
+    view = await svc.upload_file(
+        user,
+        workspace_id,
+        meta,
+        data=data,
+        content_type=content_type,
+        filename=file.filename,
+        alt_text=alt_text,
+    )
     return MediaOut.model_validate(view)
 
 
@@ -199,7 +223,18 @@ async def get_media(
 @router.get(
     f"{WS}/media/{{asset_id}}/content",
     response_class=Response,
-    responses={200: {"content": {"image/jpeg": {}, "image/png": {}, "image/webp": {}}}},
+    responses={
+        200: {
+            "content": {
+                "image/jpeg": {},
+                "image/png": {},
+                "image/webp": {},
+                "video/mp4": {},
+                "video/quicktime": {},
+                "application/pdf": {},
+            }
+        }
+    },
 )
 async def media_content(
     workspace_id: uuid.UUID,
@@ -209,7 +244,7 @@ async def media_content(
     svc: Media,
     meta: Meta,
 ) -> Response:
-    """The image bytes of a master or a rendition (immutable: cache by checksum)."""
+    """The media bytes of a master or image rendition (immutable: cache by checksum)."""
     data, content_type, checksum = await svc.content(user, workspace_id, meta, asset_id)
     etag = f'"{checksum}"'
     headers = {**_FILE_HEADERS, "ETag": etag, "Cache-Control": "private, max-age=86400"}

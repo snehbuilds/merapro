@@ -183,6 +183,7 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
     items.length !== saved.length ||
     items.some((m, i) => m.masterId !== saved[i]?.masterId || m.aspect !== saved[i]?.aspect || (m.altText ?? "") !== (saved[i]?.altText ?? ""));
   const full = items.length >= max;
+  const hasNonImage = items.some((item) => item.mediaType !== "image");
 
   function update(i: number, patch: Partial<AttachedMedia>) {
     setItems((list) => list.map((m, j) => (j === i ? { ...m, ...patch } : m)));
@@ -197,7 +198,8 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
     });
   }
 
-  function add(asset: { id: string; default_alt_text: string | null }) {
+  function add(asset: { id: string; default_alt_text: string | null; media_type?: string; content_type?: string }) {
+    const mediaType = asset.media_type ?? "image";
     setItems((list) =>
       list.some((m) => m.masterId === asset.id)
         ? list
@@ -205,30 +207,43 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
             ...list,
             {
               masterId: asset.id,
-              assetId: null,
-              aspect: aspects[0]?.key ?? null,
+              // Videos and PDFs do not get platform image renditions.
+              assetId: mediaType === "image" ? null : asset.id,
+              aspect: mediaType === "image" ? (aspects[0]?.key ?? null) : null,
               altText: asset.default_alt_text,
               width: null,
               height: null,
-              mediaType: "image",
-              contentType: null,
+              mediaType,
+              contentType: asset.content_type ?? null,
             },
           ],
     );
   }
 
-  async function upload(file: File) {
-    setBusy("upload");
-    setError(null);
-    const r = await settle(
-      uploadMedia({ client: browserApi, headers: idempotencyHeaders(), path: { workspace_id: workspaceId }, body: { file } }),
-    );
-    setBusy(null);
-    if (!r.ok) {
-      setError(MEDIA_ERROR_TEXT[r.error.code] ?? displayMessage(r.error));
+  async function upload(files: File[]) {
+    const selectedNonImage = files.some((file) => !file.type.startsWith("image/"));
+    if ((selectedNonImage && (files.length !== 1 || items.length > 0)) || hasNonImage) {
+      setError("Videos and PDFs must be attached alone. Select multiple files only for an image carousel.");
       return;
     }
-    add(r.data);
+    if (files.length + items.length > max) {
+      setError(`This platform allows at most ${max} images in one post.`);
+      return;
+    }
+    setBusy("upload");
+    setError(null);
+    for (const file of files) {
+      const r = await settle(
+        uploadMedia({ client: browserApi, headers: idempotencyHeaders(), path: { workspace_id: workspaceId }, body: { file } }),
+      );
+      if (!r.ok) {
+        setBusy(null);
+        setError(MEDIA_ERROR_TEXT[r.error.code] ?? displayMessage(r.error));
+        return;
+      }
+      add(r.data);
+    }
+    setBusy(null);
   }
 
   async function fromArticle() {
@@ -273,17 +288,18 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,application/pdf"
+            multiple
             className="sr-only"
             tabIndex={-1}
             aria-hidden="true"
             onChange={(e) => {
-              const file = e.target.files?.[0];
+              const files = Array.from(e.target.files ?? []);
               e.target.value = "";
-              if (file) void upload(file);
+              if (files.length) void upload(files);
             }}
           />
-          <Button size="sm" disabled={!editable || full || busy !== null} onClick={() => fileRef.current?.click()}>
+          <Button size="sm" disabled={!editable || full || hasNonImage || busy !== null} onClick={() => fileRef.current?.click()}>
             <Icon name="upload" size="sm" />
             {busy === "upload" ? "Uploading…" : "Upload"}
           </Button>
@@ -384,8 +400,8 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
       {items.length === 0 ? (
         <p className="text-caption text-fg-subtle">
           {spec?.requires_media
-            ? "This platform cannot post without an image. Upload one or use the article's image."
-            : "No images. JPEG, PNG or WebP up to 20 MB; Mera crops each to this platform's shape and removes location data."}
+            ? "This platform cannot post without media. Upload an image or video where supported."
+            : "Upload JPEG, PNG or WebP images (select several for a carousel), or one MP4, MOV or PDF up to 200 MB. Images are cropped per platform."}
         </p>
       ) : (
         <ol className="grid gap-2.5">
@@ -396,18 +412,22 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
                   "grid w-20 shrink-0 place-items-center overflow-hidden rounded-sm bg-surface-sunken text-fg-subtle",
                   m.assetId ? "" : "border border-dashed border-border-strong",
                 )}
-                style={{ aspectRatio: aspectRatio(aspects, m.aspect) }}
+                style={{ aspectRatio: m.mediaType === "image" ? aspectRatio(aspects, m.aspect) : "1 / 1" }}
               >
-                {m.assetId ? (
+                {m.assetId && m.mediaType === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element -- authenticated, same-origin bytes
                   <img src={mediaContentUrl(workspaceId, m.assetId)} alt={m.altText ?? ""} className="size-full object-cover" />
+                ) : m.assetId && m.mediaType === "video" ? (
+                  <video src={mediaContentUrl(workspaceId, m.assetId)} className="size-full object-cover" controls muted />
+                ) : m.assetId && m.mediaType === "document" ? (
+                  <span className="px-1 text-center text-[11px] font-medium">PDF</span>
                 ) : (
-                  <span className="px-1 text-center text-[11px] leading-tight">Cropped on save</span>
+                  <span className="px-1 text-center text-[11px] leading-tight">{m.mediaType === "image" ? "Cropped on save" : "Ready to save"}</span>
                 )}
               </div>
               <div className="grid min-w-0 flex-1 gap-1.5">
                 <div className="flex flex-wrap items-end gap-2">
-                  <div className="grid gap-1">
+                  {m.mediaType === "image" ? <div className="grid gap-1">
                     <Label htmlFor={`${id}-aspect-${i}`} className="text-caption">
                       Shape
                     </Label>
@@ -423,15 +443,15 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
                         </option>
                       ))}
                     </Select>
-                  </div>
+                  </div> : null}
                   <span className="flex-1" />
-                  <Button size="sm" variant="ghost" aria-label={`Move image ${i + 1} earlier`} disabled={!editable || i === 0} onClick={() => move(i, -1)}>
+                  <Button size="sm" variant="ghost" aria-label={`Move media ${i + 1} earlier`} disabled={!editable || i === 0} onClick={() => move(i, -1)}>
                     <Icon name="arrow" size="sm" className="rotate-180" />
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
-                    aria-label={`Move image ${i + 1} later`}
+                    aria-label={`Move media ${i + 1} later`}
                     disabled={!editable || i === items.length - 1}
                     onClick={() => move(i, 1)}
                   >
@@ -440,14 +460,14 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
                   <Button
                     size="sm"
                     variant="ghost"
-                    aria-label={`Remove image ${i + 1}`}
+                    aria-label={`Remove media ${i + 1}`}
                     disabled={!editable}
                     onClick={() => setItems((list) => list.filter((_, j) => j !== i))}
                   >
                     <Icon name="trash" size="sm" />
                   </Button>
                 </div>
-                <div className="flex items-center justify-between gap-2">
+                {m.mediaType === "image" ? <><div className="flex items-center justify-between gap-2">
                   <Label htmlFor={`${id}-alt-${i}`} className="text-caption">
                     Alt text
                   </Label>
@@ -469,6 +489,7 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
                   disabled={!editable}
                   onChange={(e) => update(i, { altText: e.target.value })}
                 />
+                </> : null}
               </div>
             </li>
           ))}
@@ -478,7 +499,7 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
       {dirty ? (
         <div className="mt-2.5 flex flex-wrap items-center gap-2">
           <Button size="sm" variant="primary" disabled={!editable || busy !== null} onClick={() => void save()}>
-            {busy === "save" ? "Saving…" : "Save images"}
+            {busy === "save" ? "Saving…" : "Save media"}
           </Button>
           <Button size="sm" variant="ghost" disabled={busy !== null} onClick={() => setItems(saved)}>
             Discard

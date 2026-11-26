@@ -653,8 +653,10 @@ TOOLS: tuple[Tool, ...] = (
     Tool(
         "create_post",
         "Create a post",
-        "Create a post set for the named groups and/or accounts. When the MCP client "
-        "has drafted the post text, provide it in 'body' so Mera saves it directly. "
+        "Create a post set (text, image, carousel, or Reel/video) for the named groups and/or "
+        "accounts. When the MCP client has drafted the post text/caption, provide it in 'body' so "
+        "Mera saves it directly. To publish a Reel or video, first upload or generate the video "
+        "to get its asset id, then pass it alone in media_ids (1 video per post). "
         "If 'body' is omitted, Mera queues its internal Writer agent. "
         "Targets are required; nothing is published without human approval.",
         _obj(
@@ -821,9 +823,9 @@ TOOLS: tuple[Tool, ...] = (
     Tool(
         "upload_media",
         "Upload media",
-        "Store an image generated or selected in ChatGPT, or ingest an image, video, or "
-        "PDF from a public URL, Base64 data, or presigned URL. Remote fetches are "
-        "SSRF-protected.",
+        "Store an image or video/Reel (MP4, MOV up to 200 MB) generated or selected in "
+        "ChatGPT/Claude, or ingest an image, video, or PDF from a public URL, Base64 data, or "
+        "presigned URL. Remote fetches are SSRF-protected.",
         {
             **_obj(
                 {

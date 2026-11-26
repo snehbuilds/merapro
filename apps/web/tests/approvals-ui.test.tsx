@@ -56,6 +56,7 @@ function variant(id: string, nickname: string, platform: string, over: Partial<A
     platform,
     nickname,
     handle: `@${nickname.toLowerCase().replace(/\s+/g, "")}`,
+    avatar_url: null,
     state: "pending",
     required: 1,
     quorum: "any_of",

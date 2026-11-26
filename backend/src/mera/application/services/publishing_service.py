@@ -82,6 +82,7 @@ class ScheduledView:
     social_account_id: uuid.UUID
     account_nickname: str
     account_handle: str
+    account_avatar_url: str | None
     platform: str
     account_group_id: uuid.UUID | None
     group_name: str | None
@@ -925,6 +926,7 @@ class PublishingService(WorkspaceScopedService):
             social_account_id=sp.social_account_id,
             account_nickname=acct.nickname if acct else "",
             account_handle=acct.handle if acct else "",
+            account_avatar_url=acct.avatar_url if acct else None,
             platform=acct.platform if acct else "",
             account_group_id=sp.account_group_id,
             group_name=grp.name if grp else None,

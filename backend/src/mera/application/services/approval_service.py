@@ -105,6 +105,7 @@ class ApprovalVariantView:
     platform: str
     nickname: str
     handle: str
+    avatar_url: str | None
     state: str
     required: int
     quorum: str
@@ -1332,6 +1333,7 @@ class ApprovalService(WorkspaceScopedService):
                     platform=acct.platform,
                     nickname=acct.nickname,
                     handle=acct.handle,
+                    avatar_url=acct.avatar_url,
                     state=r.state,
                     required=r.required_count,
                     quorum=r.quorum_mode,

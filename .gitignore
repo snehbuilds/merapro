@@ -20,3 +20,4 @@ backend/var/
 
 # Coverage output (CI regenerates it)
 coverage.json
+*.mp4

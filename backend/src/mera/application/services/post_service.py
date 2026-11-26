@@ -114,6 +114,7 @@ class VariantView:
     social_account_id: uuid.UUID
     nickname: str
     handle: str
+    avatar_url: str | None
     account_type: str
     platform: str
     via_account_group_id: uuid.UUID | None
@@ -1287,6 +1288,7 @@ async def _set_view(
                 social_account_id=v.social_account_id,
                 nickname=a.nickname,
                 handle=a.handle,
+                avatar_url=a.avatar_url,
                 account_type=a.account_type,
                 platform=v.platform,
                 via_account_group_id=v.via_account_group_id,

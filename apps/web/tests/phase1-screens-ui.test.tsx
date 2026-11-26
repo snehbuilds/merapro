@@ -67,6 +67,7 @@ function slot(id: string, at: string, over: Record<string, unknown> = {}) {
     social_account_id: `a-${id}`,
     account_nickname: `Work ${id}`,
     account_handle: `work_${id}`,
+    account_avatar_url: null,
     platform: "linkedin_member",
     account_group_id: "g1",
     group_name: "Tech News",

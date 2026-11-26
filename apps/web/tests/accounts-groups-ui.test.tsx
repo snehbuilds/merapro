@@ -142,7 +142,7 @@ describe("MemberTable reorder", () => {
       expect.objectContaining({ path: { workspace_id: "ws-1", group_id: "grp-1", account_id: "b" }, body: { position: 0 } }),
     );
     const rows = screen.getAllByRole("row").slice(1);
-    expect(rows.map((r) => within(r).getAllByRole("cell")[1]!.textContent)).toEqual(["Bluesky: b", "X: a", "Mastodon: c"]);
+    expect(rows.map((r) => within(r).getAllByRole("cell")[1]!.textContent)).toEqual(["Bluesky: b@b", "X: a@a", "Mastodon: c@c"]);
     expect(screen.getByText("b moved to position 1 of 3.")).toBeInTheDocument();
     await waitFor(() => expect(router.refresh).toHaveBeenCalled());
   });
@@ -153,7 +153,7 @@ describe("MemberTable reorder", () => {
     await userEvent.click(screen.getByRole("button", { name: "Move a down" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("This workspace is archived");
     const rows = screen.getAllByRole("row").slice(1);
-    expect(rows.map((r) => within(r).getAllByRole("cell")[1]!.textContent)).toEqual(["X: a", "Bluesky: b", "Mastodon: c"]);
+    expect(rows.map((r) => within(r).getAllByRole("cell")[1]!.textContent)).toEqual(["X: a@a", "Bluesky: b@b", "Mastodon: c@c"]);
   });
 
   it("offers no reorder controls to read-only viewers", () => {

@@ -16,6 +16,8 @@ export interface AccountRef {
   /** Platform handle, e.g. "@alexmercer". */
   handle?: string;
   avatar_url?: string | null;
+  /** Human platform label, e.g. "Facebook Page" rather than just "Facebook". */
+  platformLabel?: string;
 }
 
 export function AccountMark({
@@ -32,13 +34,22 @@ export function AccountMark({
   if (avatar_url) {
     return (
       <span className={cn("relative shrink-0 inline-flex items-center justify-center", className)}>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "grid place-items-center rounded-full bg-surface-inverse text-fg-inverse",
+            size === "lg" ? "size-[30px] [&>svg]:size-3.5" : "size-[22px] [&>svg]:size-[11px]",
+          )}
+        >
+          <PlatformMark platform={platform} decorative />
+        </span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={avatar_url}
           alt=""
           referrerPolicy="no-referrer"
           className={cn(
-            "rounded-full object-cover border border-border-subtle bg-surface-muted",
+            "absolute inset-0 rounded-full object-cover border border-border-subtle bg-surface-muted",
             size === "lg" ? "size-[30px]" : "size-[22px]",
           )}
           onError={(e) => {
@@ -75,14 +86,16 @@ export function AccountMark({
 }
 
 export interface AccountChipProps extends Omit<ComponentProps<"span">, "children"> {
-  account: Pick<AccountRef, "platform" | "name" | "handle"> & { avatar_url?: string | null };
+  account: Pick<AccountRef, "platform" | "name" | "handle" | "platformLabel"> & { avatar_url?: string | null };
   size?: "md" | "lg";
-  /** lg only: the line under the name. Defaults to the handle. */
+  /** Extra context appended after the platform on the secondary line. */
   meta?: ReactNode;
 }
 
 export function AccountChip({ account, size = "md", meta, className, ...props }: AccountChipProps) {
-  const line = meta ?? account.handle;
+  const rawHandle = account.handle?.trim();
+  const profile = rawHandle ? (rawHandle.startsWith("@") ? rawHandle : `@${rawHandle}`) : account.name;
+  const platform = account.platformLabel ?? PLATFORM_LABELS[account.platform];
   return (
     <span
       data-slot="account-chip"
@@ -91,13 +104,17 @@ export function AccountChip({ account, size = "md", meta, className, ...props }:
       {...props}
     >
       <AccountMark platform={account.platform} avatar_url={account.avatar_url} size={size} />
+      <span className="sr-only">{account.name}</span>
       {size === "lg" ? (
         <span className="min-w-0">
-          <span className="block truncate text-sm font-medium">{account.name}</span>
-          {line ? <span className="block truncate text-xs text-fg-subtle">{line}</span> : null}
+          <span className="block truncate text-sm font-medium">{profile}</span>
+          <span className="block truncate text-xs text-fg-subtle">
+            {platform}
+            {meta ? <><span aria-hidden="true"> · </span>{meta}</> : null}
+          </span>
         </span>
       ) : (
-        <span className="min-w-0 truncate text-sm font-medium">{account.name}</span>
+        <span className="min-w-0 truncate text-sm font-medium">{profile}</span>
       )}
     </span>
   );

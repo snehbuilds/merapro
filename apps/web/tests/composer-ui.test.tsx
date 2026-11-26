@@ -171,6 +171,7 @@ function variant(id: string, a: AccountOut, position: number, over: Partial<Vari
     social_account_id: a.id,
     nickname: a.nickname,
     handle: a.handle,
+    avatar_url: a.avatar_url,
     account_type: a.account_type,
     platform: a.platform,
     group_name: "Tech News",
@@ -726,7 +727,7 @@ describe("Composer: post set editor", () => {
     expect(sdk.uploadMedia.mock.calls[0]![0]).toMatchObject({ path: { workspace_id: "ws-1" }, body: { file } });
     expect(await screen.findByText("Cropped on save")).toBeInTheDocument();
     await u.type(screen.getByRole("textbox", { name: "Alt text" }), "Our dashboard");
-    await u.click(screen.getByRole("button", { name: "Save images" }));
+    await u.click(screen.getByRole("button", { name: "Save media" }));
     await waitFor(() => expect(sdk.setVariantMedia).toHaveBeenCalledTimes(1));
     expect(sdk.setVariantMedia.mock.calls[0]![0]).toMatchObject({
       path: { workspace_id: "ws-1", set_id: "ps-1", variant_id: "v-li" },
@@ -734,6 +735,38 @@ describe("Composer: post set editor", () => {
     });
     const img = await screen.findAllByRole("img", { name: "Our dashboard" });
     expect(img[0]).toHaveAttribute("src", "/api/mera/workspaces/ws-1/media/rend-1/content");
+  });
+
+  it("accepts multiple images for one carousel upload", async () => {
+    const u = userEvent.setup();
+    sdk.uploadMedia
+      .mockReturnValueOnce(ok({ id: "asset-1", default_alt_text: null, media_type: "image" }, 201))
+      .mockReturnValueOnce(ok({ id: "asset-2", default_alt_text: null, media_type: "image" }, 201));
+    renderComposer({ postSet: postSet() });
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
+    expect(input.multiple).toBe(true);
+    await u.upload(input, [
+      new File([new Uint8Array([0xff, 0xd8, 0xff])], "one.jpg", { type: "image/jpeg" }),
+      new File([new Uint8Array([0xff, 0xd8, 0xff])], "two.jpg", { type: "image/jpeg" }),
+    ]);
+    await waitFor(() => expect(sdk.uploadMedia).toHaveBeenCalledTimes(2));
+    expect(screen.getByRole("heading", { name: /Media2 \/ \d+/ })).toBeInTheDocument();
+  });
+
+  it("accepts one Reel video as media and saves it without an image crop", async () => {
+    const u = userEvent.setup();
+    sdk.uploadMedia.mockReturnValue(ok({ id: "reel-1", default_alt_text: null, media_type: "video", content_type: "video/mp4" }, 201));
+    sdk.setVariantMedia.mockReturnValue(ok(postSet()));
+    renderComposer({ postSet: postSet() });
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
+    await u.upload(input, new File(["video"], "reel.mp4", { type: "video/mp4" }));
+    await waitFor(() => expect(sdk.uploadMedia).toHaveBeenCalledTimes(1));
+    expect(document.querySelector("video")).toBeInTheDocument();
+    await u.click(screen.getByRole("button", { name: "Save media" }));
+    await waitFor(() => expect(sdk.setVariantMedia).toHaveBeenCalledTimes(1));
+    expect(sdk.setVariantMedia.mock.calls[0]![0].body.media).toEqual([
+      { asset_id: "reel-1", aspect: null, alt_text: null },
+    ]);
   });
 
   it("explains a refused upload in product words", async () => {

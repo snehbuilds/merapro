@@ -53,7 +53,7 @@ async function handle(request: NextRequest, ctx: { params: Promise<{ path: strin
 }
 
 const MAX_BODY = 2 * 1024 * 1024;
-const MAX_UPLOAD_BODY = 20 * 1024 * 1024 + 256 * 1024;
+const MAX_UPLOAD_BODY = 200 * 1024 * 1024 + 512 * 1024;
 
 function isMediaUpload(method: string, path: string[]): boolean {
   return method === "POST" && path.length === 3 && path[0] === "workspaces" && path[2] === "media";
@@ -61,7 +61,7 @@ function isMediaUpload(method: string, path: string[]): boolean {
 
 function tooLarge(): Response {
   return NextResponse.json(
-    { error: { code: "file_too_large", message: "The upload is too large. Images can be at most 20 MB.", field_errors: [] } },
+    { error: { code: "file_too_large", message: "The upload is too large. Files can be at most 200 MB.", field_errors: [] } },
     { status: 413, headers: { "cache-control": "no-store" } },
   );
 }

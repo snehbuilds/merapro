@@ -15,7 +15,7 @@ import { Panel, PanelBody, PanelHead } from "@/components/ui/panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Time } from "@/components/ui/time";
 import { useWorkspaceEvents } from "@/hooks/use-workspace-events";
-import { platformIcon } from "@/lib/accounts";
+import { platformIcon, platformLabel } from "@/lib/accounts";
 import { browserApi, settle } from "@/lib/api/browser";
 import { displayMessage } from "@/lib/api/errors";
 import {
@@ -276,7 +276,16 @@ function SlotDialog({
         actions={<Button size="sm" variant="ghost" onClick={onClose}>Close</Button>}
       />
       <PanelBody className="grid gap-3">
-        <AccountChip account={{ platform: platformIcon(item.platform as never), name: item.account_nickname, handle: item.account_handle }} />
+        <AccountChip
+          size="lg"
+          account={{
+            platform: platformIcon(item.platform as never),
+            name: item.account_nickname,
+            handle: item.account_handle,
+            avatar_url: item.account_avatar_url,
+            platformLabel: platformLabel(item.platform as never),
+          }}
+        />
         <p className="text-sm">
           <Link className="font-medium hover:underline" href={composerHref(slug, { set: item.post_set_id })}>{item.post_set_title}</Link>
         </p>

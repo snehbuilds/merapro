@@ -29,6 +29,7 @@ class ApprovalVariantOut(_Out):
     platform: str
     nickname: str
     handle: str
+    avatar_url: str | None
     state: str = Field(description="pending, approved, rejected, superseded, expired, cancelled")
     required: int = Field(description="Approvals this account needs (strictest policy)")
     quorum: str

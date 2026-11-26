@@ -415,6 +415,10 @@ export type ApprovalVariantOut = {
      */
     approve_count: number;
     /**
+     * Avatar Url
+     */
+    avatar_url: string | null;
+    /**
      * Body
      */
     body: string;
@@ -813,7 +817,7 @@ export type BodyUploadMediaApiV1WorkspacesWorkspaceIdMediaPost = {
     /**
      * File
      *
-     * JPEG, PNG or WebP, up to 20 MB
+     * JPEG, PNG, WebP, MP4, MOV or PDF, up to 200 MB
      */
     file: Blob | File;
 };
@@ -2936,7 +2940,7 @@ export type MediaOut = {
     /**
      * Origin
      *
-     * upload, og_image, generated or rendition
+     * upload, remote_url, og_image, generated or rendition
      */
     origin: string;
     /**
@@ -4701,6 +4705,10 @@ export type ScheduledPostList = {
  */
 export type ScheduledPostOut = {
     /**
+     * Account Avatar Url
+     */
+    account_avatar_url: string | null;
+    /**
      * Account Group Id
      */
     account_group_id: string | null;
@@ -6044,6 +6052,10 @@ export type VariantOut = {
      * Account Type
      */
     account_type: string;
+    /**
+     * Avatar Url
+     */
+    avatar_url: string | null;
     /**
      * Brand Voice Id
      */
@@ -12879,8 +12891,10 @@ export type MediaContentResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: Blob | File;
 };
+
+export type MediaContentResponse = MediaContentResponses[keyof MediaContentResponses];
 
 export type ListMembersData = {
     body?: never;

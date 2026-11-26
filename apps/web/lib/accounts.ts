@@ -74,6 +74,7 @@ export function accountRef(a: Pick<AccountOut, "id" | "platform" | "nickname" | 
     name: a.display_name?.trim() || a.nickname,
     handle: a.handle,
     avatar_url: a.avatar_url,
+    platformLabel: platformLabel(a.platform),
   };
 }
 

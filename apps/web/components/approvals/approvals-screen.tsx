@@ -15,7 +15,7 @@ import { StatusPill } from "@/components/ui/status-pill";
 import { Tag } from "@/components/ui/tag";
 import { Time } from "@/components/ui/time";
 import { useWorkspaceEvents } from "@/hooks/use-workspace-events";
-import { platformIcon } from "@/lib/accounts";
+import { platformIcon, platformLabel } from "@/lib/accounts";
 import { browserApi, idempotencyHeaders, settle } from "@/lib/api/browser";
 import { displayMessage, type ApiError } from "@/lib/api/errors";
 import type { ApprovalRequest, ApprovalVariant } from "@/lib/api/models";
@@ -273,7 +273,7 @@ function VariantRow({
   return (
     <article aria-labelledby={`${id}-who`} className="grid gap-2 rounded-md border border-border p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <AccountChip id={`${id}-who`} account={{ platform: platformIcon(v.platform as never), name: v.nickname, handle: v.handle }} />
+        <AccountChip id={`${id}-who`} size="lg" account={{ platform: platformIcon(v.platform as never), name: v.nickname, handle: v.handle, avatar_url: v.avatar_url, platformLabel: platformLabel(v.platform as never) }} />
         <StatusPill kind="approval_variant" state={asApprovalVariantState(v.state)} />
         {q ? <span className="text-caption text-fg-subtle">{q}</span> : null}
         {v.my_vote === "approve" && v.state === "pending" ? <Tag tone="info">You approved</Tag> : null}

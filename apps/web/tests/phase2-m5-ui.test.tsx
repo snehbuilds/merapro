@@ -82,7 +82,7 @@ describe("Composer: generate images (P2-M5)", () => {
     expect(sdk.generateMedia.mock.calls[0]?.[0].body).toMatchObject({ prompt: null, post_variant_id: "v1", attach: false });
     // The generated image joins the list with the agent's alt text, ready to save.
     expect(await screen.findByDisplayValue("A lighthouse at dawn")).toBeTruthy();
-    await userEvent.click(screen.getByRole("button", { name: "Save images" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save media" }));
     expect(onSave.mock.calls[0]?.[0]).toEqual([{ asset_id: "asset-9", aspect: "1.91x1", alt_text: "A lighthouse at dawn" }]);
   });
 

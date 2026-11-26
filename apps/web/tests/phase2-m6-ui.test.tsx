@@ -74,6 +74,7 @@ const comment = {
   social_account_id: "acc-x",
   account_nickname: "Tech X",
   account_handle: "tech",
+    account_avatar_url: null,
   account_group_id: null,
   platform: "x",
   author_handle: "ana_dev",

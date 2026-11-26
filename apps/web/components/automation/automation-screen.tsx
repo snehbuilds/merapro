@@ -14,7 +14,7 @@ import { Notice } from "@/components/ui/notice";
 import { Panel, PanelHead } from "@/components/ui/panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Time } from "@/components/ui/time";
-import { platformIcon } from "@/lib/accounts";
+import { platformIcon, platformLabel } from "@/lib/accounts";
 import { browserApi, settle } from "@/lib/api/browser";
 import { displayMessage } from "@/lib/api/errors";
 import { SCREENS } from "@/lib/nav";
@@ -31,7 +31,7 @@ export interface AutomationScreenProps {
   workspace: { id: string; slug: string; timezone: string; archived: boolean; role: string };
   states: AutomationOut[];
   groups: { id: string; name: string }[];
-  accounts: { id: string; nickname: string; handle: string; platform: string }[];
+  accounts: { id: string; nickname: string; handle: string; platform: string; avatar_url: string | null }[];
   /** Approval policies and the people who can approve (P2-M2.8); absent if unloadable. */
   policies?: PolicyOut[];
   approvers?: { id: string; name: string }[];
@@ -150,7 +150,16 @@ export function AutomationScreen({ workspace, states, groups, accounts, policies
             {accounts.map((a) =>
               row(
                 { scope_type: "social_account", scope_id: a.id, label: a.nickname },
-                <AccountChip account={{ platform: platformIcon(a.platform as never), name: a.nickname, handle: a.handle }} />,
+                <AccountChip
+                  size="lg"
+                  account={{
+                    platform: platformIcon(a.platform as never),
+                    name: a.nickname,
+                    handle: a.handle,
+                    avatar_url: a.avatar_url,
+                    platformLabel: platformLabel(a.platform as never),
+                  }}
+                />,
               ),
             )}
           </ul>

@@ -25,7 +25,7 @@ import { Notice } from "@/components/ui/notice";
 import { Panel, PanelBody, PanelFoot, PanelHead } from "@/components/ui/panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Tag } from "@/components/ui/tag";
-import { platformIcon } from "@/lib/accounts";
+import { platformIcon, platformLabel } from "@/lib/accounts";
 import { browserApi, idempotencyHeaders, settle, type Result } from "@/lib/api/browser";
 import { displayMessage, type ApiError } from "@/lib/api/errors";
 import type { HashtagSuggestion, PostSet, Variant, Voice } from "@/lib/api/models";
@@ -537,8 +537,9 @@ function AccountRow({ variant: v, selected, generating, onSelect }: { variant: V
       )}
     >
       <span className="flex items-center gap-2">
-        <AccountMark platform={platformIcon(v.platform)} className={cn(!v.enabled && "opacity-55")} />
-        <span className={cn("min-w-0 truncate text-sm font-medium", selected && "font-semibold")}>{v.nickname}</span>
+        <AccountMark platform={platformIcon(v.platform)} avatar_url={v.avatar_url} className={cn(!v.enabled && "opacity-55")} />
+        <span className="sr-only">{v.nickname}</span>
+        <span className={cn("min-w-0 truncate text-sm font-medium", selected && "font-semibold")}>{v.handle.startsWith("@") ? v.handle : `@${v.handle}`}</span>
         <span className="flex-1" />
         {!v.enabled ? (
           <StatusPill tone="neutral" shape="ring" label="Off" />
@@ -549,6 +550,7 @@ function AccountRow({ variant: v, selected, generating, onSelect }: { variant: V
           </Tag>
         ) : null}
       </span>
+      <span className="pl-[30px] text-xs text-fg-subtle">{platformLabel(v.platform)}</span>
       <span className={cn("line-clamp-2 text-sm text-fg-muted", !v.enabled && "text-fg-subtle line-through")}>
         {!v.enabled ? (
           <>

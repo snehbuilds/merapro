@@ -35,7 +35,7 @@ export default async function AutomationPage({ params }: { params: Promise<{ slu
       }}
       states={states.data}
       groups={(groups ?? []).map((g) => ({ id: g.id, name: g.name }))}
-      accounts={(accounts ?? []).map((a) => ({ id: a.id, nickname: a.nickname, handle: a.handle, platform: a.platform }))}
+      accounts={(accounts ?? []).map((a) => ({ id: a.id, nickname: a.nickname, handle: a.handle, platform: a.platform, avatar_url: a.avatar_url }))}
       policies={policies?.data}
       approvers={(members ?? []).filter((m) => canApprove.has(m.role)).map((m) => ({ id: m.user_id, name: m.display_name }))}
     />

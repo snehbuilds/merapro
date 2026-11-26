@@ -28,6 +28,7 @@ class ScheduledPostOut(_Out):
     social_account_id: uuid.UUID
     account_nickname: str
     account_handle: str
+    account_avatar_url: str | None
     platform: str
     account_group_id: uuid.UUID | None
     group_name: str | None

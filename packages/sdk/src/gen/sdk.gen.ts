@@ -1881,7 +1881,7 @@ export const listMedia = <ThrowOnError extends boolean = false>(options: Options
 /**
  * Upload Media
  *
- * Upload an image. The same bytes uploaded twice return the existing asset.
+ * Upload a supported media file. Duplicate bytes return the existing asset.
  */
 export const uploadMedia = <ThrowOnError extends boolean = false>(options: Options<UploadMediaData, ThrowOnError>): RequestResult<UploadMediaResponses, UploadMediaErrors, ThrowOnError> => (options.client ?? client).post<UploadMediaResponses, UploadMediaErrors, ThrowOnError>({
     ...formDataBodySerializer,
@@ -2064,7 +2064,7 @@ export const suggestMediaAltText = <ThrowOnError extends boolean = false>(option
 /**
  * Media Content
  *
- * The image bytes of a master or a rendition (immutable: cache by checksum).
+ * The media bytes of a master or image rendition (immutable: cache by checksum).
  */
 export const mediaContent = <ThrowOnError extends boolean = false>(options: Options<MediaContentData, ThrowOnError>): RequestResult<MediaContentResponses, MediaContentErrors, ThrowOnError> => (options.client ?? client).get<MediaContentResponses, MediaContentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
