@@ -234,7 +234,7 @@ export function MediaPanel({ workspaceId, platform, media, contentItemId, varian
     setError(null);
     for (const file of files) {
       const r = await settle(
-        uploadMedia({ client: browserApi, headers: idempotencyHeaders(), path: { workspace_id: workspaceId }, body: { file } }),
+        uploadMedia({ client: browserApi, path: { workspace_id: workspaceId }, body: { file } }),
       );
       if (!r.ok) {
         setBusy(null);

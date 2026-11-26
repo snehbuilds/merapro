@@ -725,6 +725,7 @@ describe("Composer: post set editor", () => {
     await u.upload(input, file);
     await waitFor(() => expect(sdk.uploadMedia).toHaveBeenCalledTimes(1));
     expect(sdk.uploadMedia.mock.calls[0]![0]).toMatchObject({ path: { workspace_id: "ws-1" }, body: { file } });
+    expect(sdk.uploadMedia.mock.calls[0]![0].headers).toBeUndefined();
     expect(await screen.findByText("Cropped on save")).toBeInTheDocument();
     await u.type(screen.getByRole("textbox", { name: "Alt text" }), "Our dashboard");
     await u.click(screen.getByRole("button", { name: "Save media" }));
