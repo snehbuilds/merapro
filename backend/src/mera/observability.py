@@ -72,6 +72,21 @@ def _otel_attributes(
     return attributes
 
 
+def _otel_body(event_dict: MutableMapping[str, object]) -> str:
+    """Format a concise, searchable OTLP log line while keeping full attributes."""
+    event = str(event_dict.get("event", "log"))
+    parts: list[str] = [event]
+    method = event_dict.get("method")
+    path = event_dict.get("path")
+    if method and path:
+        parts.append(f"{method} {path}")
+    for key in ("status_code", "duration_ms", "service", "request_id", "error_type"):
+        val = event_dict.get(key)
+        if val is not None:
+            parts.append(f"{key}={val}")
+    return " ".join(parts)
+
+
 def export_otel_log(
     _logger: object, _method_name: str, event_dict: MutableMapping[str, object]
 ) -> MutableMapping[str, object]:
@@ -93,7 +108,7 @@ def export_otel_log(
         LogRecord(
             severity_text=level,
             severity_number=severity,
-            body=str(event_dict.get("event", "log")),
+            body=_otel_body(event_dict),
             attributes=_otel_attributes(event_dict),
         )
     )
