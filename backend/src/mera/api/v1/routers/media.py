@@ -39,7 +39,7 @@ class MediaOut(BaseModel):
     width: int
     height: int
     byte_size: int
-    origin: str = Field(description="upload, og_image, generated or rendition")
+    origin: str = Field(description="upload, remote_url, og_image, generated or rendition")
     source_url: str | None
     rendition_key: str = Field(description="master, or aspect@size, e.g. 4x5@1080x1350")
     parent_asset_id: uuid.UUID | None

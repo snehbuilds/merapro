@@ -137,6 +137,33 @@ async def test_upload_dedupes_and_refuses_what_is_not_an_image(api: httpx.AsyncC
     assert r2.status_code == 304
 
 
+async def test_ingest_remote_image_records_remote_url_origin(
+    api: httpx.AsyncClient, fetcher: FakeFetcher
+) -> None:
+    """Generated-client assets arrive through the guarded remote URL ingestion path."""
+    s, ws = await _setup(api, "mediaremote")
+    source = "https://files.example.test/social.png"
+    fetcher.pages[source] = _photo(1080, 1080)
+    svc = _app(api).state.media_service
+    original = svc._fetcher
+    svc._fetcher = fetcher
+    try:
+        r = await api.post(
+            _media(ws, "/ingest"),
+            headers=_h(s),
+            json={
+                "remote_url": source,
+                "content_type": "image/jpeg",
+                "filename": "social.jpg",
+                "alt_text": "A generated social image",
+            },
+        )
+        assert r.status_code == 201, r.text
+        assert (r.json()["origin"], r.json()["source_url"]) == ("remote_url", source)
+    finally:
+        svc._fetcher = original
+
+
 async def test_instagram_needs_an_image_and_attaching_one_is_a_new_version(
     api: httpx.AsyncClient, deferrer: CapturingDeferrer
 ) -> None:
