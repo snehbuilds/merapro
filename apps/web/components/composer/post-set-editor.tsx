@@ -352,49 +352,56 @@ export function PostSetEditor({ workspace, postSet, accounts, voices, canEdit: c
         </Notice>
       ))}
 
-      <Panel aria-labelledby={`${id}-title`}>
-        <PanelHead className="flex-wrap">
-          <h2 id={`${id}-title`} className="min-w-0 truncate text-md font-semibold">
-            {set.title}
-          </h2>
-          <StatusPill kind="post_set" state={asPostSetState(set.state)} />
-          <span className="flex-1" />
-          {canEdit && isSetArchivable(set) ? (
-            <Button size="sm" onClick={() => void orchestrate()} title="Draft, add the images a platform needs, and propose times, as one run">
-              Run all agents
-            </Button>
-          ) : null}
-          {canEdit && isSetArchivable(set) ? (
-            <Button size="sm" variant="ghost" onClick={() => setConfirmArchive(true)} disabled={archiving}>
-              Archive
-            </Button>
-          ) : null}
-        </PanelHead>
-        <PanelBody className="grid gap-1.5 text-sm text-fg-muted">
-          {set.content ? (
-            <p>
-              From{" "}
-              {isWebUrl(set.content.url) ? (
-                <a href={set.content.url} target="_blank" rel="noopener noreferrer" className="font-medium text-accent hover:underline">
-                  {set.content.title}
-                  <span className="sr-only"> (opens in a new tab)</span>
-                </a>
-              ) : (
-                <span className="font-medium text-fg">{set.content.title}</span>
-              )}
-              {set.content.source_name ? ` · ${set.content.source_name}` : ""}
-            </p>
-          ) : set.topic_brief ? (
-            <p>
-              <span className="font-medium text-fg">Brief: </span>
-              {set.topic_brief}
-            </p>
-          ) : null}
-          <p className="text-caption text-fg-subtle">
-            {enabled.length} of {set.variants.length} {set.variants.length === 1 ? "account" : "accounts"} on
-            {groupNames.length ? ` · via ${groupNames.join(", ")}` : ""}
-          </p>
-          {confirmArchive ? (
+      <Panel aria-labelledby={`${id}-title`} className="overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-card via-card to-[color-mix(in_srgb,var(--accent)_5%,var(--card))] px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 id={`${id}-title`} className="min-w-0 truncate font-display text-lg font-medium tracking-tight">
+                {set.title}
+              </h2>
+              <StatusPill kind="post_set" state={asPostSetState(set.state)} />
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-fg-muted">
+              {set.content ? (
+                <span>
+                  From{" "}
+                  {isWebUrl(set.content.url) ? (
+                    <a href={set.content.url} target="_blank" rel="noopener noreferrer" className="font-medium text-accent hover:underline">
+                      {set.content.title}
+                      <span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  ) : (
+                    <span className="font-medium text-fg">{set.content.title}</span>
+                  )}
+                  {set.content.source_name ? ` · ${set.content.source_name}` : ""}
+                </span>
+              ) : set.topic_brief ? (
+                <span>
+                  <span className="font-medium text-fg">Brief: </span>
+                  {set.topic_brief}
+                </span>
+              ) : null}
+              <span className="text-fg-subtle">
+                {enabled.length} of {set.variants.length} {set.variants.length === 1 ? "account" : "accounts"} on
+                {groupNames.length ? ` · via ${groupNames.join(", ")}` : ""}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {canEdit && isSetArchivable(set) ? (
+              <Button size="sm" onClick={() => void orchestrate()} title="Draft, add the images a platform needs, and propose times, as one run">
+                Run all agents
+              </Button>
+            ) : null}
+            {canEdit && isSetArchivable(set) ? (
+              <Button size="sm" variant="ghost" onClick={() => setConfirmArchive(true)} disabled={archiving}>
+                Archive
+              </Button>
+            ) : null}
+          </div>
+        </div>
+        {confirmArchive ? (
+          <PanelBody>
             <Notice
               tone="danger"
               title="Archive this post set?"
@@ -411,12 +418,12 @@ export function PostSetEditor({ workspace, postSet, accounts, voices, canEdit: c
             >
               It leaves Recent drafts. Every version is kept.
             </Notice>
-          ) : null}
-        </PanelBody>
+          </PanelBody>
+        ) : null}
       </Panel>
 
-      <div className="grid grid-cols-[300px_minmax(0,1fr)] items-start gap-3.5 max-wide:grid-cols-[260px_minmax(0,1fr)] max-rail:grid-cols-1">
-        <div className="grid gap-3.5">
+      <div className="grid grid-cols-[280px_minmax(0,1fr)] items-start gap-4 max-wide:grid-cols-[250px_minmax(0,1fr)] max-rail:grid-cols-1">
+        <div className="grid gap-3.5 lg:sticky lg:top-4">
           <Panel aria-labelledby={`${id}-accounts`}>
             <PanelHead>
               <h2 id={`${id}-accounts`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">

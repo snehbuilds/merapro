@@ -194,8 +194,40 @@ export function VariantEditor({
   const counted = (text: string) => weightedLength(text, variant.platform);
 
   return (
-    <>
-      <Panel aria-labelledby={`${id}-name`}>
+    <div className={cn("grid items-start gap-4", version && "xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]")}>
+      {version ? (
+        <Panel aria-labelledby={`${id}-preview`} className="xl:sticky xl:top-4">
+          <PanelHead>
+            <h2 id={`${id}-preview`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">
+              Preview
+            </h2>
+            <span className="flex-1" />
+            <SegmentedControl<"desktop" | "mobile">
+              aria-label="Preview size"
+              options={[
+                { value: "desktop", label: "Desktop" },
+                { value: "mobile", label: "Mobile" },
+              ]}
+              value={viewport}
+              onValueChange={setViewport}
+            />
+          </PanelHead>
+          <PanelBody className="bg-[color-mix(in_srgb,var(--paper)_65%,var(--card))]">
+            <PlatformPreview
+              platform={platformIcon(variant.platform)}
+              viewport={viewport}
+              author={{ name: variant.nickname, subtitle: `${variant.handle} · Now` }}
+              body={body}
+              threadParts={thread ? parts : null}
+              hashtags={tags}
+              media={previewMedia(workspaceId, version.media)}
+              foot={<span>Renders as {label} shows it · {conventionLine(variant.platform, limit)}</span>}
+            />
+          </PanelBody>
+        </Panel>
+      ) : null}
+
+      <Panel aria-labelledby={`${id}-name`} className="min-w-0">
         <PanelHead className="flex-wrap">
           <AccountChip
             id={`${id}-name`}
@@ -493,39 +525,7 @@ export function VariantEditor({
           )}
         </PanelBody>
       </Panel>
-
-      {version ? (
-        <Panel aria-labelledby={`${id}-preview`}>
-          <PanelHead>
-            <h2 id={`${id}-preview`} className="font-label text-caption font-semibold tracking-[0.09em] uppercase">
-              Preview
-            </h2>
-            <span className="flex-1" />
-            <SegmentedControl<"desktop" | "mobile">
-              aria-label="Preview size"
-              options={[
-                { value: "desktop", label: "Desktop" },
-                { value: "mobile", label: "Mobile" },
-              ]}
-              value={viewport}
-              onValueChange={setViewport}
-            />
-          </PanelHead>
-          <PanelBody>
-            <PlatformPreview
-              platform={platformIcon(variant.platform)}
-              viewport={viewport}
-              author={{ name: variant.nickname, subtitle: `${variant.handle} · Now` }}
-              body={body}
-              threadParts={thread ? parts : null}
-              hashtags={tags}
-              media={previewMedia(workspaceId, version.media)}
-              foot={<span>Renders as {label} shows it · {conventionLine(variant.platform, limit)}</span>}
-            />
-          </PanelBody>
-        </Panel>
-      ) : null}
-    </>
+    </div>
   );
 }
 
