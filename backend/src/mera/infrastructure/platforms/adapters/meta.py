@@ -4,10 +4,12 @@ Facebook Page:
 - text and link → ``POST /{page-id}/feed`` (``message``, ``link``);
 - one image → ``POST /{page-id}/photos`` with the image bytes and the caption;
 - several → each uploaded unpublished, then ``/feed`` with ``attached_media``.
+- one MP4/MOV → the Page ``video_reels`` start/upload/finish flow.
 
 Instagram (business accounts only; media is required):
 - one image → ``POST /{ig-user-id}/media`` (``image_url``, ``caption``, ``alt_text``),
   poll the container until ``FINISHED``, then ``POST /{ig-user-id}/media_publish``;
+- one video → the same container flow with ``media_type=REELS`` and ``video_url``;
 - a carousel → one child container per image (``is_carousel_item``), then a parent
   ``CAROUSEL`` container, then publish.
 Instagram fetches images itself, so each rendition is offered at a short-lived signed URL.
@@ -101,12 +103,48 @@ class FacebookPageAdapter:
     def __init__(self, http: PlatformHTTP | None = None) -> None:
         self._http = http or PlatformHTTP(is_auth_error=graph_auth_error)
 
+    async def _publish_reel(
+        self, page: str, token: str, media: Any, description: str
+    ) -> PublishResult:
+        """Publish one Page Reel through Meta's resumable Reel upload sequence."""
+        started = await self._http.json(
+            "POST",
+            f"{GRAPH}/{page}/video_reels",
+            data={"upload_phase": "start", "access_token": token},
+        )
+        upload_url = str(started.get("upload_url") or "")
+        video_id = str(started.get("video_id") or "")
+        if not upload_url or not video_id:
+            raise PermanentError("Facebook did not create a Reel upload session")
+        await self._http.request(
+            "POST",
+            upload_url,
+            headers={"Authorization": f"OAuth {token}", "Content-Type": media.mime_type},
+            content=media.data,
+            expect_json=False,
+        )
+        finished = await self._http.json(
+            "POST",
+            f"{GRAPH}/{page}/video_reels",
+            data={
+                "upload_phase": "finish",
+                "video_id": video_id,
+                "video_state": "PUBLISHED",
+                "description": description,
+                "access_token": token,
+            },
+        )
+        post_id = str(finished.get("post_id") or finished.get("video_id") or video_id)
+        return PublishResult(post_id, f"https://www.facebook.com/{post_id}", {"video_id": video_id})
+
     async def publish(self, credentials: dict[str, Any], payload: PublishPayload) -> PublishResult:
         token = str(credentials.get("access_token", ""))
         page = payload.platform_account_id
         message = caption(payload.body, payload.hashtags, payload.link_url, payload.link_placement)
         if len(payload.media) == 1:
             m = payload.media[0]
+            if m.mime_type.startswith("video/"):
+                return await self._publish_reel(page, token, m, message)
             body = await self._http.json(
                 "POST",
                 f"{GRAPH}/{page}/photos",
@@ -115,6 +153,8 @@ class FacebookPageAdapter:
             )
             post_id = str(body.get("post_id") or body.get("id"))
         elif payload.media:
+            if any(m.mime_type.startswith("video/") for m in payload.media):
+                raise PermanentError("Facebook Reels must contain exactly one video")
             ids = []
             for m in payload.media:
                 up = await self._http.json(
@@ -254,19 +294,24 @@ class InstagramAdapter:
 
     async def publish(self, credentials: dict[str, Any], payload: PublishPayload) -> PublishResult:
         if not payload.media:
-            raise PermanentError("Instagram posts need at least one image")
+            raise PermanentError("Instagram posts need at least one image or video")
         if any(not m.public_url for m in payload.media):
-            raise PermanentError("Instagram needs a public URL for each image")
+            raise PermanentError("Instagram needs a public URL for each media item")
         token = str(credentials.get("access_token", ""))
         ig = payload.platform_account_id
         text = caption(payload.body, payload.hashtags, payload.link_url, payload.link_placement)
         if len(payload.media) == 1:
             m = payload.media[0]
-            fields: dict[str, Any] = {"image_url": m.public_url, "caption": text}
-            if m.alt_text:
+            if m.mime_type.startswith("video/"):
+                fields = {"media_type": "REELS", "video_url": m.public_url, "caption": text}
+            else:
+                fields = {"image_url": m.public_url, "caption": text}
+            if m.alt_text and not m.mime_type.startswith("video/"):
                 fields["alt_text"] = m.alt_text[:1000]
             creation = await self._container(ig, token, fields)
         else:
+            if any(m.mime_type.startswith("video/") for m in payload.media):
+                raise PermanentError("Instagram Reels must contain exactly one video")
             children = []
             for m in payload.media[:10]:
                 child: dict[str, Any] = {"image_url": m.public_url, "is_carousel_item": "true"}

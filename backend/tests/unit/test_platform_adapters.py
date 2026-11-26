@@ -45,6 +45,14 @@ IMG = MediaFile(
     1350,
     "https://m.example/i.jpg?sig=1",
 )
+VIDEO = MediaFile(
+    b"\x00\x00\x00\x18ftypmp42video-bytes",
+    "video/mp4",
+    None,
+    720,
+    1280,
+    "https://m.example/r.mp4?sig=1",
+)
 
 
 def _payload(**kw: Any) -> PublishPayload:
@@ -460,6 +468,57 @@ async def test_instagram_single_image_container_flow() -> None:
     assert created["image_url"] == [IMG.public_url]
     assert created["alt_text"] == ["A chart of read latency"]
     assert "postgresql.org" not in created["caption"][0]  # Instagram: no link in the caption
+
+
+async def test_meta_video_reels_publish_flow() -> None:
+    fb = Cassette(
+        [
+            (
+                "POST",
+                "https://graph.facebook.com/v23.0/page/video_reels",
+                _json({"video_id": "v1", "upload_url": "https://rupload.facebook.com/upload/v1"}),
+            ),
+            ("POST", "https://rupload.facebook.com/upload/v1", lambda r: httpx.Response(200)),
+            (
+                "POST",
+                "https://graph.facebook.com/v23.0/page/video_reels",
+                _json({"post_id": "page_99", "video_id": "v1"}),
+            ),
+        ]
+    )
+    result = await FacebookPageAdapter(fb.http()).publish(
+        CREDS, _payload(platform="facebook", platform_account_id="page", media=[VIDEO])
+    )
+    assert result.platform_post_id == "page_99"
+    assert result.permalink == "https://www.facebook.com/page_99"
+    assert _form(fb.requests[0])["upload_phase"] == ["start"]
+    assert fb.requests[1].content == VIDEO.data
+    assert fb.requests[1].headers["authorization"] == "OAuth tok-123"
+    assert _form(fb.requests[2])["video_state"] == ["PUBLISHED"]
+
+    ig = Cassette(
+        [
+            ("POST", "https://graph.facebook.com/v23.0/ig/media", _json({"id": "container"})),
+            (
+                "GET",
+                "https://graph.facebook.com/v23.0/container",
+                _json({"status_code": "FINISHED"}),
+            ),
+            ("POST", "https://graph.facebook.com/v23.0/ig/media_publish", _json({"id": "reel"})),
+            (
+                "GET",
+                "https://graph.facebook.com/v23.0/reel",
+                _json({"permalink": "https://instagram.example/reel"}),
+            ),
+        ]
+    )
+    result = await InstagramAdapter(ig.http(), poll_seconds=0).publish(
+        CREDS, _payload(platform="instagram", platform_account_id="ig", media=[VIDEO])
+    )
+    assert result.platform_post_id == "reel"
+    form = _form(ig.requests[0])
+    assert form["media_type"] == ["REELS"]
+    assert form["video_url"] == [VIDEO.public_url]
 
 
 async def test_instagram_carousel() -> None:
