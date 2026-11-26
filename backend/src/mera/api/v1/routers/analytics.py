@@ -272,7 +272,7 @@ async def export_csv(
 
 HEARTBEAT_SECONDS = 20
 POLL_SECONDS = 2.0
-MAX_STREAM_SECONDS = 300  # the browser's EventSource reconnects with Last-Event-ID
+MAX_STREAM_SECONDS = 240  # close before Vercel's 300s limit; EventSource reconnects with Last-Event-ID
 
 
 @events_router.get(f"{WS}/events")
